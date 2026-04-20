@@ -40,6 +40,8 @@ Fetch and merge the base branch so tests run against the merged state:
 git fetch origin <base> && git merge origin/<base> --no-edit
 ```
 
+**Why sync before testing:** Your feature branch tests pass against a snapshot of the base. But the base has moved forward since you branched. If tests fail on the merged result, you want to know now — not after the PR is created and CI fails publicly.
+
 If merge conflicts: try auto-resolve for simple cases (VERSION, CHANGELOG ordering). If complex: stop and show conflicts.
 
 ## Step 3: Run Tests
@@ -78,6 +80,8 @@ If fixes were applied: commit them, re-run tests, then continue.
    - **MAJOR:** Breaking changes or milestones (ask the user)
 3. Write the new version. Bumping a digit resets all to its right.
 
+**Why auto-decide with conservative default:** Version bumps are a common source of analysis paralysis. The rules are simple enough to automate: when in doubt, PATCH. An undersold MINOR is easy to correct later; an oversold MINOR erodes consumer trust immediately.
+
 ## Step 6: Update CHANGELOG
 
 1. Read `git log <base>..HEAD --oneline` for all commits
@@ -97,6 +101,8 @@ Group changes into logical, bisectable commits:
 2. **Models and services:** with their tests
 3. **Controllers and views:** with their tests
 4. **VERSION + CHANGELOG:** always the final commit
+
+**Why this ordering:** Each commit must be independently valid. Infrastructure must exist before models can use it. Models must exist before controllers can reference them. VERSION + CHANGELOG last because they describe everything that came before. This ordering means `git bisect` always lands on a compilable, testable state.
 
 Each commit must be independently valid. No broken imports, no missing dependencies.
 
@@ -181,6 +187,32 @@ When in doubt, PATCH. It's easier to bump MINOR later than to undo a premature M
 - Never force push. Use regular `git push` only.
 - Never push without fresh verification evidence.
 - The goal: user says /taku-ship, next thing they see is the PR URL.
+
+## Known Pitfalls
+
+**Bumping MINOR when it should be PATCH.** A branch with 30 line changes — all bug fixes — was classified as MINOR because the branch started with `feat/`. Downstream consumers saw the version bump and expected new features. The changelog listed only fixes. Trust was eroded.
+
+*What went wrong:* Branch name convention overrode the actual change content. The auto-decide logic used the branch prefix as a signal without cross-checking the diff.
+
+*Prevention:* When in doubt, PATCH. The semver reference explicitly states this. A premature MINOR is harder to undo than a late MINOR. Always verify the bump level against what actually changed, not just the branch name.
+
+**Skipping the verification gate after review fixes.** Tests passed in Step 3. Review in Step 4 found 2 issues and auto-fixed them. Step 8 (Verification Gate) was skipped because "the fixes were minor." The fixes introduced an import cycle that broke the build.
+
+*What went wrong:* Any code change after testing invalidates the test result. "Minor" fixes can introduce major problems — especially import changes, type changes, or dependency adjustments.
+
+*Prevention:* Step 8 is conditional but never optional when code changed. If Step 4 applied fixes, Step 8 MUST re-run tests. No exceptions. The 2 minutes of re-testing saves the embarrassment of a broken build on the PR.
+
+**CHANGELOG missing commits.** The CHANGELOG listed 4 bullet points. The diff contained 9 commits. Two bug fixes and a config change were invisible in the changelog. Users who upgraded missed critical information about the config change.
+
+*What went wrong:* The changelog was written from the diff summary alone, without cross-checking against the commit log.
+
+*Prevention:* Step 6 requires cross-checking: "every commit maps to at least one bullet point." Read `git log <base>..HEAD --oneline` AND the diff. If a commit isn't represented in the changelog, add it. This is the most commonly skipped sub-step and the most important one.
+
+**Committing everything in one monolithic commit.** 15 files changed across models, controllers, views, and tests — all committed together as "feat: add user dashboard." Now a bisect lands on this commit and the developer has to read 15 files to find the regression.
+
+*What went wrong:* Step 7's commit grouping was skipped in favor of speed. One massive commit is easier to create but much harder to debug later.
+
+*Prevention:* Group commits logically: infrastructure first, then models with tests, then controllers with tests, then VERSION + CHANGELOG. Each commit must be independently valid. This takes 5 extra minutes and saves hours during bisect.
 
 ## Step 11: Documentation Sync
 

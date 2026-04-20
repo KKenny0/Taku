@@ -87,6 +87,8 @@ For each page in scope, evaluate:
 
 For each fixable finding, in severity order:
 
+**Why severity order:** High-severity findings affect users' first impression and trust. Fixing a high-severity issue might change the layout enough that a lower-severity issue resolves itself (or changes position). Fix the big problems first, then reassess the small ones.
+
 ### 3a. Take Before Screenshot
 
 ```
@@ -156,3 +158,23 @@ Write the report to `.taku/visual-review/visual-review-{date}.md`:
 | "AI slop patterns are just trendy" | They signal "no human designer was involved." Users notice. |
 | "I'll fix the layout later" | You won't. Fix it now while the context is fresh. |
 | "The screenshot looks fine to me" | Take the screenshot anyway. Your memory of how it looked is unreliable. |
+
+## Known Pitfalls
+
+**Evaluating source code before seeing the rendered page.** The reviewer started by reading CSS and component files, identified "spacing issues" in the code, and made fixes. When the page was actually rendered, the spacing was correct — the CSS values looked wrong in code but produced the right visual result due to flexbox behavior.
+
+*What went wrong:* Important Rule 6 says "Never read source code for the initial audit. Evaluate the rendered site." The reviewer let code analysis bias their visual judgment.
+
+*Prevention:* The initial audit (Step 2) is purely visual. Navigate to the page, take a screenshot, evaluate what you SEE. Only read source code when you need to fix a finding. Your eyes are the testing tool here, not the code.
+
+**Making structural changes when CSS-only fixes would work.** A spacing issue between sections was caused by inconsistent margins. Instead of fixing the margins (CSS-only), the reviewer restructured the component hierarchy (moving elements between parent containers). The restructure fixed the spacing but broke the responsive layout.
+
+*What went wrong:* Important Rule 3 says "CSS-first. Prefer styling changes over structural changes." The reviewer jumped to restructuring because the CSS fix wasn't immediately obvious.
+
+*Prevention:* Always try the CSS fix first. If a margin, padding, or gap adjustment solves the visual issue, stop there. Only restructure when the CSS fix is genuinely impossible (e.g., the DOM order doesn't support the desired visual layout). Structural changes have a much higher regression risk.
+
+**Exceeding the fix cap and burning out.** 45 visual findings were identified. The reviewer fixed all 45 in one session. By fix #30, reverts were happening on 40% of fixes due to regression cascades. The final page looked worse than the initial audit.
+
+*What went wrong:* Self-regulation (Step 3f) says "Hard cap: 30 fixes per session. Every 5 fixes, evaluate." Neither the cap nor the periodic evaluation was respected.
+
+*Prevention:* Stop at 30 fixes. Revert count climbing? Slow down at 5, stop at 10. Better to ship with 15 verified fixes than 45 fixes where half introduced regressions. Deferred findings go into the report for a follow-up session.

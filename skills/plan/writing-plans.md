@@ -40,6 +40,8 @@ Each step is one action (2-5 minutes):
 - "Run tests to verify pass" → step
 - "Commit" → step
 
+**Why fine-grained steps:** A step that says "Implement the feature and write tests" is unverifiable. The implementer can do it in any order, skip verification, or batch unrelated changes. Fine-grained steps make each verification explicit: write test → verify it fails → implement → verify it passes → commit. Each step produces a checkable result.
+
 ## Plan Document Header
 
 Every plan starts with:
@@ -135,6 +137,32 @@ If the design covers multiple independent subsystems, suggest breaking into sepa
 ## Output
 
 Save to `PLAN.md` at project root (or user-specified location).
+
+## Known Pitfalls
+
+**Plan references types or functions not defined in any task.** Task 3 calls `UserStore.findById()` but no task defines `UserStore`. The implementer either creates a stub (wrong implementation) or asks for clarification (delay).
+
+*What went wrong:* Tasks were written independently without cross-referencing type signatures and function names. Each task looked complete in isolation but the plan had broken references between tasks.
+
+*Prevention:* Self-review checklist item 3 exists for this: "Do types, method signatures, and names match across tasks?" Read through all tasks sequentially and verify that every function, type, or class referenced in one task is defined in another. `clearLayers()` in Task 3 but `clearFullLayers()` in Task 7 is a build error.
+
+**TDD ordering violated — code step before test step.** Task 5 lists "Step 1: Implement the validation function" then "Step 2: Write tests for validation." The implementer wrote the function, then wrote tests that pass against it — proving nothing about correctness.
+
+*What went wrong:* Plan author treated testing as a post-implementation verification step rather than a design step. Tests written after code are biased toward the implementation.
+
+*Prevention:* Self-review checklist item 4 checks TDD ordering. Every code step must have a preceding test step. The test must fail first (proving it tests the right thing), then the code makes it pass. If you catch yourself writing "implement X, then test X," rewrite as "write failing test for X, then implement X to pass."
+
+**Placeholder code masquerading as detail.** "Add appropriate error handling" — the implementer adds a generic try-catch that swallows errors. "Handle edge cases" — the implementer adds a single `if (input)` check. The plan looked complete but the instructions were too vague to execute correctly.
+
+*What went wrong:* The plan author didn't have a concrete implementation in mind but wrote the step as if they did. "Appropriate" and "handle" are placeholders dressed up as instructions.
+
+*Prevention:* The No Placeholders section explicitly lists these as plan failures. Every step must include actual code blocks. If you can't write the error handling code, the design isn't detailed enough. Go back to the design phase, don't push ambiguity into the plan.
+
+**Plan is too large for one sprint.** 22 tasks, each with 5-7 steps. Total: ~130 steps. The plan looked comprehensive. In practice, context limits were hit at task 14. The second half of the plan was executed with degraded context, producing lower quality code.
+
+*What went wrong:* The scope check (at the end of the plan) should have flagged this earlier. 130 steps is not one plan — it's three plans.
+
+*Prevention:* If the plan exceeds 15 tasks, suggest decomposition. Each plan should produce working, testable software on its own. Split by subsystem or by dependency layer. Three focused plans beat one comprehensive plan that can't be fully loaded into context.
 
 ## Execution Handoff
 

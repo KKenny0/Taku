@@ -57,6 +57,8 @@ git status --porcelain
 
 If dirty: offer commit, stash, or abort. QA needs a clean tree for atomic commits.
 
+**Why clean tree:** Each bug fix needs its own commit. If the working tree already has uncommitted changes, you can't tell which changes are from QA fixes vs. pre-existing work. Clean tree = clean commit history = easy rollback if a fix introduces a regression.
+
 ### 1d. Create output directory
 
 ```bash
@@ -97,6 +99,8 @@ Visit pages systematically. At each page:
 5. **States** — empty, loading, error, overflow
 6. **Console** — check for JS errors after every interaction
 7. **Responsive** — check mobile viewport if relevant
+
+**Why systematic over ad-hoc:** Ad-hoc testing tests what you remember to test. Systematic exploration ensures every page, every interaction, and every state gets checked. The bugs you miss are the ones you didn't think to look for.
 
 **Quick mode:** Homepage + top 5 targets only. Check: loads? Errors? Broken links?
 
@@ -159,6 +163,8 @@ Sort by severity. Fix based on tier:
 - Make the **minimal fix**
 - Do NOT refactor surrounding code
 
+**Why minimal fix:** QA fix scope must not expand. A fix that touches surrounding code risks introducing regressions in areas that were working. Fix only what's broken, commit, verify, move on. If the surrounding code needs work, log it as a separate finding.
+
 **Commit:**
 ```bash
 git add <only-changed-files>
@@ -186,6 +192,8 @@ Every 5 fixes, evaluate:
 - Revert count? → slow down
 - Touching unrelated files? → stop and ask
 - Hard cap: 50 fixes per session
+
+**Why self-regulate:** Fix quality degrades over time. Each fix slightly shifts your mental model of the codebase. After many fixes, you're no longer fixing with fresh context — you're fixing based on accumulated assumptions. The periodic check catches degradation before it produces regressions.
 
 ## Step 4: Final QA
 
@@ -231,6 +239,32 @@ Use `--report-only` when you want a bug report without code changes. Trigger phr
 - Produce the same structured report
 
 For full test-fix-verify loop, use default mode (no flag).
+
+## Known Pitfalls
+
+**Testing only the happy path.** Every form submitted correctly, every button clicked produced the expected result, every page loaded with valid data. QA looked clean. In production, users submitted empty forms, clicked back then forward, pasted 10MB of text, and used the app on a spotty mobile connection.
+
+*What went wrong:* QA tested what the developer expected users to do, not what users actually do. The unhappy paths — empty input, invalid data, network failures, browser back button — were never exercised.
+
+*Prevention:* Phase 3 (Explore) requires testing empty states, error states, loading states, and overflow conditions explicitly. This isn't optional. Real users hit these paths within hours of launch.
+
+**Fixing bugs in unrelated code during QA.** QA found a visual glitch on the settings page. While fixing it, the engineer noticed the auth module used an outdated hash function and "upgraded" it. This broke existing password verification for all users.
+
+*What went wrong:* QA fix scope expanded beyond the finding. A one-line CSS fix became a cross-module refactor.
+
+*Prevention:* Step 3b says "Do NOT refactor surrounding code." Each fix must be minimal — address only the specific finding. If you notice something unrelated, log it as a new finding or create a follow-up task. Never fix it in the same commit.
+
+**Ignoring JavaScript console errors.** The page looked fine. Every button worked. QA passed with a 9/10 health score. Three days post-launch, analytics showed 40% of mobile users couldn't complete checkout — a console error was silently preventing a payment callback.
+
+*What went wrong:* Console errors were never checked. Visual testing alone misses errors that don't break the UI immediately but corrupt state over time.
+
+*Prevention:* Step 2 Phase 3 item 6 requires checking the console after EVERY interaction. This is not paranoia — silent JS errors are among the most production-dangerous bugs because users can't report what they can't see.
+
+**Not re-testing after fixes.** QA found 8 issues, fixed all 8, and shipped. Issue #3's fix introduced a regression that broke the login page. Nobody noticed because re-testing only covered issue #3's page, not the login page.
+
+*What went wrong:* Fixes were verified in isolation. The final re-test (Step 4) was skipped because "all individual fixes verified."
+
+*Prevention:* Step 4 (Final QA) is mandatory, not optional. After all fixes, re-test ALL affected pages — not just the ones that were fixed. Fixes interact. Verify the whole system, not individual patches.
 
 ## Anti-Rationalization
 

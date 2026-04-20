@@ -69,6 +69,8 @@ The description is how future agents find your skill. It's the most important fi
 - NEVER summarize the skill's workflow or process
 - Why: If the description says "run X then Y," the agent may follow the summary instead of reading the full skill. The description is a trigger, not a tutorial.
 
+**Why the description matters most:** Skills are loaded based on description matching. A vague description ("Use for debugging") won't trigger when it should. A specific description ("Use when encountering any bug, test failure, or unexpected behavior — systematic root cause investigation") catches the relevant scenarios. The description is the skill's front door — if agents can't find it, the skill doesn't exist.
+
 ```yaml
 # BAD: Summarizes workflow — agent follows summary instead of reading skill
 description: Use when debugging — add logs, trace data flow, fix root cause
@@ -84,6 +86,8 @@ NO SKILL WITHOUT A FAILING TEST FIRST
 ```
 
 Write the skill before testing? Delete it. Start over. Edit without testing? Same violation. No exceptions.
+
+**Why this mirrors TDD:** Skills are code that runs in an LLM's context. Untested code has bugs. Untested skills produce unreliable agent behavior. The same discipline that prevents bugs in software prevents bugs in process documentation. If you wouldn't ship code without tests, don't ship skills without tests.
 
 ## RED-GREEN-REFACTOR for Skills
 
@@ -170,3 +174,23 @@ Checklist:
 - [ ] One excellent example (not multi-language)
 
 Status: DONE when all checklist items are complete. DONE_WITH_CONCERNS if rationalizations remain unaddressed. BLOCKED if baseline testing is skipped.
+
+## Known Pitfalls
+
+**Writing the skill before running the baseline test.** The skill was written first (200 lines of detailed instructions). Then the baseline test was run. The baseline agent actually performed well on most scenarios — the skill addressed problems that didn't exist. The 200 lines were unnecessary for 4 of the 6 scenarios.
+
+*What went wrong:* The Iron Law says "NO SKILL WITHOUT A FAILING TEST FIRST." Writing first means you're solving imagined problems, not observed ones.
+
+*Prevention:* RED step (baseline) must happen first. Watch what agents actually do wrong. THEN write the skill to address those specific failures. If agents handle most scenarios fine, the skill only needs to address the few scenarios where they fail. A targeted 50-line skill beats a comprehensive 200-line skill that solves problems nobody has.
+
+**Description field summarizes the workflow.** The description said "Use when debugging — add diagnostic logs, trace data flow backward, identify root cause, implement minimal fix, write regression test." Agents read the description, followed it as a simplified workflow, and skipped reading the actual skill body.
+
+*What went wrong:* The description field rules say "NEVER summarize the skill's workflow or process." The description was a tutorial, not a trigger.
+
+*Prevention:* The description should only say WHEN to use the skill (triggering conditions). "Use when encountering any bug, test failure, or unexpected behavior." The HOW is in the skill body. If the description contains steps, rewrite it to only contain conditions.
+
+**Skill grows beyond 500 lines without splitting.** The skill started at 200 lines. Edge cases were added (250). Framework-specific guidance was added (350). More anti-rationalization entries (400). Reference tables (480). By 600 lines, the skill was too long to load reliably into context — the end was getting truncated.
+
+*What went wrong:* The 500-line limit was treated as a suggestion. Each addition seemed necessary in isolation, but the total exceeded what the context window could reliably handle.
+
+*Prevention:* At 400 lines, start looking for content that can move to a reference file. Framework-specific guidance, long code examples, and extensive tables are good candidates. The SKILL.md body stays focused on the core pattern. Supporting details go in `references/` files that are loaded as needed. Under 500 lines is a hard limit, not a soft guideline.

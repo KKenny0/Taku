@@ -90,6 +90,8 @@ Code review requires technical evaluation, not emotional performance. Verify bef
 
 **2. UNDERSTAND** — Restate each finding in your own words. Can't restate it? Ask for clarification.
 
+**Why restate:** If you can't explain a finding in your own words, you don't understand it well enough to evaluate it. Restating forces comprehension before judgment.
+
 **3. VERIFY** — Is this finding technically correct for THIS codebase?
 - Does the suggested fix apply here?
 - Would it break existing functionality?
@@ -133,3 +135,23 @@ Before /taku-ship: final review gate, all critical and important findings resolv
 | "I already checked it myself" | You wrote it. You have blind spots. That's the point. |
 | "The reviewer is probably right" | Probably is not verification. Check the code. |
 | "I'll implement it all to be safe" | Blind implementation introduces regressions. Verify first. |
+
+## Known Pitfalls
+
+**Agreeing with every piece of feedback without verifying.** The reviewer sent 5 findings. The implementer responded "You're absolutely right!" to all 5 and implemented every suggestion. Finding #3 was wrong — the "missing null check" was actually a validated enum with no null possibility. The unnecessary check added complexity.
+
+*What went wrong:* The Forbidden Responses section says never say "You're absolutely right!" before verifying. The 6-Step Protocol (Read, Understand, VERIFY, Evaluate, Respond, Implement) was compressed into Read → Implement.
+
+*Prevention:* The VERIFY step exists between understanding and responding. For each finding, check: is this technically correct for THIS codebase? Does the suggested fix apply here? Would it break existing functionality? Only after verification should you respond.
+
+**Sending insufficient context in the dispatch packet.** The dispatch packet included the diff and commit messages but not the DESIGN.md requirements. The reviewer flagged a "missing feature" that was actually a deliberate scope exclusion documented in DESIGN.md. Time was wasted on a non-issue.
+
+*What went wrong:* Step 1 (Gather Context) was incomplete. The requirements (DESIGN.md) were skipped because "the diff speaks for itself."
+
+*Prevention:* The dispatch packet must include all five elements: git SHAs, what was implemented, requirements, test results, and specific concerns. If you skip requirements, the reviewer can't distinguish a bug from a deliberate exclusion.
+
+**Implementing all fixes in one batch without testing between.** Three findings were received. All three fixes were applied in one editing session, then tests were run. Two tests failed. Which fix broke them? All three touched overlapping code. Now you're debugging your own fixes.
+
+*What went wrong:* Step 6 of the Receive Protocol says: "Order: blocking issues first, then simple fixes, then complex fixes. Test after each fix." All three were batched.
+
+*Prevention:* Fix one finding, run tests, verify. Then fix the next. This takes longer per-finding but produces a clean, debuggable history. If fixes conflict, you discover it one fix at a time, not three at once.

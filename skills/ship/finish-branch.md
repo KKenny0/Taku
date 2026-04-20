@@ -20,6 +20,8 @@ Run the project's test suite before presenting any options:
 npm test 2>/dev/null || pytest 2>/dev/null || cargo test 2>/dev/null || go test ./...
 ```
 
+**Why this is a hard gate:** All four completion options (merge, PR, keep, discard) assume the code works. Presenting options before verifying tests invites the user to choose a merge path for broken code. The test gate prevents this by refusing to proceed until the code is verified.
+
 If tests fail:
 ```
 Tests failing (N failures). Must fix before completing:
@@ -156,3 +158,23 @@ Never:
 - Merge without verifying tests on the result
 - Delete work without confirmation
 - Force-push without explicit request
+
+## Known Pitfalls
+
+**Merging without testing the merge result.** Tests passed on the feature branch. The merge to main introduced a conflict that was auto-resolved incorrectly. The merged result had broken imports. Nobody noticed because "tests passed on the branch."
+
+*What went wrong:* Step 4 Option 1 says to run tests on the MERGED result, not just the branch. This step was skipped because the branch tests passed.
+
+*Prevention:* Always run tests after merge, before deleting the branch. If tests fail on the merged result, you still have the branch as a reference point. Once the branch is deleted, debugging the merge conflict is much harder.
+
+**Accidental worktree cleanup when PR is still open.** The user chose Option 2 (create PR). The script then cleaned up the worktree because the cleanup logic was triggered by the "done" flag. The PR was open, code was pushed, but the local worktree was gone. The user needed to make a follow-up commit based on reviewer feedback.
+
+*What went wrong:* Quick Reference table says Option 2 (PR) preserves the worktree. The cleanup was triggered incorrectly.
+
+*Prevention:* Worktree cleanup only happens for Options 1 (merge locally) and 4 (discard). Options 2 (PR) and 3 (keep as-is) must NOT trigger cleanup. Double-check the option before running `git worktree remove`.
+
+**Discarding without reading what's being lost.** The user said "discard this." The confirmation showed "This will permanently delete: branch feat/auth, 12 commits." The user typed "discard." What the confirmation didn't show: 3 of those 12 commits contained utility functions that other branches were depending on via cherry-picks. Those commits were now lost.
+
+*What went wrong:* The discard confirmation lists commits but doesn't check if those commits have been referenced or cherry-picked elsewhere.
+
+*Prevention:* Before showing the discard confirmation, check: `git branch --contains <commit>` for each commit. If any commit appears on another branch, note it in the confirmation: "Warning: 3 commits are also present on branch X." The user can then make an informed decision rather than discovering the dependency later.

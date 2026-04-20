@@ -198,3 +198,27 @@ Startup | Builder
 After saving notes:
 - Recommend `/taku-brainstorm` to refine the chosen approach into a full DESIGN.md
 - Or `/taku-plan` if the design is already clear enough to plan
+
+## Known Pitfalls
+
+**Asking all six questions regardless of product stage.** A solo engineer building an internal tool got all six startup-mode questions, including "Name the actual human who needs this most" and "Have you watched someone use this?" The session felt like an interrogation for a pitch that didn't exist. The engineer abandoned the session and built without any design thinking.
+
+*What went wrong:* The Smart Routing section was ignored. Every session defaulted to all six questions regardless of context.
+
+*Prevention:* Use Smart Routing. Pre-product → Q1, Q2, Q3 only. Has users → Q2, Q4, Q5. Pure engineering/infra → Q2, Q4. If earlier answers already cover a later question, skip it. Six questions for every session is a process failure, not thoroughness.
+
+**Pushing back twice when the user says "just do it."** The user said "just do it" at Q2. The reviewer asked Q3 anyway. The user said "just build it" again. The reviewer asked Q4. The user left the session.
+
+*What went wrong:* The Escape Hatch says: first pushback → ask the 2 most critical remaining questions. Second pushback → respect it and move on. This was followed zero times.
+
+*Prevention:* The Escape Hatch exists because forced process on an unwilling participant produces worse outcomes than no process. After two pushbacks, the user has communicated that they want to build, not talk. Respect that. Move to alternatives generation.
+
+**Generating alternatives without a minimal viable option.** Three approaches were presented: all medium-to-large effort, all requiring new infrastructure. The user picked the "smallest" option, which was still a 3-week project. A simpler 3-day option existed but wasn't presented.
+
+*What went wrong:* The alternatives generation skipped the "minimal viable" requirement. All three options were variations on the same scope.
+
+*Prevention:* One alternative MUST be minimal viable: fewest files, smallest diff, ships fastest. If all three options feel like the same amount of work, the minimal viable option hasn't been found yet. Keep cutting until you reach something shippable in days, not weeks.
+
+## Why This Skill Matters
+
+This skill costs 10-20 minutes. Building the wrong thing costs weeks. The forcing questions aren't academic exercises — each one addresses a specific, common failure mode in product development. Skipping them doesn't save time; it moves the cost downstream where it's exponentially more expensive.

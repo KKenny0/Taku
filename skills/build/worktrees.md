@@ -68,9 +68,13 @@ cd ".worktrees/$BRANCH_NAME"
 
 Don't hardcode. Detect from project files. If none match, skip dependency install.
 
+**Why auto-detect:** Hardcoded setup commands break on different projects and become stale. Auto-detection from project files means the worktree setup works for any project without modification.
+
 ### 4. Run baseline tests
 
 Run the project's test suite. If tests fail before you've changed anything, that's a pre-existing problem. Report it and ask whether to proceed.
+
+**Why baseline tests:** Without a baseline, you can't distinguish bugs you introduced from bugs that already existed. The baseline establishes what "passing" looks like in this worktree's environment. If tests fail here, any work you do will be built on a broken foundation.
 
 ```bash
 npm test        # or cargo test, pytest, go test ./...
@@ -111,6 +115,26 @@ git worktree remove ".worktrees/$BRANCH_NAME"
 | Proceed with failing tests | Can't tell new bugs from old | Report failures, get permission |
 | Hardcode setup commands | Breaks on different projects | Auto-detect from project files |
 | Never clean up worktrees | Disk usage grows, stale branches | Remove worktree after merge |
+
+## Known Pitfalls
+
+**Creating worktree without checking gitignore.** A worktree was created in `.worktrees/my-feature`. After implementing the feature, `git status` showed 2,000+ untracked files — the worktree's `node_modules/` and build artifacts. The entire worktree contents were about to be committed.
+
+*What went wrong:* The gitignore check was skipped because "it usually works." The `.worktrees/` directory wasn't in `.gitignore`, so git saw everything inside it as untracked files.
+
+*Prevention:* The Safety step is first for a reason: `git check-ignore -q .worktrees`. If it's not ignored, fix it BEFORE creating the worktree. This is a 10-second check that prevents a very messy cleanup.
+
+**Baseline tests failing but proceeding anyway.** The worktree was created, `npm install` ran, `npm test` showed 3 failures. The developer proceeded with implementation assuming the failures were pre-existing. After 2 hours of work, the tests still failed — 2 were pre-existing but 1 was caused by a dependency version mismatch in the worktree's fresh install.
+
+*What went wrong:* Failing baseline tests were assumed to be someone else's problem. The worktree's isolated environment had a different dependency resolution than the main workspace.
+
+*Prevention:* If baseline tests fail, report the output and ask whether to proceed. Don't assume failures are pre-existing. In isolated worktrees, dependency versions may differ. Verifying the baseline protects you from debugging your own changes against a broken foundation.
+
+**Stale worktrees accumulating.** Over 3 months, 12 worktrees were created for various features. 10 were merged, but the worktrees were never cleaned up. Each had its own `node_modules/` (500MB each). Six gigabytes of disk space consumed by dead worktrees.
+
+*What went wrong:* The Cleanup step was never executed. After merging, developers moved on without removing worktrees.
+
+*Prevention:* Add worktree cleanup to the post-merge routine. After `/taku-finish` completes Option 1 (merge locally) or Option 4 (discard), remove the worktree immediately. List stale worktrees with `git worktree list` periodically.
 
 ## Completion
 

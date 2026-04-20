@@ -46,6 +46,8 @@ Delivered: <1-line summary>
 
 This is informational, not a gate. Continue to Step 4.
 
+**Why scope check before code review:** If the diff includes unrelated changes, reviewing those wastes effort. If requirements are missing, no amount of code review will catch them. Scope check focuses the code review on the right surface area.
+
 ## Step 4: Get the Diff
 
 ```bash
@@ -62,6 +64,8 @@ Apply these check categories in two passes.
 ### Pass 1 — Critical
 
 These are bugs that blow up in production:
+
+**Why Critical first, separate pass:** Critical findings change code. If you review everything at once, you risk flagging code that will be rewritten by a Critical fix. Pass 1 identifies what must change; fix those first; then Pass 2 reviews the remaining diff with fresh eyes.
 
 **SQL injection risk**
 - String concatenation or interpolation in SQL queries
@@ -110,6 +114,8 @@ These degrade quality over time:
 ### Confidence Scores
 
 Every finding includes confidence (1-10):
+
+**Why explicit confidence:** Low-confidence findings waste reviewer time and erode trust. A finding at 3/10 is speculation — it belongs in an appendix, not in the main review. The confidence score forces honest assessment and helps the developer prioritize which findings to investigate first.
 
 | Score | Meaning | Display |
 |-------|---------|---------|
@@ -178,3 +184,23 @@ If no issues: "Pre-Landing Review: No issues found."
 - Only flag real problems. Skip anything that's fine.
 - Never commit, push, or create PRs. That's /taku-ship's job.
 - Verify your claims. Cite specific lines. Never say "probably fine."
+
+## Known Pitfalls
+
+**Auto-fixing without understanding the full context.** The diff showed a SQL query with string concatenation. The reviewer auto-fixed it with parameterized queries. The fix broke the application because the query was dynamically constructed across three functions — the parameterized version couldn't handle the dynamic table name.
+
+*What went wrong:* The Critical auto-fix was applied based on a pattern match without understanding how the code actually used the query. "SQL injection risk" was the correct pattern, but the fix was wrong for this specific usage.
+
+*Prevention:* Auto-fix Critical and Important findings, but verify the fix compiles and tests pass immediately after. If the fix breaks something, read the surrounding context before re-fixing. Pattern matching catches issues; understanding context produces correct fixes.
+
+**Flagging issues already addressed later in the diff.** The reviewer flagged a missing null check on line 45. But line 62 in the same diff added a null-safe wrapper that handles it. The finding was correct in isolation but wrong in context.
+
+*What went wrong:* The Important Rule says "Read the FULL diff before commenting." The reviewer processed the diff linearly, flagging issues as they appeared, rather than reading the entire diff first.
+
+*Prevention:* Step 5 (Two-Pass Review) applies checks to the FULL diff, not line by line. Read everything first. Then review. A finding in the first half of the diff may be addressed in the second half.
+
+**Nit-finding explosion drowning real issues.** The review produced 47 findings: 2 Critical, 3 Important, 6 Minor, and 36 Nits about naming conventions, comment style, and formatting. The 5 real findings were buried in noise. The developer fixed all 36 Nits first (easy wins) and missed one Critical.
+
+*What went wrong:* The reviewer treated every style observation as a finding. Nit severity exists to de-prioritize these, but 36 of them still dominated the output.
+
+*Prevention:* "Only flag real problems. Skip anything that's fine." Nits should be rare — mention 2-3 at most in passing, not catalogued. If the code style is consistently different from your preference, make ONE note about the pattern, not 36 individual findings. The signal-to-noise ratio determines whether the review is useful.

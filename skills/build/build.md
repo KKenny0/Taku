@@ -51,6 +51,8 @@ Read PLAN.md
     → Route to REVIEW phase
 ```
 
+**Why wave-based dispatch:** Full parallelism (all tasks at once) creates massive reconciliation complexity. Pure sequential wastes time on independent tasks. Wave-based dispatch gets the best of both: independent tasks run together, dependent tasks wait for their prerequisites. Each wave is small enough to reconcile cleanly.
+
 ### Dependency Analysis
 
 Parse each task in PLAN.md to identify dependencies:
@@ -137,11 +139,15 @@ After each task:
 
 Fix issues between stages. Don't proceed to Stage 2 until Stage 1 passes.
 
+**Why two stages:** Spec compliance and code quality are independent concerns. Code can be beautiful but wrong (matches nothing in the plan). Code can be correct but fragile (meets spec but has poor structure). Checking both at once conflates the issues. Stage 1 first ensures you built the right thing; Stage 2 ensures you built it well.
+
 ### Reconciliation (After Parallel Wave)
 
 1. Check for file conflicts between parallel tasks
 2. Run integration tests
 3. Verify task boundaries (no task leaked into another's files)
+
+**Why reconciliation matters:** Each parallel task works in isolation. They don't know about each other's changes. Without reconciliation, conflicting imports, duplicate definitions, and crossed dependencies accumulate silently until the final integration — where they're much harder to untangle. Catch conflicts wave-by-wave while the context is fresh.
 
 ---
 
@@ -170,6 +176,8 @@ For each task:
 5. Commit as specified
 6. Mark as completed
 
+**Why follow each step exactly:** Plans are written to be executable without judgment calls. If a step seems wrong, raise it before deviating — don't silently adapt. Silent deviations mean the plan and reality diverge, making later steps unreliable.
+
 ### Step 3: Checkpoints
 
 After each task, briefly summarize: what was done, test results, deviations.
@@ -195,6 +203,32 @@ After all tasks: run full test suite, announce completion, route to REVIEW phase
 - Provide complete context upfront
 - Follow /taku-tdd for all code changes
 - Stop and ask when stuck
+
+## Known Pitfalls
+
+**Parallel subagents modifying the same file.** The plan listed overlapping file paths across two independent tasks. Both subagents wrote to `utils/auth.py` simultaneously. One commit overwrote the other's changes silently.
+
+*What went wrong:* Dependency analysis didn't catch the overlap because both tasks listed the file under "modify" rather than "create."
+
+*Prevention:* During Dependency Analysis, grep all tasks' file lists for duplicates. If any file appears in more than one task, mark those tasks as dependent — they must run sequentially.
+
+**Subagent received partial context.** The plan's Task 4 referenced a `UserStore` interface defined in Task 2, but the subagent context only included Task 4's description. The subagent invented its own `UserStore` with different method signatures.
+
+*What went wrong:* The context format included task description but not the actual code from prior tasks.
+
+*Prevention:* For dependent tasks, include the relevant code from completed tasks in the subagent context. Reference exact file paths and line numbers. The implementer should never guess at interfaces.
+
+**Skipping reconciliation between waves.** Three parallel tasks completed successfully. The next wave started immediately without checking for conflicts. Two tasks had added imports to the same file — the combined result had duplicate imports and a circular dependency.
+
+*What went wrong:* Eager to maintain speed, reconciliation was treated as optional.
+
+*Prevention:* Reconciliation is never optional. After every parallel wave, always check for file conflicts and run integration tests before dispatching the next wave.
+
+**Accepting "DONE_WITH_CONCERNS" without reading concerns.** A subagent reported DONE_WITH_CONCERNS. The coordinator moved on. The concern was a partially implemented error handler that returned `undefined` for three error cases.
+
+*What went wrong:* The status handler treated DONE_WITH_CONCERNS as a soft pass instead of reading and addressing the concerns.
+
+*Prevention:* DONE_WITH_CONCERNS always requires reading the concerns. Address correctness issues immediately. If concerns are non-critical (style, naming), note and proceed. If concerns affect behavior, fix before moving on.
 
 ## When to Stop
 

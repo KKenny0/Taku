@@ -15,6 +15,8 @@ A design review that scores, not opines. Each dimension gets a number, an explan
 
 "Looks good" is not a design review. Neither is "I don't like the color." Design quality is measurable across specific dimensions. This skill forces that measurement, explains the gap between current and ideal, and produces actionable fixes the implementer can apply.
 
+**Why score numerically:** Numbers create accountability. "The typography needs work" is forgettable. "Typography scores 4/10 because no type scale is defined" demands action. Numbers also enable comparison: the before-score vs. after-score shows whether the revision actually improved things.
+
 ## The 9 Dimensions
 
 Rate each 0-10. For anything below 8, explain what a 10 looks like and write the specific fix into the plan.
@@ -121,6 +123,28 @@ OVERALL: N/10
 ```
 
 For dimensions scoring 8+, a brief note is fine. For dimensions below 8, the fix must be specific enough for the implementer to act on without asking questions.
+
+**Why the 8+ threshold:** Scoring 8+ means the dimension is solid enough that only minor polish could improve it. Below 8 means there's a meaningful gap that will be visible to users. The fix must be specific because vague guidance ("improve the spacing") produces vague implementation.
+
+## Known Pitfalls
+
+**Scoring everything 7-8 without genuine analysis.** All nine dimensions scored 7 or 8. The scorecard looks balanced but reveals nothing. No dimension was strong enough to praise, no dimension was weak enough to flag. This is the "Gentleman's C" of design reviews — it passes everyone without teaching anything.
+
+*What went wrong:* The reviewer didn't want to be negative. Every dimension got a safe score with vague observations like "could be slightly more intentional." No actionable fixes were produced.
+
+*Prevention:* For anything below 8, the "What a 10 looks like" and "Fix" fields must be specific enough that the implementer can act without asking questions. If you can't write a specific fix, you haven't understood the gap well enough to score it. Scores without specific observations are guesses, not evaluations.
+
+**Reviewing without a design system to calibrate against.** The review scored Typography 6/10 with "no clear type hierarchy." But the project never defined a type hierarchy in the first place. The fix said "define a type hierarchy" — which is a design task, not a review finding.
+
+*What went wrong:* Design review is meant to evaluate a plan against its own stated intentions. Scoring against an unstated ideal produces findings that are really new design requirements, not review feedback.
+
+*Prevention:* If the plan doesn't specify typography choices, the correct finding is "Typography is undefined" with a fix that says "Define typeface, size scale, and heading hierarchy before implementation." Don't score what doesn't exist — flag the gap.
+
+**Treating the scorecard as the final deliverable.** Nine scores were produced, the overall was 8.2, and the review was declared "done." But three dimensions had fixes that contradicted each other (Motion said "add transitions everywhere" while Accessibility said "respect reduced motion"). The implementer was left with conflicting instructions.
+
+*What went wrong:* Dimensions were scored in isolation without cross-referencing fixes for conflicts.
+
+*Prevention:* After scoring all nine dimensions, scan fixes for contradictions. If Motion recommends animations that Accessibility flags, note the tension and recommend a resolution. The scorecard is analysis; synthesis is the actual deliverable.
 
 ## Completion
 

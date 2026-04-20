@@ -209,6 +209,26 @@ If image generation available: component showcase and sample page. Skip if unava
 
 Append `## Design System` section with all tokens. No placeholders, no TBD.
 
+## Known Pitfalls
+
+**Presenting one approach and calling it three.** "Approach A: Use React. Approach B: Use React with hooks. Approach C: Use React with hooks and TypeScript." All three are the same approach with minor variations. The user has no real choice and the trade-off analysis is theater.
+
+*What went wrong:* The skill says "2-3 distinct options with trade-offs." The keyword is *distinct*. Variations on the same architecture aren't alternatives — they're implementation details.
+
+*Prevention:* One approach must be minimal viable (fewest files, smallest diff). One must be ideal architecture. If a third exists, it must approach the problem from a genuinely different angle (different data model, different framework, different mental model). If you can't find three genuinely different approaches, present two. Two real options beat three fake ones.
+
+**Skipping the design-first gate for "obvious" features.** "Add a logout button" seems too simple for a design. But the design questions reveal: Should it invalidate server sessions or just clear local state? Should it show a confirmation? What happens to in-flight requests? These answers change the implementation significantly.
+
+*What went wrong:* "This is too simple to need a design" is literally the first entry in the anti-rationalization table. It was rationalized anyway.
+
+*Prevention:* The Hard Gate applies to every project regardless of perceived simplicity. The design CAN be short — a few sentences answering the key questions. But present it and get approval. A 3-minute design for a logout button prevents a 3-hour debate about session invalidation strategy.
+
+**Writing DESIGN.md with TBD sections.** The design was approved verbally but the written doc had "Error handling: TBD" and "Testing strategy: standard approach." During implementation, the developer interpreted "standard approach" as no tests at all.
+
+*What went wrong:* Step 7 (Write Design Doc) was rushed. Step 8 (Spec Self-Review) was skipped. The placeholder scan would have caught these.
+
+*Prevention:* Step 8's placeholder scan is mandatory. After writing DESIGN.md, search for TBD, TODO, "appropriate", "standard", and "handle". Every instance must be replaced with a concrete decision. A design doc with TBDs is a design doc that hasn't been written yet.
+
 ## Anti-Rationalization
 
 | Excuse | Why it's wrong |

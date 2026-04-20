@@ -86,6 +86,8 @@ CROSS-MODEL ANALYSIS:
 
 **Rule:** Overlapping findings are high confidence. Implement them. Unique findings from either model get investigated — verify they're real before acting on them.
 
+**Why overlapping = high confidence:** Two models with different architectures, training data, and biases independently flagged the same issue. The probability of a false positive drops dramatically when two independent observers agree. This is the core value of cross-model review — the intersection is where the real bugs live.
+
 ## Step 3: CHALLENGE Mode — Adversarial Review
 
 Tell the external model to actively try to break the code. This catches edge cases that a normal review misses.
@@ -164,3 +166,23 @@ VERDICT: <PASS|FAIL|N/A> (REVIEW mode only)
 | "The external model doesn't know our context" | It doesn't need full context to find logic bugs and security holes. |
 | "I'll just implement what it says" | Verify first. External models can be wrong too. Overlapping findings are the only auto-fix zone. |
 | "This is too small for cross-model review" | Small changes break production. The review catches what single-model review misses. |
+
+## Known Pitfalls
+
+**Blindly implementing all external model findings.** The external model flagged 8 issues. All 8 were implemented without verification. 3 were genuine bugs, 2 were false positives (the external model didn't understand the framework convention), and 3 were style preferences that conflicted with the project's existing patterns. The "fixes" introduced 2 regressions.
+
+*What went wrong:* Synthesis Rules say: "Unique findings from either model get investigated — verify they're real before acting on them." This rule was ignored in favor of "the external model found it, so it must be real."
+
+*Prevention:* Only overlapping findings (both models agree) get auto-implemented. Unique findings must be verified against the actual codebase before acting. If the external model doesn't understand the framework, its architecture suggestions will be wrong for this project.
+
+**Truncating the external model's output.** The external model produced 200 lines of review. The coordinator summarized it as "5 findings, all minor." The actual output contained a critical security finding buried in paragraph 4 that was lost in the summary.
+
+*What went wrong:* Synthesis Rule 1 says "Present output verbatim." The coordinator summarized for brevity and dropped the most important finding.
+
+*Prevention:* Present the full external model output before adding your commentary. If it's long, use collapsible sections — but include everything. Your summary comes AFTER the full output, never instead of it.
+
+**External model reads skill files instead of source code.** The external model's output referenced "SKILL.md configuration" and commented on prompt engineering patterns. It didn't review the actual application code — it read the skills framework files and reviewed those instead.
+
+*What went wrong:* The diff sent to the external model included skill files alongside source code. The model prioritized the more unusual files (skill definitions) over the routine application code.
+
+*Prevention:* Synthesis Rule 3 says "Flag skill-file rabbit holes." If the external model's findings reference skill files, config files, or documentation instead of source code, warn the user and re-run with a more focused diff that excludes non-source files.

@@ -26,6 +26,8 @@ Violating the letter of this process is violating the spirit of debugging.
 
 Gather context before forming any hypothesis. This is evidence collection, not problem-solving.
 
+**Why evidence-first:** Jumping to solutions before understanding the problem is the single most common debugging failure. You fix what you think is wrong, not what's actually wrong. Evidence-first prevents this bias.
+
 1. **Read the error.** Stack traces, error messages, log output. Read them completely. Line numbers, file paths, error codes — all of it. The error message usually contains the answer.
 
 2. **Reproduce consistently.** What are the exact steps? Does it happen every time? If not reproducible, gather more data. Don't guess at intermittent bugs.
@@ -47,6 +49,8 @@ Output: **Root cause hypothesis** — a specific, testable claim about what is w
 
 Match the bug against known patterns before proposing solutions.
 
+**Why pattern-match first:** Most bugs are instances of well-known failure modes. Recognizing the pattern tells you where to look and what to check, cutting investigation time from hours to minutes. Novel bugs are rare; your bug has almost certainly happened before.
+
 | Pattern | Signature | Where to look |
 |---------|-----------|---------------|
 | Race condition | Intermittent, timing-dependent | Shared state, concurrent access |
@@ -66,6 +70,8 @@ If the pattern isn't obvious, search the web for "{framework} {error type}" (san
 ### Phase 3: HYPOTHESIS
 
 Form hypotheses ranked by likelihood. Test them one at a time.
+
+**Why rank and isolate:** Ranking forces honest probability assessment — you test the most likely cause first, not the most interesting one. Testing one at a time means each test produces clear signal: confirmed or denied. Multiple simultaneous changes produce ambiguous results.
 
 1. **Rank hypotheses:**
    ```
@@ -98,6 +104,8 @@ Form hypotheses ranked by likelihood. Test them one at a time.
 
 Fix the root cause, not the symptom.
 
+**Why root-cause-only:** Symptom fixes suppress the error at the crash site, but the underlying problem persists and will surface elsewhere — usually in a harder-to-diagnose form. A null check at the crash site doesn't fix the auth middleware that produced the null.
+
 1. **Write a failing test first.** The simplest reproduction of the bug as an automated test. If no test framework exists, write a one-off script. The test MUST fail before the fix.
 
 2. **Implement the minimal fix.** One change. One root cause addressed. No "while I'm here" refactoring. No bundled improvements.
@@ -106,7 +114,35 @@ Fix the root cause, not the symptom.
 
 4. **Blast radius check.** If the fix touches more than 5 files, stop and ask. A bug fix that large usually means you're fixing the wrong thing.
 
+**Why the 5-file limit:** A genuine root cause fix is usually localized — it changes one thing in one place. If you're touching 5+ files, you're likely fixing symptoms across multiple layers rather than the single source. Stop and re-investigate.
+
 5. **Run the full test suite.** Paste the output. No regressions.
+
+## Known Pitfalls
+
+**Fixing the symptom instead of root cause.** The error was a `NullPointerException` on `user.getEmail()`. The fix added a null check: `user?.getEmail() ?? ""`. Two days later, a different code path crashed because `user` was null — the real bug was in the auth middleware that failed to populate the session.
+
+*What went wrong:* The null pointer was a symptom. The root cause was upstream. The fix suppressed the error at the crash site instead of fixing where the null originated.
+
+*Prevention:* Phase 1 Step 4 (trace data flow backward) exists specifically for this. Never fix at the crash site without tracing where the bad value comes from. Fix at the source.
+
+**Testing multiple hypotheses simultaneously.** Three hypotheses were on the list. To save time, all three fixes were applied at once. The bug disappeared. Now none of the three fixes can be individually verified — which one actually fixed it? Is the fix correct, or did two wrong fixes cancel each other out?
+
+*What went wrong:* Parallel hypothesis testing saves time in the moment but destroys diagnostic value. You learn nothing from a bulk fix.
+
+*Prevention:* One hypothesis at a time. One change. One test. If the first fix works, you're done. If it doesn't, you still have a clean system for the next hypothesis. Phase 3 Step 2 says "one variable at a time" for a reason.
+
+**Skipping Phase 1 because the cause "seems obvious."** A 500 error appeared right after a deploy. The obvious fix was to revert the deploy. After reverting, the error persisted — it was actually caused by a database migration that ran during deploy and wasn't included in the revert.
+
+*What went wrong:* "Obvious" causes are usually the first thing that comes to mind, not the actual cause. Skipping investigation means missing the real problem.
+
+*Prevention:* Complete Phase 1 (INVESTIGATE) every time, even when the cause seems obvious. The Iron Law exists because "obvious" causes are wrong often enough to justify the discipline.
+
+**Not writing a regression test for the fix.** A race condition was found and fixed with a mutex. Six weeks later, a refactoring removed the mutex as "unnecessary overhead." The race condition returned in production.
+
+*What went wrong:* The fix wasn't protected by a regression test. Without a test, future developers can't know why the code exists.
+
+*Prevention:* Phase 4 Step 1 requires a failing test first. This test becomes the regression guard. A bug without a regression test is a bug waiting to happen again.
 
 ## Output: Debug Report
 

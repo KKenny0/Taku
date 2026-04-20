@@ -33,6 +33,8 @@ This review catches both problems. Strategic review challenges premises (changin
 
 A CEO doesn't care about your class hierarchy. A CEO cares about whether you're building the right thing, for the right people, at the right time.
 
+**Why scope before architecture:** Scope mistakes are expensive because every downstream decision (architecture, implementation, testing) is built on top of wrong assumptions. Fixing scope costs minutes (delete tasks, reframe the problem). Fixing architecture costs days. Fixing implementation costs weeks. Catch mistakes at the cheapest stage.
+
 ### The Four Scope Modes
 
 After reviewing the plan, pick ONE mode:
@@ -62,6 +64,8 @@ After reviewing the plan, pick ONE mode:
 2. Is this the right solution? Simpler approaches for 80% of the problem?
 3. Who benefits? Name the specific user in context. If you can't, the plan lacks clarity.
 4. What's the cost of being wrong? How much work wasted if assumptions fail?
+
+**Why challenge premises:** Premises are the foundation. If a premise is wrong, everything built on it is wrong. Most plans don't state their premises explicitly — they're implicit assumptions that everyone agrees with because nobody questions them. The challenge step makes implicit assumptions explicit and tests them.
 
 **Step 3: Identify blind spots:**
 - Distribution: How do users actually get this?
@@ -134,6 +138,32 @@ User sees? [what]
 Any failure with no test AND no error handling AND silent UX = critical gap.
 
 ---
+
+## Known Pitfalls
+
+**Scope review approves everything without challenging.** The plan had 14 tasks spanning 3 subsystems. Scope review returned HOLD SCOPE with no changes. During implementation, it became clear that 6 of the 14 tasks addressed edge cases nobody had asked for. Three weeks were wasted on unneeded features.
+
+*What went wrong:* The reviewer treated scope review as a rubber stamp. No premises were challenged. No blind spots were identified. The process was followed in letter but not spirit.
+
+*Prevention:* Scope review must produce at least one challenge per premise. If you can't find anything to question, you haven't looked hard enough. A review that agrees with everything is a review that wasn't done.
+
+**Running architecture review on a trivial change.** A one-line config fix got a full architecture review with data flow diagrams, edge case tables, and failure mode analysis. The review took longer than the implementation and found nothing.
+
+*What went wrong:* No tier detection. Every plan, regardless of size, got the same depth of review. This wastes time and erodes trust in the review process.
+
+*Prevention:* Use SKILL.md's depth-tier to calibrate review effort. Lightweight changes (<50 files) can skip full architecture review. Don't perform a 14-point inspection on an oil change.
+
+**Missing edge cases in the data flow diagram.** The data flow showed the happy path: user submits form → server validates → database stores → confirmation email sends. The review didn't trace what happens when the email service is down (data stored but user sees error), or when the database transaction fails after email sends (user gets confirmation for data that wasn't saved).
+
+*What went wrong:* The data flow diagram traced only the primary path. Error paths, partial failures, and async boundaries were ignored.
+
+*Prevention:* Step 2 of architecture review requires annotating where errors occur, where state changes, and where caching happens. Every arrow is a failure point. Draw the data flow for the failure scenarios too, not just the happy path.
+
+**REDUCTION mode feels like rejection.** The plan proposed 8 features for a v1 launch. Scope review recommended REDUCTION to 3 features. The user interpreted this as "my ideas are bad" and pushed back, keeping all 8 features. The v1 launch was delayed by 4 weeks and shipped with quality issues.
+
+*What went wrong:* REDUCTION was presented as a verdict without framing. It felt like a rejection of the user's vision rather than a strategic choice.
+
+*Prevention:* Frame REDUCTION as focus, not loss: "These 3 features form a coherent product. The other 5 are great features for v2 — they're not being rejected, they're being sequenced." Name the core value and show how reduction serves it.
 
 ## Completion
 

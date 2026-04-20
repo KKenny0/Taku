@@ -62,6 +62,8 @@ Learnings live in `.taku/learnings/{project-slug}.jsonl`. Each line:
 
 **EXPORT:** Convert to markdown. Offer to append to CLAUDE.md or save as separate file.
 
+**Why JSONL over markdown:** JSONL entries can be searched with grep, parsed programmatically, and deduplicated. Markdown learnings files become unstructured text that's hard to query or prune. The machine-readable format makes the SEARCH and PRUNE operations reliable.
+
 ### Auto-Capture
 
 Other Taku skills log learnings automatically. When /taku-review, /taku-reflect, or /taku-cso discovers a non-obvious pattern or pitfall, they append to the learnings file.
@@ -88,6 +90,8 @@ git log origin/<base> --since="<window>" --format="COMMIT:%H|%aN" --numstat
 git log origin/<base> --since="<window>" --format="" --name-only | grep -v '^$' | sort | uniq -c | sort -rn
 git shortlog origin/<base> --since="<window>" -sn --no-merges
 ```
+
+**Why git data over self-reporting:** People misremember what they worked on. They overestimate time spent on important tasks and underestimate time spent on interruptions. Git data is objective: it shows what actually happened, not what someone thinks happened.
 
 ### Step 2: Compute Metrics
 
@@ -130,3 +134,23 @@ Save to `.taku/retros/{date}.md`. Append trends to `.taku/retros/trends.jsonl`.
 | "This is too obvious to log" | Obvious now. Not obvious in 3 weeks after 50 other sessions. |
 | "We didn't do much this week" | Even small weeks have patterns worth examining. |
 | "Retros waste time" | 5 minutes of reflection saves hours of repeated mistakes. |
+
+## Known Pitfalls
+
+**Learnings file becomes a dumping ground.** Over 30 sessions, the learnings file grew to 200+ entries. Most were trivial ("used `map` instead of `for` loop"). When searching for meaningful patterns, the signal was buried in noise. The file became useless and was abandoned.
+
+*What went wrong:* No pruning. No quality filter. Every observation was logged as a "learning" regardless of whether it would be useful in future sessions.
+
+*Prevention:* Use the PRUNE operation regularly. Every 30 days, review entries: remove trivial observations, update stale patterns, delete entries that were hypotheses later proven wrong. A 30-entry file of high-quality insights is more valuable than a 200-entry file of noise. Confidence levels help: prune low-confidence entries first.
+
+**Retro becomes a vanity metric exercise.** The weekly retro showed "142 commits, 8,400 lines added, 12 PRs merged." The team felt productive. But 6,000 of those lines were generated code and boilerplate. The 142 commits included 40 auto-generated dependency bumps. Actual meaningful work: maybe 20 commits.
+
+*What went wrong:* Metrics were taken at face value without context. Raw numbers without interpretation produce false confidence.
+
+*Prevention:* Step 4 (Work Patterns) computes commit type breakdown and flags fix ratio > 50%. Use these signals. If LOC is inflated by generated code, note it. If commit count is inflated by automation, note it. The retro's value is in the analysis, not the numbers.
+
+**Saving learnings but never searching them.** 50 learnings were recorded over a month. None were ever searched or referenced. The team repeated the same mistake 3 times because nobody thought to check the learnings file.
+
+*What went wrong:* The learnings file existed but wasn't integrated into the workflow. It was treated as an archive, not an active reference.
+
+*Prevention:* Auto-Capture should also auto-search. When a new session starts, relevant learnings should be surfaced based on the current task. Other Taku skills that discover patterns should search existing learnings before adding duplicates. The knowledge base is only valuable if it's queried, not just written to.

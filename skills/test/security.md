@@ -32,6 +32,8 @@ The real attack surface isn't your code. It's your dependencies, CI logs with ex
 
 Detect the tech stack to determine scan priority, not scope.
 
+**Why stack-first:** Different stacks have different vulnerability profiles. Node.js has prototype pollution and supply chain risks. Python has pickle deserialization and template injection. Go has race conditions. Knowing the stack focuses Phases 4-11 on relevant threats instead of scanning for everything everywhere.
+
 ```bash
 ls package.json 2>/dev/null && echo "STACK: Node/TypeScript"
 ls requirements.txt pyproject.toml 2>/dev/null && echo "STACK: Python"
@@ -46,6 +48,8 @@ Detect frameworks, read CLAUDE.md/README, map architecture: components, data flo
 ## Phase 2: Attack Surface Census
 
 Map what an attacker sees. Use Grep for code searches.
+
+**Why census before scanning:** You can't secure what you don't know exists. Hidden endpoints, forgotten webhooks, and debug routes are low-hanging fruit for attackers. Counting each category reveals whether the surface is manageable or needs reduction before you invest in hardening.
 
 **Code:** Public endpoints, auth boundaries, file upload paths, admin routes, webhook handlers, background jobs. Count each.
 
@@ -63,6 +67,8 @@ Output a surface map with counts per category.
 ## Phase 3: Secrets Archaeology
 
 Scan git history for leaked credentials.
+
+**Why git history:** Developers rotate credentials when they leak, but git history is forever. A key committed in 2022 and deleted in 2022 still works if it was never rotated. Scanning current code isn't enough — the secrets are in the diffs.
 
 ```bash
 git log -p --all -S "AKIA" --diff-filter=A -- "*.env" "*.yml" "*.json" 2>/dev/null
@@ -82,6 +88,8 @@ CRITICAL for active secret patterns in history. HIGH for tracked .env, CI inline
 ## Phase 4: Dependency Audit
 
 Beyond `npm audit`. Check actual supply chain risk.
+
+**Why beyond npm audit:** `npm audit` checks known CVEs. It doesn't check if a dependency runs install scripts (potential code execution), if it's been abandoned (no security patches coming), or if the lockfile has been tampered with. The supply chain attack surface is real dependencies, not just their version numbers.
 
 ```bash
 npm audit 2>/dev/null || yarn audit 2>/dev/null || bun audit 2>/dev/null
@@ -141,6 +149,8 @@ Flag: sensitive data in logs, PII in URLs/query params, unencrypted data at rest
 ## Phase 13: False Positive Filtering
 
 Run every candidate through this filter. **Daily mode:** 8/10 confidence. **Comprehensive:** 2/10, flag as `TENTATIVE`.
+
+**Why filter aggressively:** Security fatigue is real. A team that receives 50 findings will investigate none of them. A team that receives 3 high-confidence findings will fix all of them. The filter exists to protect the signal from drowning in noise. Better to miss a low-confidence theoretical vulnerability than to bury a real one in false positives.
 
 ### 22 Hard Exclusions — Auto-Discard
 
@@ -209,3 +219,23 @@ mkdir -p .taku/security
 ```
 
 Write `.taku/security/{date}-{HHMMSS}.json` with: version, date, mode, findings array, filter_stats, totals, trend. Include disclaimer: "AI-assisted scan, not a professional security audit. For production systems handling sensitive data, hire a professional penetration testing firm."
+
+## Known Pitfalls
+
+**Flagging every theoretical vulnerability.** The audit produced 47 findings. After review, 38 were theoretical (no concrete exploit scenario), 7 were false positives, and 2 were real. The team spent 3 days investigating all 47 before realizing most were noise. By the time the real findings were addressed, the window for one of them had already been exploited.
+
+*What went wrong:* The Iron Law says "ZERO NOISE IS MORE IMPORTANT THAN ZERO MISSES." Phase 13 (False Positive Filtering) was skipped or applied loosely. Every "possible" finding was included.
+
+*Prevention:* The 22 Hard Exclusions and 12 Precedents in Phase 13 exist to prevent this exact scenario. Apply them ruthlessly. Daily mode uses an 8/10 confidence gate for a reason — 3 real findings you act on beats 47 findings you can't triage. If you can't write a concrete exploit scenario for a finding, it doesn't survive Phase 13.
+
+**Scanning code but ignoring infrastructure.** The audit focused entirely on application code (Phases 7-11). An AWS access key had been committed to git history 6 months ago. The key was still active. Phase 3 (Secrets Archaeology) wasn't run because "we use environment variables."
+
+*What went wrong:* The audit started at Phase 7 and skipped infrastructure phases. The most critical finding was in git history, not in the code.
+
+*Prevention:* Phase order is intentional: infrastructure-first (Phases 1-6) before code (Phases 7-11). The real attack surface is dependencies, CI logs, secrets in history, and forgotten staging servers — not your application code. Always run the full scan or use `--infra`/`--code` flags deliberately.
+
+**Testing secrets against live APIs during verification.** Phase 13 says "DO NOT test secrets against live APIs." The auditor tested a found AWS key by calling `aws sts get-caller-identity`. The call succeeded, confirming the key was active — but it also generated a CloudTrail event that triggered the security team's alerts. The auditor's IP was blocked.
+
+*What went wrong:* Active Verification in Phase 13 explicitly prohibits testing secrets against live APIs. The prohibition exists to prevent exactly this scenario: triggering security alerts during an audit.
+
+*Prevention:* Check key FORMAT (is it a valid AWS key pattern?), not key VALIDITY (does it work?). For other findings: trace handler code, check imports, verify the vulnerable code path exists. Never make actual HTTP requests or API calls with found credentials. Mark as VERIFIED based on static analysis, not dynamic testing.

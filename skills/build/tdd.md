@@ -59,6 +59,8 @@ Run the test. Confirm:
 
 Test passes immediately? Wrong test — it's verifying existing behavior. Delete and rewrite.
 
+**Why watch it fail:** A test that passes before the feature exists isn't testing the feature — it's testing something else. If you don't see it fail, you don't know what it's actually testing. The failure is proof that the test is wired to the right thing.
+
 ### GREEN — Minimal Code
 
 Write the simplest code that makes the test pass. No extra features, no "while I'm here" improvements.
@@ -83,6 +85,8 @@ Run all tests. Confirm:
 ### REFACTOR — Clean Up
 
 Remove duplication, improve names, extract helpers. Keep tests green. No new behavior.
+
+**Why separate refactor step:** GREEN produces working code, but working code written to pass a specific test often has duplication or awkward structure. The refactor step is where you clean up WITHOUT adding features. Combining cleanup with implementation risks introducing bugs alongside the cleanup. Keep the steps separate: first make it work, then make it clean.
 
 ## Anti-Rationalization Table
 
@@ -109,6 +113,26 @@ Ask your human partner for these cases:
 - Pure configuration files
 
 Everything else gets a test first.
+
+## Known Pitfalls
+
+**Test passes immediately on the RED step — and nobody notices.** The test was supposed to verify a new `calculateDiscount()` function. But the test called `calculate_price()` (an existing function) by mistake. It passed immediately. The developer assumed the function already existed and moved on. The real `calculateDiscount()` was never implemented.
+
+*What went wrong:* The RED step requires watching the test fail AND confirming the failure is for the expected reason. This test failed to fail, which should have been a red flag. Instead, it was treated as a green light.
+
+*Prevention:* "Verify RED" step says: "Test passes immediately? Wrong test — it's verifying existing behavior. Delete and rewrite." This check is not optional. A test that passes before the feature exists is testing the wrong thing.
+
+**Writing the test after code, then claiming TDD was followed.** Code was written first (200 lines). Then tests were written that call the exact implementation. The tests pass, but they test the implementation, not the behavior. When the implementation was refactored later, all tests broke — they were coupled to internal structure.
+
+*What went wrong:* The Iron Law was violated in spirit. Writing tests after code isn't TDD — it's documentation of what you happened to build. The tests are biased toward the implementation.
+
+*Prevention:* The Iron Law says: "Wrote code before the test? Delete it." This isn't hyperbole. Delete the code, write the test, watch it fail, then re-implement. The fresh implementation will be driven by requirements (the test) rather than assumptions (your first draft). The re-implementation is usually better.
+
+**Testing implementation details instead of behavior.** The test asserts that `processOrder()` calls `validateCart()` then `applyDiscount()` then `createCharge()` in sequence. A refactor that combined `validateCart` and `applyDiscount` into a single `prepareOrder()` step broke all tests — even though the observable behavior (order processed, discount applied, charge created) was identical.
+
+*What went wrong:* Tests asserted HOW the code works (internal call sequence) instead of WHAT the code does (observable outcomes). Implementation-coupled tests resist refactoring and produce false failures.
+
+*Prevention:* "Good Tests" says tests should demonstrate the desired API surface. Test inputs and outputs, not internal mechanics. If you need to check intermediate state, test it through the public API, not by asserting on private methods or call order.
 
 ## Good Tests
 
