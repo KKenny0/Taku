@@ -6,7 +6,9 @@
 
 <p align="center"><strong>Structured AI-assisted development — from idea to shipped code.</strong></p>
 
-Taku combines the best of [Superpowers](https://github.com/obra/superpowers) by Jesse Vincent and [gstack](https://github.com/garrytan/gstack) by Garry Tan into a unified skill pack for Claude Code and OpenClaw.
+A discipline-first development sprint framework that adapts to your project's scale. Opinionated workflows, anti-rationalization guards, and evidence-based gates keep AI agents honest — from first idea to production deploy.
+
+> Inspired by [Superpowers](https://github.com/obra/superpowers) and [gstack](https://github.com/garrytan/gstack).
 
 ## Why Taku
 
