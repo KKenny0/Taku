@@ -1,12 +1,25 @@
-# Forge
+# Taku 琢
 
-**The complete AI-assisted development sprint.**
+**Structured AI-assisted development — from idea to shipped code.**
 
-Forge combines the best of [Superpowers](https://github.com/obra/superpowers) by Jesse Vincent and [gstack](https://github.com/garrytan/gstack) by Garry Tan into a unified skill pack that works on both OpenClaw and Claude Code.
+Taku combines the best of [Superpowers](https://github.com/obra/superpowers) by Jesse Vincent and [gstack](https://github.com/garrytan/gstack) by Garry Tan into a unified skill pack for Claude Code and OpenClaw.
 
-## What It Does
+## Why Taku
 
-A structured 7-phase sprint pipeline that turns ideas into shipped, tested, reviewed code:
+> 如切如磋，如琢如磨 — 《诗经·卫风·淇奥》
+
+Taku (琢) means to carve jade — to reveal the shape that was always inside the stone. Software development works the same way: you don't forge code by adding material, you carve it by removing what doesn't belong.
+
+| Stage | Chinese | Pipeline Phase | What Happens |
+|-------|---------|----------------|-------------|
+| 切 | Cut | Think | Cut through ambiguity — force clarity before code |
+| 磋 | Grind | Plan | Grind the problem into concrete, executable tasks |
+| 琢 | Carve | Build → Review → Test | Carve the solution, then inspect and verify |
+| 磨 | Polish | Ship → Reflect | Polish to production grade, learn from the process |
+
+## The Sprint Pipeline
+
+A structured 7-phase pipeline that turns ideas into shipped, tested, reviewed code:
 
 ```
 Think → Plan → Build → Review → Test → Ship → Reflect
@@ -14,30 +27,31 @@ Think → Plan → Build → Review → Test → Ship → Reflect
 
 Each phase has dedicated skills with iron-clad rules, anti-rationalization guards, and evidence-based gates. The agent can't skip steps, can't fake completions, and can't rationalize shortcuts.
 
-## The Sprint
+### Phase Skills
 
 | Phase | Skill | What Happens |
 |-------|-------|-------------|
-| **Think** | `/forge-office-hours` | 6 forcing questions reframe your product before you write code |
-| **Think** | `/forge-brainstorm` | Socratic design refinement — no code until you approve the design |
-| **Think** | `/forge-design` | Build a complete design system from scratch |
-| **Plan** | `/forge-ceo-review` | Rethink the problem, find the 10-star product |
-| **Plan** | `/forge-eng-review` | Lock in architecture, data flow, edge cases |
-| **Plan** | `/forge-design-review` | Rate design dimensions 0-10, fix what's weak |
-| **Plan** | `/forge-plan` | Bite-sized tasks with exact file paths, complete code, TDD steps |
-| **Build** | `/forge-build` | Subagent-driven development with parallel sprint support |
-| **Build** | `/forge-exec` | Sequential plan execution with checkpoints |
-| **Build** | `/forge-tdd` | RED-GREEN-REFACTOR enforcement |
-| **Review** | `/forge-review` | Pattern-based code review with auto-fix |
-| **Review** | `/forge-cross-review` | Second opinion from a different AI model |
-| **Review** | `/forge-visual-review` | Before/after visual QA with screenshots |
-| **Test** | `/forge-qa` | Test → find bugs → fix → verify with health scoring |
-| **Test** | `/forge-cso` | 14-phase security audit with OWASP + STRIDE |
-| **Test** | `/forge-debug` | 4-phase root cause investigation |
-| **Ship** | `/forge-ship` | Full pipeline: test → review → version → changelog → push → PR |
-| **Ship** | `/forge-deploy` | Merge → CI → deploy → verify production health |
-| **Reflect** | `/forge-retro` | Weekly retrospective with trend tracking |
-| **Reflect** | `/forge-learn` | Persistent learning across sessions |
+| **Think** | `/taku-office-hours` | 6 forcing questions reframe your product before you write code |
+| | `/taku-brainstorm` | Socratic design refinement — no code until you approve the design |
+| | `/taku-design` | Build a complete design system from scratch |
+| **Plan** | `/taku-ceo-review` | Rethink the problem, find the 10-star product |
+| | `/taku-eng-review` | Lock in architecture, data flow, edge cases |
+| | `/taku-design-review` | Rate design dimensions 0–10, fix what's weak |
+| | `/taku-plan` | Bite-sized tasks with exact file paths, TDD steps |
+| **Build** | `/taku-build` | Subagent-driven development with parallel sprint support |
+| | `/taku-exec` | Sequential plan execution with checkpoints |
+| | `/taku-tdd` | RED-GREEN-REFACTOR enforcement |
+| **Review** | `/taku-review` | Pattern-based code review with auto-fix |
+| | `/taku-cross-review` | Second opinion from a different AI model |
+| | `/taku-visual-review` | Before/after visual QA with screenshots |
+| **Test** | `/taku-qa` | Test → find bugs → fix → verify with health scoring |
+| | `/taku-cso` | 14-phase security audit with OWASP + STRIDE |
+| | `/taku-debug` | 4-phase root cause investigation |
+| | `/taku-verify` | Evidence-based completion — no "should work" without proof |
+| **Ship** | `/taku-ship` | Full pipeline: test → review → version → changelog → push → PR |
+| | `/taku-deploy` | Merge → CI → deploy → verify production health |
+| **Reflect** | `/taku-retro` | Weekly retrospective with trend tracking |
+| | `/taku-learn` | Persistent learning across sessions |
 
 ## Philosophy
 
@@ -45,14 +59,14 @@ Each phase has dedicated skills with iron-clad rules, anti-rationalization guard
 - **No production code without a failing test.** TDD is not optional.
 - **No fixes without root cause.** Three failed fixes → stop and question architecture.
 - **No completion claims without evidence.** "It should work" is not a completion statement.
-- **No rationalization.** Red flags tables and iron laws catch every shortcut excuse.
+- **No rationalization.** Red flag tables and iron laws catch every shortcut excuse.
 
 ## Platforms
 
 | Platform | Status | Notes |
 |----------|--------|-------|
-| Claude Code | ✅ Primary | Canonical format. Install via plugin marketplace or manual. |
-| OpenClaw | ✅ Supported | Adapter layer translates tool calls. Install as skill pack. |
+| Claude Code | Primary | Canonical format. Install via plugin marketplace or manual. |
+| OpenClaw | Supported | Adapter layer translates tool calls. Install as skill pack. |
 
 ## Installation
 
@@ -60,30 +74,28 @@ Each phase has dedicated skills with iron-clad rules, anti-rationalization guard
 
 ```bash
 # Via plugin marketplace (coming soon)
-/plugin install forge
+/plugin install taku
 
 # Manual
-git clone https://github.com/KKenny0/forge.git ~/.claude/skills/forge
+git clone https://github.com/KKenny0/Taku.git ~/.claude/skills/taku
 ```
 
 ### OpenClaw
 
 ```bash
 # Coming soon via ClawhHub
-openclaw skills install forge
+openclaw skills install taku
 ```
 
 ## Credits
 
-Forge is built on the shoulders of two exceptional projects:
+Taku is built on the shoulders of two exceptional projects:
 
-- **[Superpowers](https://github.com/obra/superpowers)** by [Jesse Vincent](https://github.com/obra) — A complete software development workflow for coding agents. The discipline-first approach (TDD enforcement, systematic debugging, evidence-based completion) forms Forge's backbone.
+- **[Superpowers](https://github.com/obra/superpowers)** by [Jesse Vincent](https://github.com/obra) — A complete software development workflow for coding agents. The discipline-first approach (TDD enforcement, systematic debugging, evidence-based completion) forms Taku's backbone.
 
 - **[gstack](https://github.com/garrytan/gstack)** by [Garry Tan](https://github.com/garrytan) — A sprint process with 25+ skills covering everything from YC office hours to browser QA to security audits. The product thinking, QA methodology, and parallel sprint architecture are deeply influential.
 
-Both projects are MIT licensed. Forge inherits that license.
-
-Special thanks to Jesse and Garry for open-sourcing how they build software.
+Both projects are MIT licensed. Taku inherits that license.
 
 ## License
 
