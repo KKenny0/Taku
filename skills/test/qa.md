@@ -1,12 +1,12 @@
 ---
-name: forge-qa
+name: taku-qa
 description: >
-  Full QA with fix loop. Test a web application, find bugs, fix them in source
-  code with atomic commits, re-verify each fix. Three tiers: QUICK (5 min smoke
-  test), STANDARD (15 min full test), EXHAUSTIVE (30+ min deep test). Produces
-  health scores, before/after evidence, and ship-readiness summary. Enhanced dep:
-  browser tool (REQUIRED for web QA). Use when asked to "qa", "test this",
-  "find bugs", or "test and fix".
+  Full QA with fix loop (default) or findings-only report (--report-only). Test
+  a web application, find bugs, fix them (or just report them). Three tiers:
+  QUICK (5 min), STANDARD (15 min), EXHAUSTIVE (30+ min). Produces health scores,
+  before/after evidence, and ship-readiness summary. Enhanced dep: browser tool
+  (REQUIRED for web QA). Use when asked to "qa", "test this", "find bugs",
+  "test and fix", "just report bugs", "qa report only", or "test but don't fix".
 allowed-tools:
   - Bash
   - Read
@@ -60,7 +60,7 @@ If dirty: offer commit, stash, or abort. QA needs a clean tree for atomic commit
 ### 1d. Create output directory
 
 ```bash
-mkdir -p .forge/qa/screenshots
+mkdir -p .taku/qa/screenshots
 ```
 
 ### 1e. Diff-aware mode (automatic on feature branches)
@@ -77,7 +77,7 @@ If no URL given and on a feature branch:
 
 ```
 browser(action: navigate, url: <target>)
-browser(action: screenshot, path: .forge/qa/screenshots/initial.png)
+browser(action: screenshot, path: .taku/qa/screenshots/initial.png)
 ```
 
 Check console for errors. Map navigation structure.
@@ -170,7 +170,7 @@ One commit per fix.
 **Re-verify:**
 ```
 browser(action: navigate, url: <affected-url>)
-browser(action: screenshot, path: .forge/qa/screenshots/issue-NNN-after.png)
+browser(action: screenshot, path: .taku/qa/screenshots/issue-NNN-after.png)
 ```
 
 Check console. Verify the fix works. No regressions.
@@ -196,7 +196,7 @@ After all fixes:
 
 ## Step 5: Report
 
-Write to `.forge/qa/qa-report-{date}.md`:
+Write to `.taku/qa/qa-report-{date}.md`:
 
 - Health score: baseline → final
 - Issues found by severity and category
@@ -217,6 +217,20 @@ Write to `.forge/qa/qa-report-{date}.md`:
 8. **One commit per fix.** Never bundle.
 9. **Revert on regression.** Immediately.
 10. **Never refuse to use the browser.** The user asked for QA. Open the browser.
+
+## Report-Only Mode (--report-only)
+
+Use `--report-only` when you want a bug report without code changes. Trigger phrases: "just report bugs", "qa report only", "test but don't fix".
+
+**In report-only mode:**
+- Test everything as normal (Steps 1-2)
+- Document every issue with severity, repro steps, expected vs actual, screenshot
+- Compute health score
+- **NEVER fix bugs.** Find and document only. Do not edit source files.
+- **NEVER read source code.** Test as a user, not a developer.
+- Produce the same structured report
+
+For full test-fix-verify loop, use default mode (no flag).
 
 ## Anti-Rationalization
 

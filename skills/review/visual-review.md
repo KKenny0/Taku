@@ -1,5 +1,5 @@
 ---
-name: forge-visual-review
+name: taku-visual-review
 description: >
   Before/after visual QA. Navigate live sites with the browser tool, take before
   screenshots, identify visual issues, fix in source code, take after screenshots,
@@ -31,7 +31,7 @@ which gstack 2>/dev/null && echo "BROWSER: ready" || echo "BROWSER: not found"
 # OpenClaw: browser tool is available natively
 ```
 
-If browser is unavailable: "Visual review requires the browser tool. Install gstack browse or use OpenClaw with browser support. Run `/forge-review` for code-only review instead." Stop.
+If browser is unavailable: "Visual review requires the browser tool. Install gstack browse or use OpenClaw with browser support. Run `/taku-review` for code-only review instead." Stop.
 
 ## Step 1: Setup
 
@@ -50,7 +50,7 @@ If dirty: "Working tree has uncommitted changes. Visual review needs a clean tre
 ### 1c. Create output directory
 
 ```bash
-mkdir -p .forge/visual-review/screenshots
+mkdir -p .taku/visual-review/screenshots
 ```
 
 ### 1d. Navigate to target
@@ -91,7 +91,7 @@ For each fixable finding, in severity order:
 
 ```
 browser(action: navigate, url: <affected-url>)
-browser(action: screenshot, path: .forge/visual-review/screenshots/finding-NNN-before.png)
+browser(action: screenshot, path: .taku/visual-review/screenshots/finding-NNN-before.png)
 ```
 
 ### 3b. Fix in Source Code
@@ -111,7 +111,7 @@ One commit per fix. Never bundle.
 
 ```
 browser(action: navigate, url: <affected-url>)
-browser(action: screenshot, path: .forge/visual-review/screenshots/finding-NNN-after.png)
+browser(action: screenshot, path: .taku/visual-review/screenshots/finding-NNN-after.png)
 ```
 
 ### 3e. Verify
@@ -131,7 +131,7 @@ Every 5 fixes, evaluate:
 
 ## Step 4: Report
 
-Write the report to `.forge/visual-review/visual-review-{date}.md`:
+Write the report to `.taku/visual-review/visual-review-{date}.md`:
 
 - Total findings by severity
 - Fixes applied (verified / best-effort / reverted / deferred)

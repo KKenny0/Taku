@@ -1,6 +1,6 @@
 ---
-name: forge-ship
-description: Use when code is reviewed and tested, ready to ship. Runs the full pipeline: sync, test, review, version, changelog, push, PR. Invoke when the user says "ship", "deploy", "push", "create a PR", or indicates code is ready. Proactively invoke when the user asks about deploying or wants to push code.
+name: taku-ship
+description: Use when code is reviewed and tested, ready to ship. Runs the full pipeline: sync, test, review, version, changelog, push, PR, and documentation sync. Invoke when the user says "ship", "deploy", "push", "create a PR", or indicates code is ready. Proactively invoke when the user asks about deploying or wants to push code.
 allowed-tools:
   - Bash
   - Read
@@ -12,7 +12,7 @@ allowed-tools:
 
 # Full Shipping Pipeline
 
-Run straight through. The user said /forge-ship, which means DO IT. Output the PR URL at the end.
+Run straight through. The user said /taku-ship, which means DO IT. Output the PR URL at the end.
 
 Only stop for:
 - On the base branch (abort)
@@ -137,7 +137,7 @@ gh pr create --base <base> --title "<type>: <summary>" --body "$(cat <<'EOF'
 ## Test Plan
 - [ ] <verification steps>
 
-🤖 Generated with Forge
+🤖 Generated with Taku
 EOF
 )"
 ```
@@ -180,4 +180,20 @@ When in doubt, PATCH. It's easier to bump MINOR later than to undo a premature M
 - Never skip tests. If they fail, stop.
 - Never force push. Use regular `git push` only.
 - Never push without fresh verification evidence.
-- The goal: user says /forge-ship, next thing they see is the PR URL.
+- The goal: user says /taku-ship, next thing they see is the PR URL.
+
+## Step 11: Documentation Sync
+
+After PR creation, sync all project docs with what was shipped.
+
+**Diff analysis:** `git diff <base>...HEAD --stat` to understand scope. Discover docs: `find . -maxdepth 2 -name "*.md" | sort`.
+
+**Per-file audit:** Cross-reference each doc against the diff. Auto-update factual corrections (paths, counts, table entries). Ask user for narrative changes, section removals, or large rewrites.
+
+**CHANGELOG polish:** NEVER clobber entries. Polish wording only. Use Edit, never Write, on CHANGELOG.md. Lead with what users can DO.
+
+**Cross-doc consistency:** README features match CLAUDE.md? ARCHITECTURE matches CONTRIBUTING? CHANGELOG version matches VERSION file?
+
+**TODO/FIXME cleanup:** Scan diff for TODO/FIXME/HACK. Check if open items are completed by the diff.
+
+**Commit:** `git commit -m "docs: update project documentation for vX.Y.Z"`. Push.

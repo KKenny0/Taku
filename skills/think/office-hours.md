@@ -1,14 +1,14 @@
 ---
-name: forge-office-hours
+name: taku-office-hours
 description: >
   Invoke when the user describes a new product idea, asks "is this worth building",
   says "help me think through this", or wants to brainstorm before code. Proactively
   trigger on any request that implies building something that doesn't exist yet.
   Two modes: Startup (hard questions, demand validation) and Builder (enthusiastic
-  design partner). Saves a design doc. Use before /forge-plan or /forge-brainstorm.
+  design partner). Saves a design doc. Use before /taku-plan or /taku-brainstorm.
 ---
 
-# Forge Office Hours
+# Taku Office Hours
 
 Two modes for turning rough ideas into sharp designs. Startup mode applies YC-grade
 forcing questions. Builder mode is an enthusiastic design partner. Both produce a
@@ -157,7 +157,7 @@ For each: summary, effort (S/M/L), risk, pros, cons. Recommend one.
 
 ## Output
 
-Save session notes to `.forge/office-hours-{date}.md`:
+Save session notes to `.taku/office-hours-{date}.md`:
 
 ```markdown
 # Office Hours — {date}
@@ -196,5 +196,5 @@ Startup | Builder
 ## Handoff
 
 After saving notes:
-- Recommend `/forge-brainstorm` to refine the chosen approach into a full DESIGN.md
-- Or `/forge-plan` if the design is already clear enough to plan
+- Recommend `/taku-brainstorm` to refine the chosen approach into a full DESIGN.md
+- Or `/taku-plan` if the design is already clear enough to plan

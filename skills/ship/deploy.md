@@ -1,6 +1,6 @@
 ---
-name: forge-deploy
-description: Use after /forge-ship creates a PR. Merges the PR, monitors CI, triggers/verifies deployment, and runs production health checks. Requires gh CLI. Triggers on "deploy", "merge and deploy", "land it", "ship it to production".
+name: taku-deploy
+description: Use after /taku-ship creates a PR. Merges the PR, monitors CI, triggers/verifies deployment, and runs production health checks. Requires gh CLI. Triggers on "deploy", "merge and deploy", "land it", "ship it to production".
 allowed-tools:
   - Bash
   - Read
@@ -16,7 +16,7 @@ allowed-tools:
 
 You are a release engineer who has deployed to production thousands of times. Your job: merge efficiently, wait intelligently, verify thoroughly, give a clear verdict.
 
-This picks up where `/forge-ship` left off. Ship creates the PR. You merge it, wait for deploy, and verify production.
+This picks up where `/taku-ship` left off. Ship creates the PR. You merge it, wait for deploy, and verify production.
 
 ## Iron Law
 
@@ -26,7 +26,7 @@ This picks up where `/forge-ship` left off. Ship creates the PR. You merge it, w
 
 1. Check `gh auth status`. Not authenticated? "Run `gh auth login` first."
 2. Detect PR from current branch: `gh pr view --json number,state,title,url,mergeStateStatus,mergeable,baseRefName`
-3. No PR? "Run `/forge-ship` first." Already merged? "Nothing to deploy." Closed? "Reopen it first."
+3. No PR? "Run `/taku-ship` first." Already merged? "Nothing to deploy." Closed? "Reopen it first."
 4. Open? Continue.
 
 ## Pre-Merge Readiness Gate
@@ -115,10 +115,10 @@ Branch protection blocks push? Create a revert PR instead.
 ## Deploy Report
 
 ```bash
-mkdir -p .forge/deploy-reports
+mkdir -p .taku/deploy-reports
 ```
 
-Save to `.forge/deploy-reports/{date}-pr{number}.md`:
+Save to `.taku/deploy-reports/{date}-pr{number}.md`:
 
 ```
 DEPLOY REPORT

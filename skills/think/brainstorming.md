@@ -1,14 +1,16 @@
 ---
-name: forge-brainstorm
+name: taku-brainstorm
 description: >
   Invoke before ANY creative or implementation work — new feature, component,
   API, refactor, or behavioral change. This is the design-first gate. Do NOT
   write code, scaffold projects, or invoke implementation skills until the user
-  approves the design. Triggers on "build me X", "add a feature for", "let's
-  design", "how should we implement", or any request that implies building.
+  approves the design. Also handles design system creation (brand identity,
+  typography, color, spacing, layout). Triggers on "build me X", "add a feature
+  for", "let's design", "how should we implement", "design system", "brand",
+  "visual identity", "design tokens", or any request that implies building.
 ---
 
-# Forge Brainstorm — Socratic Design Refinement
+# Taku Brainstorm — Socratic Design Refinement
 
 Turn ideas into validated designs through structured dialogue. One question at a
 time. No code until the user approves.
@@ -42,7 +44,7 @@ Read the codebase before asking questions. You can't design in a vacuum.
 - Read CLAUDE.md, README.md, package.json (or equivalent)
 - Check recent commits: what's changed lately?
 - Map the area the user wants to touch: which files, which modules, which patterns?
-- Check for existing design docs (DESIGN.md, `.forge/office-hours-*.md`)
+- Check for existing design docs (DESIGN.md, `.taku/office-hours-*.md`)
 
 **Why:** Understanding the existing structure prevents proposing patterns that conflict
 with established conventions. It also reveals reusable code you might not know about.
@@ -166,7 +168,7 @@ Getting explicit approval prevents "but I thought you meant..." disagreements la
 
 ## Terminal State
 
-Once the design is approved, invoke `/forge-plan` to create the implementation plan.
+Once the design is approved, invoke `/taku-plan` to create the implementation plan.
 Do NOT invoke any implementation skill directly. The plan is the bridge between design
 and code.
 
@@ -178,6 +180,34 @@ and code.
 - **Explore alternatives** — always propose 2-3 before settling
 - **Incremental validation** — get approval at each stage
 - **Be flexible** — go back and clarify when something doesn't make sense
+
+## Design System Mode
+
+When the user says "design system", "brand identity", "visual identity", "design tokens", or the project needs aesthetic direction, switch to design system mode. This produces a concrete specification the implementer can build from.
+
+### Phase 1: Product Context
+
+Gather: target audience, core emotion (trust/speed/delight/calm), competitive set (3-5 products), anti-patterns (what to avoid), constraints (dark mode, RTL, accessibility). Use AskUserQuestion with concrete options.
+
+### Phase 2: Competitive Research
+
+Use web_search to study competitors. For each: one thing done well (steal the principle), one thing done poorly (avoid the trap).
+
+### Phase 3: Full Design Proposal
+
+Produce: aesthetic direction (specific, not "clean and modern"), typography (no Inter/Roboto/system-ui as primary), color system (CSS custom properties with WCAG AA contrast), spacing scale, layout grid, motion (durations, easing, prefers-reduced-motion).
+
+### Phase 4: SAFE/RISK Breakdown
+
+Classify every design decision. If 3+ are RISK, simplify.
+
+### Phase 5: Preview (Optional)
+
+If image generation available: component showcase and sample page. Skip if unavailable.
+
+### Phase 6: Write to DESIGN.md
+
+Append `## Design System` section with all tokens. No placeholders, no TBD.
 
 ## Anti-Rationalization
 

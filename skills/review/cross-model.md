@@ -1,5 +1,5 @@
 ---
-name: forge-cross-review
+name: taku-cross-review
 description: >
   Get a second opinion from a different AI model on your diff. Three modes:
   REVIEW (pass/fail gate), CHALLENGE (adversarial, try to break the code),
@@ -31,15 +31,15 @@ which codex 2>/dev/null && echo "CODEX: ready" || echo "CODEX: not found"
 # This is platform-dependent — detected by the router
 ```
 
-If neither capability is available: "Cross-model review requires codex CLI or multi-model sessions_spawn. Skipping. Run `/forge-review` for single-model review instead." Stop.
+If neither capability is available: "Cross-model review requires codex CLI or multi-model sessions_spawn. Skipping. Run `/taku-review` for single-model review instead." Stop.
 
 ## Step 1: Detect Mode
 
 Parse the user's input:
 
-1. `/forge-cross-review review [instructions]` or no mode specified with a diff present — **REVIEW mode** (Step 2)
-2. `/forge-cross-review challenge [focus-area]` — **CHALLENGE mode** (Step 3)
-3. `/forge-cross-review consult [question]` or `/forge-cross-review [anything else]` — **CONSULT mode** (Step 4)
+1. `/taku-cross-review review [instructions]` or no mode specified with a diff present — **REVIEW mode** (Step 2)
+2. `/taku-cross-review challenge [focus-area]` — **CHALLENGE mode** (Step 3)
+3. `/taku-cross-review consult [question]` or `/taku-cross-review [anything else]` — **CONSULT mode** (Step 4)
 
 If no diff exists and mode isn't specified: ask what they want to review.
 
@@ -74,7 +74,7 @@ End with verdict: PASS or FAIL." --base <base> 2>"$TMPERR"
 
 ### Cross-Model Comparison
 
-If `/forge-review` was already run in this session, compare findings:
+If `/taku-review` was already run in this session, compare findings:
 
 ```
 CROSS-MODEL ANALYSIS:

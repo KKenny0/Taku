@@ -1,5 +1,5 @@
 ---
-name: forge
+name: taku
 version: 0.2.0
 description: >
   Invoke for ANY development task — new feature, bug fix, refactor, API endpoint,
@@ -10,7 +10,7 @@ description: >
   building software. Do NOT answer directly — route through the sprint pipeline.
 ---
 
-# Forge — Cross-Platform Development Sprint Framework
+# Taku — Cross-Platform Development Sprint Framework
 
 A structured sprint pipeline: **Think → Plan → Build → Review → Test → Ship → Reflect**.
 
@@ -31,10 +31,10 @@ Check enhanced capabilities. Store as session state. Missing = skip, don't block
 
 | Capability | Check | Enables |
 |------------|-------|---------|
-| Browser QA | `which gstack` OR browser tool | `/forge-qa`, `/forge-visual-review` |
-| Cross-model | `which codex` OR multi-model support | `/forge-cross-review` |
-| GitHub | `which gh` && `gh auth status` | `/forge-ship`, `/forge-deploy` |
-| Image gen | image_generate tool | `/forge-design` previews |
+| Browser QA | `which gstack` OR browser tool | `/taku-qa`, `/taku-visual-review` |
+| Cross-model | `which codex` OR multi-model support | `/taku-cross-review` |
+| GitHub | `which gh` && `gh auth status` | `/taku-ship`, `/taku-deploy` |
+| Image gen | image_generate tool | `/taku-brainstorm` design system previews |
 
 ### Project State Detection
 
@@ -44,6 +44,26 @@ Check enhanced capabilities. Store as session state. Missing = skip, don't block
 git status --porcelain 2>/dev/null | head -5
 git log --oneline -5 2>/dev/null
 ```
+
+### Depth-Tier Detection
+
+Assess project complexity. This determines skill intensity for the entire sprint.
+
+```bash
+FILE_COUNT=$(git ls-files 2>/dev/null | wc -l)
+CHANGED_FILES=$(git diff --name-only HEAD~1 2>/dev/null | wc -l)
+DIRS_TOUCHED=$(git diff --name-only HEAD~1 2>/dev/null | xargs -I{} dirname {} 2>/dev/null | sort -u | wc -l)
+```
+
+| Tier | Criteria | Behavior |
+|------|----------|----------|
+| **Lightweight** | <50 files OR single-file change (1 dir touched) | Skip plan-review, skip security full scan (phases 1-5 only), skip visual-review. Use sequential build by default. |
+| **Standard** | 50-500 files, moderate scope | Full pipeline with all optional skills when capabilities allow. |
+| **Deep** | >500 files OR cross-cutting change (3+ dirs touched) | Full pipeline plus: architecture diagram mandatory, exhaustive QA tier, comprehensive security audit. |
+
+**Auto-reclassification:** If scope expands mid-sprint (e.g., a "simple bugfix" touches 6 files across 3 modules), escalate one tier. Log: `DEPTH ESCALATION: Lightweight → Standard (reason: scope expanded to N files across M modules)`.
+
+Store as `DEPTH_TIER` session state. All phase routing reads this value.
 
 ---
 
@@ -73,6 +93,29 @@ Before routing, classify the task. This determines which phases to run.
 - Contains "idea", "thinking about", "what if", "should we" → **idea**
 - Everything else → **feature**
 
+### Scope Mode
+
+After classifying the task type, declare a scope mode. This governs how aggressively the agent handles scope throughout the sprint.
+
+| Mode | When | Posture |
+|------|------|---------|
+| **expand** | New feature, greenfield, or the plan feels too small for the problem | Push scope up. Ask "what would make this 10x better?" Suggest adjacent improvements. Must justify each expansion with user value — no gold-plating. |
+| **shape** | Adding to existing system, moderate change | Hold the baseline. Surface options one at a time for the user to choose. Every addition needs explicit user approval. |
+| **hold** | Bug fix, hotfix, or tight-constraint change | Scope locked. Implement exactly what's needed. Any deviation requires stopping and asking. |
+| **cut** | Plan is too large, or depth-tier mismatch | Strip to the minimum that solves the real problem. List every cut with one-line justification. User approves the cuts. |
+
+**Auto-selection:** feature + greenfield → `expand` | feature + existing → `shape` | bugfix/hotfix → `hold` | refactor → `shape` | review/ship → `hold` | idea → `expand`
+
+The user can override the auto-selected mode at any time.
+
+**Scope mode per phase:**
+- **THINK:** `expand` = deep exploration, `hold` = skip THINK (bugfix)
+- **PLAN:** `expand` = run all reviews, `hold` = skip reviews, write plan directly
+- **BUILD:** `expand` = suggest improvements, `hold` = implement exactly, no suggestions
+- **REVIEW/TEST:** All modes = full discipline (quality is non-negotiable)
+- **SHIP:** `cut` = minimal ship (no doc sync), others = full pipeline
+- **REFLECT:** `expand` = deep retro, `hold` = quick learn only
+
 ---
 
 ## 3. Phase Orchestrations
@@ -87,14 +130,14 @@ Each phase has a **specific skill sequence**. Follow the sequence in order. Each
 
 ```
 ┌─────────────────────────────────────┐
-│ Step 1: /forge-office-hours         │
+│ Step 1: /taku-office-hours         │
 │ (if feature type or idea type)      │
-│ Output: .forge/office-hours.md      │
+│ Output: .taku/office-hours.md      │
 └──────────────┬──────────────────────┘
                │
                ▼
 ┌─────────────────────────────────────┐
-│ Step 2: /forge-brainstorm          │
+│ Step 2: /taku-brainstorm          │
 │ Reads: office-hours output          │
 │ Output: DESIGN.md                   │
 │ Gate: User must explicitly approve  │
@@ -102,10 +145,10 @@ Each phase has a **specific skill sequence**. Follow the sequence in order. Each
                │ approved
                ▼
 ┌─────────────────────────────────────┐
-│ Step 3 (optional): /forge-design   │
-│ (only for visual/UX-heavy projects)│
-│ Reads: DESIGN.md                    │
-│ Appends: Design system section     │
+│ Step 3 (optional): /taku-brainstorm│
+│ Design system mode for UX-heavy   │
+│ projects. Reads: DESIGN.md        │
+│ Appends: Design system section    │
 └─────────────────────────────────────┘
 ```
 
@@ -125,23 +168,15 @@ Each phase has a **specific skill sequence**. Follow the sequence in order. Each
 
 ```
 ┌─────────────────────────────────────┐
-│ Step 1: /forge-ceo-review          │
+│ Step 1: /taku-plan-review         │
 │ Reads: DESIGN.md                    │
-│ Mode: auto-select scope mode        │
-│ Output: design review notes         │
+│ Modes: scope review + architecture  │
+│ Output: review notes + diagrams     │
 └──────────────┬──────────────────────┘
                │
                ▼
 ┌─────────────────────────────────────┐
-│ Step 2: /forge-eng-review          │
-│ Reads: DESIGN.md + ceo-review notes │
-│ Output: architecture notes          │
-│ Creates: Mermaid diagrams           │
-└──────────────┬──────────────────────┘
-               │
-               ▼
-┌─────────────────────────────────────┐
-│ Step 3: /forge-design-review        │
+│ Step 2: /taku-design-review        │
 │ (only if project has UI)           │
 │ Reads: DESIGN.md                    │
 │ Output: design dimension scores     │
@@ -149,7 +184,7 @@ Each phase has a **specific skill sequence**. Follow the sequence in order. Each
                │
                ▼
 ┌─────────────────────────────────────┐
-│ Step 4: /forge-plan                │
+│ Step 3: /taku-plan                │
 │ Reads: DESIGN.md + all reviews      │
 │ Output: PLAN.md                     │
 │ Gate: Self-review checklist        │
@@ -157,10 +192,10 @@ Each phase has a **specific skill sequence**. Follow the sequence in order. Each
 ```
 
 **Rules:**
-- All three reviews feed their output into `/forge-plan` as context
-- `/forge-design-review` is conditional: skip if project has no UI component
-- `/forge-plan` reads ALL review outputs to produce a comprehensive plan
-- Self-review checklist in `/forge-plan` is mandatory — if it fails, revise the plan
+- `/taku-plan-review` runs both scope and architecture modes by default
+- `/taku-design-review` is conditional: skip if project has no UI component
+- `/taku-plan` reads ALL review outputs to produce a comprehensive plan
+- Self-review checklist in `/taku-plan` is mandatory — if it fails, revise the plan
 
 **→ On completion: route to BUILD phase**
 
@@ -172,15 +207,15 @@ Each phase has a **specific skill sequence**. Follow the sequence in order. Each
 
 ```
 ┌─────────────────────────────────────┐
-│ Step 0: /forge-worktree            │
+│ Step 0: /taku-worktree            │
 │ (create isolated workspace)        │
 └──────────────┬──────────────────────┘
                │
                ▼
 ┌─────────────────────────────────────┐
-│ Step 1: /forge-build               │
+│ Step 1: /taku-build               │
 │ Reads: PLAN.md                      │
-│ Internally uses: /forge-tdd        │
+│ Internally uses: /taku-tdd        │
 │ Dispatches subagents per task      │
 │ 2-stage review per task            │
 │ Parallel for independent tasks     │
@@ -193,10 +228,10 @@ Each phase has a **specific skill sequence**. Follow the sequence in order. Each
 **Alternative path:**
 ```
 ┌─────────────────────────────────────┐
-│ Step 1: /forge-exec                │
-│ (sequential, user in the loop)     │
+│ Step 1: /taku-build (sequential)   │
+│ (sequential mode, user in the loop) │
 │ Reads: PLAN.md                      │
-│ Internally uses: /forge-tdd        │
+│ Internally uses: /taku-tdd        │
 └──────────────┬──────────────────────┘
                │
                ▼
@@ -204,9 +239,9 @@ Each phase has a **specific skill sequence**. Follow the sequence in order. Each
 ```
 
 **Rules:**
-- `/forge-build` is the default (parallel, fast)
-- Use `/forge-exec` when: project is small (1-3 tasks), user wants to stay in loop, subagents unavailable
-- TDD is enforced inside both — `/forge-tdd` is called by the build skill, not separately
+- `/taku-build` auto-selects mode: parallel (5+ tasks, subagents available) or sequential (1-3 tasks)
+- User can override mode at any time
+- TDD is enforced inside both modes — `/taku-tdd` is called by the build skill
 - After BUILD completes, **automatically route to REVIEW** — don't wait for user to ask
 
 **→ On completion: auto-route to REVIEW phase**
@@ -219,14 +254,14 @@ Each phase has a **specific skill sequence**. Follow the sequence in order. Each
 
 ```
 ┌─────────────────────────────────────┐
-│ Step 1: /forge-review              │
+│ Step 1: /taku-review              │
 │ Reads: git diff                     │
 │ Auto-fixes: Critical + Important    │
 └──────────────┬──────────────────────┘
                │
                ▼
 ┌─────────────────────────────────────┐
-│ Step 2: /forge-cross-review        │
+│ Step 2: /taku-cross-review        │
 │ (if cross-model capability)        │
 │ Reads: git diff                     │
 │ Cross-model analysis                │
@@ -234,7 +269,7 @@ Each phase has a **specific skill sequence**. Follow the sequence in order. Each
                │
                ▼
 ┌─────────────────────────────────────┐
-│ Step 3: /forge-visual-review       │
+│ Step 3: /taku-visual-review       │
 │ (if browser capability + has UI)   │
 │ Before/after screenshots            │
 └──────────────┬──────────────────────┘
@@ -251,9 +286,9 @@ Each phase has a **specific skill sequence**. Follow the sequence in order. Each
 ```
 
 **Rules:**
-- `/forge-review` is always run — it's the minimum
-- `/forge-cross-review` is optional but recommended (skip if no capability)
-- `/forge-visual-review` is conditional: only for projects with UI + browser capability
+- `/taku-review` is always run — it's the minimum
+- `/taku-cross-review` is optional but recommended (skip if no capability)
+- `/taku-visual-review` is conditional: only for projects with UI + browser capability
 - **Critical findings block progress.** Fix them before moving to TEST.
 - Important findings: fix if possible, note if not
 - After all reviews pass, **automatically route to TEST**
@@ -268,7 +303,7 @@ Each phase has a **specific skill sequence**. Follow the sequence in order. Each
 
 ```
 ┌─────────────────────────────────────┐
-│ Step 1: /forge-qa                  │
+│ Step 1: /taku-qa                  │
 │ (if browser capability)            │
 │ Tier: auto-select based on scope   │
 │ Fix loop: test → fix → verify      │
@@ -276,7 +311,7 @@ Each phase has a **specific skill sequence**. Follow the sequence in order. Each
                │
                ▼
 ┌─────────────────────────────────────┐
-│ Step 2: /forge-cso                 │
+│ Step 2: /taku-cso                 │
 │ (security audit)                   │
 │ 14-phase scan                       │
 │ Gate: 8/10 confidence              │
@@ -284,7 +319,7 @@ Each phase has a **specific skill sequence**. Follow the sequence in order. Each
                │
                ▼
 ┌─────────────────────────────────────┐
-│ Step 3: /forge-verify              │
+│ Step 3: /taku-verify              │
 │ Evidence-based completion gate      │
 │ Run verification commands           │
 │ Show output                         │
@@ -295,12 +330,12 @@ Each phase has a **specific skill sequence**. Follow the sequence in order. Each
 ```
 
 **Rules:**
-- `/forge-qa` is conditional: requires browser capability. Without it, rely on unit tests + verify
-- `/forge-cso` is recommended for all features. For bugfixes, run a lighter scan (phases 1-5, 10 only)
-- `/forge-verify` is always run — it's the final evidence gate
+- `/taku-qa` is conditional: requires browser capability. Without it, rely on unit tests + verify
+- `/taku-cso` is recommended for all features. For bugfixes, run a lighter scan (phases 1-5, 10 only)
+- `/taku-verify` is always run — it's the final evidence gate
 - **If QA health score < 4: DO NOT SHIP.** Go back to BUILD to fix critical issues.
 - **If verify fails: DO NOT SHIP.** Fix and re-verify.
-- `/forge-debug` is invoked on-demand within this phase if something breaks during QA
+- `/taku-debug` is invoked on-demand within this phase if something breaks during QA
 
 **→ On completion: auto-route to SHIP phase**
 
@@ -312,38 +347,30 @@ Each phase has a **specific skill sequence**. Follow the sequence in order. Each
 
 ```
 ┌─────────────────────────────────────┐
-│ Step 1: /forge-ship                │
+│ Step 1: /taku-ship                │
 │ Pipeline: sync → test → review →   │
 │ version → changelog → push → PR     │
 └──────────────┬──────────────────────┘
                │
                ▼
 ┌─────────────────────────────────────┐
-│ Step 2: /forge-deploy              │
+│ Step 2: /taku-deploy              │
 │ (if deploy capability)             │
 │ Merge → CI → deploy → health check │
 └──────────────┬──────────────────────┘
                │
                ▼
 ┌─────────────────────────────────────┐
-│ Step 3: /forge-docs                │
-│ Post-ship doc sync                  │
-│ Cross-reference diff with docs      │
-└──────────────┬──────────────────────┘
-               │
-               ▼
-┌─────────────────────────────────────┐
-│ Step 4: /forge-finish              │
+│ Step 3: /taku-finish              │
 │ 4 options: merge/PR/keep/discard   │
 │ Cleanup worktree                    │
 └─────────────────────────────────────┘
 ```
 
 **Rules:**
-- `/forge-ship` is always run
-- `/forge-deploy` is conditional: requires deploy platform detection
-- `/forge-docs` is always run after ship
-- `/forge-finish` is always run to clean up
+- `/taku-ship` is always run (includes documentation sync)
+- `/taku-deploy` is conditional: requires deploy platform detection
+- `/taku-finish` is always run to clean up
 
 **→ On completion: route to REFLECT phase (or stop if user doesn't want retro)**
 
@@ -355,22 +382,22 @@ Each phase has a **specific skill sequence**. Follow the sequence in order. Each
 
 ```
 ┌─────────────────────────────────────┐
-│ Step 1: /forge-learn               │
+│ /taku-reflect (learn mode)         │
 │ Record: patterns, pitfalls,         │
 │ preferences from this sprint       │
 └──────────────┬──────────────────────┘
                │
                ▼
 ┌─────────────────────────────────────┐
-│ Step 2: /forge-retro               │
+│ /taku-reflect --retro (optional)   │
 │ (run weekly or per sprint)         │
 │ Git log analysis, trends            │
 └─────────────────────────────────────┘
 ```
 
 **Rules:**
-- `/forge-learn` runs after every sprint (quick — record key learnings)
-- `/forge-retro` runs weekly or on explicit request (heavier — full analysis)
+- Learn mode runs after every sprint (quick — record key learnings)
+- Retro mode runs weekly or on explicit request (heavier — full analysis)
 - REFLECT is optional — ask user if they want to run it
 
 ---
@@ -433,7 +460,7 @@ Current phase: BUILD (3/7 tasks complete)
 Artifacts:
   DESIGN.md ✓
   PLAN.md ✓
-  .forge/office-hours-2026-03-30.md ✓
+  .taku/office-hours-2026-03-30.md ✓
 ```
 
 Use this format when the user asks "where are we?" or "what's the status?"
@@ -445,27 +472,27 @@ Use this format when the user asks "where are we?" or "what's the status?"
 This is the complete sequence for a greenfield feature with all capabilities available:
 
 ```
-/forge-office-hours
-  → /forge-brainstorm → DESIGN.md approved
-    → /forge-ceo-review → /forge-eng-review → /forge-design-review → /forge-plan → PLAN.md
-      → /forge-worktree
-        → /forge-build (parallel subagents, TDD enforced)
-          → /forge-review → /forge-cross-review → /forge-visual-review
-            → /forge-qa → /forge-cso → /forge-verify
-              → /forge-ship → /forge-deploy → /forge-docs → /forge-finish
-                → /forge-learn → /forge-retro
+/taku-office-hours
+  → /taku-brainstorm → DESIGN.md approved
+    → /taku-plan-review → /taku-design-review → /taku-plan → PLAN.md
+      → /taku-worktree
+        → /taku-build (parallel or sequential, TDD enforced)
+          → /taku-review → /taku-cross-review → /taku-visual-review
+            → /taku-qa → /taku-cso → /taku-verify
+              → /taku-ship → /taku-deploy → /taku-finish
+                → /taku-reflect
 ```
 
 **Shortcuts by task type:**
 
 | Type | Flow |
 |------|------|
-| bugfix | `/forge-debug` → `/forge-build` → `/forge-review` → `/forge-ship` |
-| hotfix | `/forge-build` → `/forge-ship` (skip review for urgency) |
-| refactor | `/forge-review` → `/forge-build` → `/forge-review` → `/forge-ship` |
-| review | `/forge-review` → `/forge-cross-review` (optional) |
-| ship | `/forge-ship` → `/forge-docs` → `/forge-finish` |
-| idea | `/forge-office-hours` → (ask user if they want to continue) |
+| bugfix | `/taku-debug` → `/taku-build` → `/taku-review` → `/taku-ship` |
+| hotfix | `/taku-build` → `/taku-ship` (skip review for urgency) |
+| refactor | `/taku-review` → `/taku-build` → `/taku-review` → `/taku-ship` |
+| review | `/taku-review` → `/taku-cross-review` (optional) |
+| ship | `/taku-ship` → `/taku-finish` |
+| idea | `/taku-office-hours` → (ask user if they want to continue) |
 
 ---
 
@@ -473,32 +500,27 @@ This is the complete sequence for a greenfield feature with all capabilities ava
 
 | Command | Phase | Skill |
 |---------|-------|-------|
-| `/forge-office-hours` | THINK | 6 forcing questions |
-| `/forge-brainstorm` | THINK | Socratic design |
-| `/forge-design` | THINK | Design system creation |
-| `/forge-ceo-review` | PLAN | Strategic scope |
-| `/forge-eng-review` | PLAN | Architecture |
-| `/forge-design-review` | PLAN | Design scoring |
-| `/forge-plan` | PLAN | Write plan |
-| `/forge-build` | BUILD | Parallel subagents |
-| `/forge-exec` | BUILD | Sequential execution |
-| `/forge-tdd` | BUILD | RED-GREEN-REFACTOR |
-| `/forge-worktree` | BUILD | Workspace isolation |
-| `/forge-review` | REVIEW | Code review |
-| `/forge-cross-review` | REVIEW | Cross-model opinion |
-| `/forge-visual-review` | REVIEW | Visual QA |
-| `/forge-qa` | TEST | Browser QA |
-| `/forge-qa-report` | TEST | Findings only |
-| `/forge-cso` | TEST | Security audit |
-| `/forge-debug` | TEST | Root cause |
-| `/forge-verify` | TEST | Evidence gate |
-| `/forge-ship` | SHIP | Ship pipeline |
-| `/forge-deploy` | SHIP | Deploy + verify |
-| `/forge-finish` | SHIP | Branch completion |
-| `/forge-docs` | SHIP | Doc sync |
-| `/forge-retro` | REFLECT | Weekly retro |
-| `/forge-learn` | REFLECT | Learning persistence |
-| `/forge-write-skill` | META | Create new skill |
+| `/taku-office-hours` | THINK | 6 forcing questions |
+| `/taku-brainstorm` | THINK | Socratic design + design system |
+| `/taku-plan-review` | PLAN | Scope + architecture review |
+| `/taku-design-review` | PLAN | Design scoring |
+| `/taku-plan` | PLAN | Write plan |
+| `/taku-build` | BUILD | Parallel or sequential execution |
+| `/taku-tdd` | BUILD | RED-GREEN-REFACTOR |
+| `/taku-worktree` | BUILD | Workspace isolation |
+| `/taku-review` | REVIEW | Code review |
+| `/taku-cross-review` | REVIEW | Cross-model opinion |
+| `/taku-visual-review` | REVIEW | Visual QA |
+| `/taku-review-collab` | REVIEW | Dispatch/receive review |
+| `/taku-qa` | TEST | Browser QA (with --report-only) |
+| `/taku-cso` | TEST | Security audit |
+| `/taku-debug` | TEST | Root cause |
+| `/taku-verify` | TEST | Evidence gate |
+| `/taku-ship` | SHIP | Ship + doc sync pipeline |
+| `/taku-deploy` | SHIP | Deploy + verify |
+| `/taku-finish` | SHIP | Branch completion |
+| `/taku-reflect` | REFLECT | Learn + retro |
+| `/taku-write-skill` | META | Create new skill |
 
 ---
 

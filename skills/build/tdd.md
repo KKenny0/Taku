@@ -1,6 +1,6 @@
 ---
-name: forge-tdd
-description: Use whenever writing implementation code. Triggers during /forge-build, /forge-exec, or when the user starts implementing a feature.
+name: taku-tdd
+description: Use whenever writing implementation code. Triggers during /taku-build, /taku-build (sequential mode), or when the user starts implementing a feature.
 ---
 
 # Test-Driven Development

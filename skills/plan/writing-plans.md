@@ -1,6 +1,6 @@
 ---
-name: forge-plan
-description: Use when the user has an approved design and needs to turn it into an executable plan. Triggers after /forge-brainstorm or /forge-ceo-review.
+name: taku-plan
+description: Use when the user has an approved design and needs to turn it into an executable plan. Triggers after /taku-brainstorm or /taku-plan-review.
 ---
 
 # Writing Implementation Plans
@@ -9,7 +9,7 @@ description: Use when the user has an approved design and needs to turn it into 
 
 Write implementation plans that a zero-context engineer can execute flawlessly. Every task has exact file paths, complete code, and verification steps. No guesswork, no placeholders, no "you figure it out."
 
-**Announce:** "I'm using /forge-plan to create the implementation plan."
+**Announce:** "I'm using /taku-plan to create the implementation plan."
 
 **Why this matters:** A plan with gaps means the implementer either guesses (bugs) or asks questions (delays). Both waste time. A complete plan means the implementer just executes — fast and correct.
 
@@ -47,7 +47,7 @@ Every plan starts with:
 ```markdown
 # [Feature Name] Implementation Plan
 
-> **For agentic workers:** Use /forge-build (subagent-driven) or /forge-exec (sequential) to implement this plan.
+> **For agentic workers:** Use /taku-build (subagent-driven) or /taku-build (sequential mode) (sequential) to implement this plan.
 
 **Goal:** [One sentence]
 
@@ -142,7 +142,7 @@ After saving, offer the choice:
 
 "Plan saved to `PLAN.md`. Two execution options:
 
-1. **Subagent-Driven** (/forge-build) — parallel subagents per task, automatic review, faster iteration
-2. **Sequential** (/forge-exec) — execute in this session, checkpoints between tasks, you stay in the loop
+1. **Subagent-Driven** (/taku-build) — parallel subagents per task, automatic review, faster iteration
+2. **Sequential** (/taku-build (sequential mode)) — execute in this session, checkpoints between tasks, you stay in the loop
 
 Which approach?"

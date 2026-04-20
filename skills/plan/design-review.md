@@ -1,5 +1,5 @@
 ---
-name: forge-design-review
+name: taku-design-review
 description: >
   Use when a plan has UI/UX components that need design quality scoring — aesthetic,
   typography, color, spacing, layout, motion, responsiveness, accessibility, and
@@ -7,7 +7,7 @@ description: >
   design", "design critique", or when plan-phase UI decisions need evaluation.
 ---
 
-# forge-design-review — Design Dimension Scoring
+# taku-design-review — Design Dimension Scoring
 
 A design review that scores, not opines. Each dimension gets a number, an explanation of what perfection looks like, and a specific fix to close the gap.
 
@@ -126,7 +126,7 @@ For dimensions scoring 8+, a brief note is fine. For dimensions below 8, the fix
 
 Append a `## Design Review` section to the design doc with the scorecard and all fixes.
 
-If overall score is 8+: "Design is implementation-ready. Run forge-visual-review after implementation for visual QA."
+If overall score is 8+: "Design is implementation-ready. Run taku-visual-review after implementation for visual QA."
 
 If overall score is below 8: "Design needs revision. Address the fixes above before proceeding to build."
 

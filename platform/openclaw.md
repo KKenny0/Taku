@@ -1,6 +1,6 @@
 # OpenClaw Platform Adapter
 
-Tool mapping for running Forge skills on OpenClaw. Claude Code uses Bash/Read/Write/Edit natively and does not need this adapter.
+Tool mapping for running Taku skills on OpenClaw. Claude Code uses Bash/Read/Write/Edit natively and does not need this adapter.
 
 ## Core Tool Mapping
 
@@ -117,12 +117,12 @@ exec(command: "$D variants --brief '...' --count 3 --output-dir /tmp/designs/")
 
 ## File Conventions
 
-- Sprint artifacts go in `.forge/` (gitignored)
+- Sprint artifacts go in `.taku/` (gitignored)
 - Design docs at project root: `DESIGN.md`, `PLAN.md`
-- Reviews: `.forge/reviews/{type}-{date}.md`
-- QA reports: `.forge/qa/{date}.md`
-- Retros: `.forge/retros/{date}.md`
-- Learnings: `.forge/learnings/{project}.jsonl`
+- Reviews: `.taku/reviews/{type}-{date}.md`
+- QA reports: `.taku/qa/{date}.md`
+- Retros: `.taku/retros/{date}.md`
+- Learnings: `.taku/learnings/{project}.jsonl`
 
 ## Setup Check
 

@@ -1,5 +1,5 @@
 ---
-name: forge-debug
+name: taku-debug
 description: >
   Use when encountering any bug, test failure, or unexpected behavior — systematic
   root cause investigation with 4 phases. Triggers on "debug this", "fix this bug",
@@ -8,7 +8,7 @@ description: >
   of proposing fixes directly.
 ---
 
-# forge-debug — 4-Phase Root Cause Investigation
+# taku-debug — 4-Phase Root Cause Investigation
 
 Random fixes create new bugs. Systematic investigation finds root causes. This skill merges the best of Superpowers' systematic debugging with gstack's investigate workflow into a unified 4-phase process.
 

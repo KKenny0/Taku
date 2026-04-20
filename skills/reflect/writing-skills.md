@@ -1,5 +1,5 @@
 ---
-name: forge-write-skill
+name: taku-write-skill
 description: >
   Use when creating new skills, editing existing skills, or verifying skills work
   before deployment. Triggers on "write a skill", "create a skill", "edit this skill",
@@ -7,7 +7,7 @@ description: >
   codify a learned pattern into reusable documentation.
 ---
 
-# forge-write-skill — TDD for Documentation
+# taku-write-skill — TDD for Documentation
 
 Writing skills IS test-driven development applied to process documentation. You write test cases (pressure scenarios), watch them fail (baseline behavior), write the skill, watch them pass (agents comply), and refactor (close loopholes).
 

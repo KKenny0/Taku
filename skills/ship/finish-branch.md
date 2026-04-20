@@ -1,5 +1,5 @@
 ---
-name: forge-finish
+name: taku-finish
 description: Use when implementation on a branch is done. Verify tests, present 4 options (merge/PR/keep/discard), handle cleanup. Triggers after all tasks in PLAN.md are complete or when the user says "I'm done with this branch".
 allowed-tools:
   - Bash

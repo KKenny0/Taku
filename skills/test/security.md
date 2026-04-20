@@ -1,5 +1,5 @@
 ---
-name: forge-cso
+name: taku-cso
 description: Use when running a security audit. 14-phase infrastructure-first security scan: stack detection, attack surface, secrets archaeology, dependency audit, CI/CD security, infra shadow surface, webhooks, LLM security, skill supply chain, OWASP Top 10, STRIDE, data classification, FP filtering, and report. Two modes: daily (8/10 confidence) and comprehensive (2/10). Triggers on "security audit", "threat model", "CSO review", "OWASP", "pentest review".
 allowed-tools:
   - Bash
@@ -18,11 +18,11 @@ The real attack surface isn't your code. It's your dependencies, CI logs with ex
 
 ## Arguments
 
-- `/forge-cso` — daily audit (8/10 confidence gate)
-- `/forge-cso --comprehensive` — monthly deep scan (2/10 bar)
-- `/forge-cso --diff` — branch changes only
-- `/forge-cso --infra` — Phases 1-6, 12-14
-- `/forge-cso --code` — Phases 1-2, 7-11, 13-14
+- `/taku-cso` — daily audit (8/10 confidence gate)
+- `/taku-cso --comprehensive` — monthly deep scan (2/10 bar)
+- `/taku-cso --diff` — branch changes only
+- `/taku-cso --infra` — Phases 1-6, 12-14
+- `/taku-cso --code` — Phases 1-2, 7-11, 13-14
 
 ## Iron Law
 
@@ -164,7 +164,7 @@ Run every candidate through this filter. **Daily mode:** 8/10 confidence. **Comp
 18. CVEs with CVSS < 4.0 and no known exploit
 19. Docker issues in dev-only Dockerfiles
 20. CI findings on archived/disabled workflows
-21. Forge's own skill files (trusted source)
+21. Taku's own skill files (trusted source)
 22. Any finding without a concrete exploit scenario
 
 ### 12 Precedents
@@ -200,12 +200,12 @@ Per-finding format: severity, confidence, status, description, exploit scenario,
 
 ### Trend Tracking
 
-If prior reports exist in `.forge/security/`: show resolved, persistent, new counts and trend direction (IMPROVING/DEGRADING/STABLE).
+If prior reports exist in `.taku/security/`: show resolved, persistent, new counts and trend direction (IMPROVING/DEGRADING/STABLE).
 
 ### Save
 
 ```bash
-mkdir -p .forge/security
+mkdir -p .taku/security
 ```
 
-Write `.forge/security/{date}-{HHMMSS}.json` with: version, date, mode, findings array, filter_stats, totals, trend. Include disclaimer: "AI-assisted scan, not a professional security audit. For production systems handling sensitive data, hire a professional penetration testing firm."
+Write `.taku/security/{date}-{HHMMSS}.json` with: version, date, mode, findings array, filter_stats, totals, trend. Include disclaimer: "AI-assisted scan, not a professional security audit. For production systems handling sensitive data, hire a professional penetration testing firm."

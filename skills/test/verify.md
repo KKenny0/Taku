@@ -1,5 +1,5 @@
 ---
-name: forge-verify
+name: taku-verify
 description: Use before claiming any task is complete. Enforces evidence-based completion — no 'should work' without running the verification command. Triggers before commits, PRs, task completion, or any positive status claim.
 ---
 

@@ -1,6 +1,6 @@
 # QA Report Template
 
-> Fill this out after running `/forge-qa`. One report per QA session.
+> Fill this out after running `/taku-qa`. One report per QA session.
 
 ## Report Metadata
 
@@ -36,7 +36,7 @@ Score: N/10
 | **Repro Steps** | 1. Navigate to X 2. Click Y 3. Observe Z |
 | **Expected** | What should happen |
 | **Actual** | What actually happens |
-| **Screenshot** | `.forge/qa/screenshots/finding-1.png` or N/A |
+| **Screenshot** | `.taku/qa/screenshots/finding-1.png` or N/A |
 | **Status** | Fixed / Open / Won't Fix |
 
 ### Finding 2
@@ -48,7 +48,7 @@ Score: N/10
 | **Repro Steps** | 1. Navigate to X 2. Click Y 3. Observe Z |
 | **Expected** | What should happen |
 | **Actual** | What actually happens |
-| **Screenshot** | `.forge/qa/screenshots/finding-2.png` or N/A |
+| **Screenshot** | `.taku/qa/screenshots/finding-2.png` or N/A |
 | **Status** | Fixed / Open / Won't Fix |
 
 <!-- Add more findings as needed -->

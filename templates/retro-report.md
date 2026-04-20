@@ -1,6 +1,6 @@
 # Retrospective Report Template
 
-> Fill this out after running `/forge-retro`. One report per retro session.
+> Fill this out after running `/taku-reflect --retro`. One report per retro session.
 
 ## Report Metadata
 

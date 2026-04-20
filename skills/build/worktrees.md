@@ -1,5 +1,5 @@
 ---
-name: forge-worktree
+name: taku-worktree
 description: >
   Use when starting feature work that needs isolation from the current workspace —
   creates isolated git worktrees with auto-detected project setup and baseline test
@@ -8,7 +8,7 @@ description: >
   sandbox before making changes.
 ---
 
-# forge-worktree — Git Worktree Isolation
+# taku-worktree — Git Worktree Isolation
 
 Git worktrees let you work on multiple branches simultaneously without switching. One workspace per feature. No context pollution. No stash juggling. No "wait, I was in the middle of something."
 

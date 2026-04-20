@@ -1,6 +1,6 @@
 ---
-name: forge-review
-description: Use after implementation is complete. Triggers after /forge-build or /forge-exec. Analyzes diffs for security issues, bugs, and code quality. Run when asked to "review this", "check my diff", "code review", or before shipping. Proactively invoke when the user is about to merge or land code changes.
+name: taku-review
+description: Use after implementation is complete. Triggers after /taku-build or /taku-build (sequential mode). Analyzes diffs for security issues, bugs, and code quality. Run when asked to "review this", "check my diff", "code review", or before shipping. Proactively invoke when the user is about to merge or land code changes.
 allowed-tools:
   - Bash
   - Read
@@ -32,7 +32,7 @@ Detect platform (GitHub/GitLab/unknown) and determine the base branch. If no PR 
 
 ## Step 3: Scope Drift Check
 
-Read commit messages and any plan file (PLAN.md, .forge/*.md). Compare stated intent against files changed.
+Read commit messages and any plan file (PLAN.md, .taku/*.md). Compare stated intent against files changed.
 
 - **Scope creep:** files changed unrelated to intent
 - **Missing requirements:** intent items not addressed in the diff
@@ -176,5 +176,5 @@ If no issues: "Pre-Landing Review: No issues found."
 - Read the FULL diff before commenting. Don't flag issues already addressed.
 - Be terse. One line problem, one line fix.
 - Only flag real problems. Skip anything that's fine.
-- Never commit, push, or create PRs. That's /forge-ship's job.
+- Never commit, push, or create PRs. That's /taku-ship's job.
 - Verify your claims. Cite specific lines. Never say "probably fine."

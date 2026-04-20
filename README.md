@@ -38,26 +38,23 @@ Each phase has dedicated skills with iron-clad rules, anti-rationalization guard
 | Phase | Skill | What Happens |
 |-------|-------|-------------|
 | **Think** | `/taku-office-hours` | 6 forcing questions reframe your product before you write code |
-| | `/taku-brainstorm` | Socratic design refinement — no code until you approve the design |
-| | `/taku-design` | Build a complete design system from scratch |
-| **Plan** | `/taku-ceo-review` | Rethink the problem, find the 10-star product |
-| | `/taku-eng-review` | Lock in architecture, data flow, edge cases |
+| | `/taku-brainstorm` | Socratic design refinement + design system creation |
+| **Plan** | `/taku-plan-review` | Strategic scope + architecture review |
 | | `/taku-design-review` | Rate design dimensions 0–10, fix what's weak |
 | | `/taku-plan` | Bite-sized tasks with exact file paths, TDD steps |
-| **Build** | `/taku-build` | Subagent-driven development with parallel sprint support |
-| | `/taku-exec` | Sequential plan execution with checkpoints |
+| **Build** | `/taku-build` | Parallel or sequential execution with mode auto-selection |
 | | `/taku-tdd` | RED-GREEN-REFACTOR enforcement |
 | **Review** | `/taku-review` | Pattern-based code review with auto-fix |
 | | `/taku-cross-review` | Second opinion from a different AI model |
 | | `/taku-visual-review` | Before/after visual QA with screenshots |
-| **Test** | `/taku-qa` | Test → find bugs → fix → verify with health scoring |
+| **Test** | `/taku-qa` | Test → find bugs → fix → verify (with `--report-only` mode) |
 | | `/taku-cso` | 14-phase security audit with OWASP + STRIDE |
 | | `/taku-debug` | 4-phase root cause investigation |
 | | `/taku-verify` | Evidence-based completion — no "should work" without proof |
-| **Ship** | `/taku-ship` | Full pipeline: test → review → version → changelog → push → PR |
+| **Ship** | `/taku-ship` | Full pipeline: test → review → version → changelog → push → PR → doc sync |
 | | `/taku-deploy` | Merge → CI → deploy → verify production health |
-| **Reflect** | `/taku-retro` | Weekly retrospective with trend tracking |
-| | `/taku-learn` | Persistent learning across sessions |
+| **Reflect** | `/taku-reflect` | Learn (quick) or retro (weekly) with mode selection |
+
 
 ## Philosophy
 
