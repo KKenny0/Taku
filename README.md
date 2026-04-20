@@ -1,6 +1,10 @@
-# Taku 琢
+<p align="center">
+  <img src="logo.svg" alt="Taku 琢" width="180" />
+</p>
 
-**Structured AI-assisted development — from idea to shipped code.**
+<h1 align="center">Taku 琢</h1>
+
+<p align="center"><strong>Structured AI-assisted development — from idea to shipped code.</strong></p>
 
 Taku combines the best of [Superpowers](https://github.com/obra/superpowers) by Jesse Vincent and [gstack](https://github.com/garrytan/gstack) by Garry Tan into a unified skill pack for Claude Code and OpenClaw.
 

@@ -1,0 +1,142 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- Jade gradient - cool green tones -->
+    <linearGradient id="jadeGrad" x1="0%" y1="0%" x2="50%" y2="100%">
+      <stop offset="0%" style="stop-color:#A8E6CF;stop-opacity:1" />
+      <stop offset="40%" style="stop-color:#6BBF8A;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#3A7D5C;stop-opacity:1" />
+    </linearGradient>
+    <!-- Dark jade for depth -->
+    <linearGradient id="jadeDarkGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#3A7D5C;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1B4332;stop-opacity:1" />
+    </linearGradient>
+    <!-- Chisel steel gradient -->
+    <linearGradient id="steelGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#CBD5E0;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#A0AEC0;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#718096;stop-opacity:1" />
+    </linearGradient>
+    <!-- Background gradient - ink wash -->
+    <radialGradient id="bgGrad" cx="50%" cy="45%" r="50%">
+      <stop offset="0%" style="stop-color:#1A202C;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0D1117;stop-opacity:1" />
+    </radialGradient>
+    <!-- Jade glow -->
+    <radialGradient id="jadeGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#6BBF8A;stop-opacity:0.4" />
+      <stop offset="100%" style="stop-color:#6BBF8A;stop-opacity:0" />
+    </radialGradient>
+    <!-- Spark glow -->
+    <radialGradient id="sparkGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#A8E6CF;stop-opacity:0.8" />
+      <stop offset="100%" style="stop-color:#A8E6CF;stop-opacity:0" />
+    </radialGradient>
+  </defs>
+
+  <!-- Background circle -->
+  <circle cx="256" cy="256" r="240" fill="url(#bgGrad)" />
+  <circle cx="256" cy="256" r="240" fill="none" stroke="#2D3748" stroke-width="1.5" />
+
+  <!-- Subtle outer ring - 7 phase markers -->
+  <g opacity="0.3">
+    <circle cx="256" cy="256" r="218" fill="none" stroke="#6BBF8A" stroke-width="0.5" stroke-dasharray="4 12" />
+  </g>
+
+  <!-- 7 phase dots around the ring -->
+  <g>
+    <circle cx="256" cy="38" r="3" fill="#A8E6CF" opacity="0.5">
+      <animate attributeName="opacity" values="0.5;0.8;0.5" dur="4s" repeatCount="indefinite" />
+    </circle>
+    <circle cx="412" cy="102" r="3" fill="#A8E6CF" opacity="0.5">
+      <animate attributeName="opacity" values="0.5;0.8;0.5" dur="4s" begin="0.57s" repeatCount="indefinite" />
+    </circle>
+    <circle cx="474" cy="256" r="3" fill="#6BBF8A" opacity="0.5">
+      <animate attributeName="opacity" values="0.5;0.8;0.5" dur="4s" begin="1.14s" repeatCount="indefinite" />
+    </circle>
+    <circle cx="412" cy="410" r="3" fill="#6BBF8A" opacity="0.5">
+      <animate attributeName="opacity" values="0.5;0.8;0.5" dur="4s" begin="1.71s" repeatCount="indefinite" />
+    </circle>
+    <circle cx="256" cy="474" r="3" fill="#3A7D5C" opacity="0.5">
+      <animate attributeName="opacity" values="0.5;0.8;0.5" dur="4s" begin="2.28s" repeatCount="indefinite" />
+    </circle>
+    <circle cx="100" cy="410" r="3" fill="#3A7D5C" opacity="0.5">
+      <animate attributeName="opacity" values="0.5;0.8;0.5" dur="4s" begin="2.85s" repeatCount="indefinite" />
+    </circle>
+    <circle cx="100" cy="102" r="3" fill="#A8E6CF" opacity="0.5">
+      <animate attributeName="opacity" values="0.5;0.8;0.5" dur="4s" begin="3.42s" repeatCount="indefinite" />
+    </circle>
+  </g>
+
+  <!-- Ambient jade glow behind the stone -->
+  <circle cx="256" cy="230" r="100" fill="url(#jadeGlow)" />
+
+  <!-- The jade stone (rough, uncarved half) -->
+  <g transform="translate(256, 230)">
+    <!-- Rough jade outline - organic, asymmetric -->
+    <path d="M-55,-60 C-40,-75 -15,-80 10,-75 C30,-72 50,-65 60,-50 C70,-35 72,-15 68,5 C65,20 58,35 45,48 C35,58 20,65 5,68 C-10,72 -28,70 -42,62 C-55,54 -65,42 -70,25 C-75,8 -72,-10 -65,-28 C-60,-42 -55,-55 -55,-60 Z"
+          fill="url(#jadeGrad)" opacity="0.9" />
+
+    <!-- Inner jade light reflection -->
+    <path d="M-30,-45 C-20,-55 0,-58 15,-52 C25,-48 35,-40 38,-28 C40,-18 35,-5 25,5 C18,12 5,15 -8,14 C-20,12 -30,5 -35,-5 C-40,-15 -38,-30 -30,-45 Z"
+          fill="#B8F0D5" opacity="0.25" />
+
+    <!-- Carved facet line (top-right) - showing the craftsman's work -->
+    <path d="M15,-68 L40,-45 L30,-20" fill="none" stroke="#3A7D5C" stroke-width="1.5" opacity="0.6" />
+
+    <!-- Carved facet line (bottom-left) -->
+    <path d="M-45,45 L-20,55 L10,52" fill="none" stroke="#3A7D5C" stroke-width="1.5" opacity="0.6" />
+
+    <!-- Small carved detail suggesting a shape emerging -->
+    <path d="M-5,-40 C5,-30 15,-20 10,-5 C5,10 -10,15 -20,8 C-30,0 -25,-15 -15,-30 Z"
+          fill="#4A9B6F" opacity="0.4" />
+
+    <!-- Jade texture veins -->
+    <path d="M-20,-30 C-10,-25 0,-30 10,-20" fill="none" stroke="#8DD4B0" stroke-width="0.5" opacity="0.4" />
+    <path d="M-35,10 C-25,15 -15,10 -5,20" fill="none" stroke="#8DD4B0" stroke-width="0.5" opacity="0.4" />
+    <path d="M10,-50 C20,-40 25,-30 20,-15" fill="none" stroke="#8DD4B0" stroke-width="0.5" opacity="0.3" />
+  </g>
+
+  <!-- The chisel - positioned as if mid-strike -->
+  <g transform="translate(310, 160) rotate(45)">
+    <!-- Chisel blade -->
+    <path d="M-4,-50 L4,-50 L6,-10 L-6,-10 Z" fill="url(#steelGrad)" />
+    <!-- Chisel tip (sharpened edge) -->
+    <path d="M-6,-10 L6,-10 L1,5 L-1,5 Z" fill="#E2E8F0" />
+    <!-- Chisel handle -->
+    <rect x="-5" y="-90" width="10" height="40" rx="2" fill="#8B6F47" />
+    <rect x="-3" y="-88" width="3" height="36" rx="1" fill="#A0845C" opacity="0.5" />
+    <!-- Handle ring/ferrule -->
+    <rect x="-6" y="-52" width="12" height="5" rx="1" fill="#718096" />
+  </g>
+
+  <!-- Jade dust / carving particles - floating away from the stone -->
+  <g>
+    <circle cx="320" cy="195" r="2" fill="#A8E6CF" opacity="0.7">
+      <animate attributeName="cy" values="195;185;175" dur="2s" repeatCount="indefinite" />
+      <animate attributeName="opacity" values="0.7;0.3;0" dur="2s" repeatCount="indefinite" />
+    </circle>
+    <circle cx="335" cy="210" r="1.5" fill="#6BBF8A" opacity="0.6">
+      <animate attributeName="cy" values="210;198;188" dur="2.5s" repeatCount="indefinite" />
+      <animate attributeName="opacity" values="0.6;0.2;0" dur="2.5s" repeatCount="indefinite" />
+    </circle>
+    <circle cx="310" cy="180" r="1" fill="#B8F0D5" opacity="0.5">
+      <animate attributeName="cy" values="180;168;158" dur="1.8s" repeatCount="indefinite" />
+      <animate attributeName="opacity" values="0.5;0.2;0" dur="1.8s" repeatCount="indefinite" />
+    </circle>
+    <circle cx="325" cy="200" r="1.8" fill="#A8E6CF" opacity="0.5">
+      <animate attributeName="cy" values="200;188;178" dur="2.2s" repeatCount="indefinite" />
+      <animate attributeName="opacity" values="0.5;0.2;0" dur="2.2s" repeatCount="indefinite" />
+    </circle>
+  </g>
+
+  <!-- "TAKU" text -->
+  <text x="256" y="395" text-anchor="middle" font-family="'SF Pro Display', 'Helvetica Neue', Arial, sans-serif" font-size="42" font-weight="700" letter-spacing="14" fill="#E2E8F0">
+    TAKU
+  </text>
+
+  <!-- Chinese character 琢 -->
+  <text x="256" y="440" text-anchor="middle" font-family="'Noto Serif SC', 'SimSun', 'STSong', serif" font-size="24" fill="#6BBF8A" opacity="0.7">
+    琢
+  </text>
+</svg>
