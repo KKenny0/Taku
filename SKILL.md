@@ -150,34 +150,23 @@ Each phase has a **specific skill sequence**. Follow the sequence in order. Each
 
 ```
 ┌─────────────────────────────────────┐
-│ Step 1: /taku-plan-review         │
-│ Reads: DESIGN.md                    │
-│ Modes: scope review + architecture  │
-│ Output: review notes + diagrams     │
-└──────────────┬──────────────────────┘
-               │
-               ▼
-┌─────────────────────────────────────┐
-│ Step 2: /taku-design-review        │
-│ (only if project has UI)           │
-│ Reads: DESIGN.md                    │
-│ Output: design dimension scores     │
-└──────────────┬──────────────────────┘
-               │
-               ▼
-┌─────────────────────────────────────┐
-│ Step 3: /taku-plan                │
-│ Reads: DESIGN.md + all reviews      │
+│ /taku-plan                          │
+│ Auto-detects step:                  │
+│   Step 1: scope + architecture      │
+│           review (load reference)   │
+│   Step 2: design review (UI only)   │
+│           (load reference)          │
+│   Step 3: write PLAN.md             │
 │ Output: PLAN.md                     │
 │ Gate: Self-review checklist        │
 └─────────────────────────────────────┘
 ```
 
 **Rules:**
-- `/taku-plan-review` runs both scope and architecture modes by default
-- `/taku-design-review` is conditional: skip if project has no UI component
-- `/taku-plan` reads ALL review outputs to produce a comprehensive plan
-- Self-review checklist in `/taku-plan` is mandatory — if it fails, revise the plan
+- `/taku-plan` auto-detects which step to start from based on project state
+- Scope + architecture review runs by default (skip only for trivial plans)
+- Design review is conditional: skip if project has no UI component
+- Self-review checklist is mandatory — if it fails, revise the plan
 
 **→ On completion: route to BUILD phase**
 
@@ -189,33 +178,17 @@ Each phase has a **specific skill sequence**. Follow the sequence in order. Each
 
 ```
 ┌─────────────────────────────────────┐
-│ Step 0: /taku-worktree            │
-│ (create isolated workspace)        │
-└──────────────┬──────────────────────┘
-               │
-               ▼
-┌─────────────────────────────────────┐
-│ Step 1: /taku-build               │
-│ Reads: PLAN.md                      │
-│ Internally uses: /taku-tdd        │
-│ Dispatches subagents per task      │
-│ 2-stage review per task            │
-│ Parallel for independent tasks     │
+│ /taku-build                         │
+│ Pre-check: worktree setup if needed │
+│   (load references/worktrees.md)    │
+│ Auto-selects execution mode:        │
+│   Parallel — 5+ tasks, subagents    │
+│   Sequential — 1-3 tasks, in-loop   │
+│ TDD enforced (load references/)     │
+│ 2-stage review per task             │
+│ Dispatches subagents per task       │
 └──────────────┬──────────────────────┘
                │ all tasks done
-               ▼
-         (auto-route to REVIEW)
-```
-
-**Alternative path:**
-```
-┌─────────────────────────────────────┐
-│ Step 1: /taku-build (sequential)   │
-│ (sequential mode, user in the loop) │
-│ Reads: PLAN.md                      │
-│ Internally uses: /taku-tdd        │
-└──────────────┬──────────────────────┘
-               │
                ▼
          (auto-route to REVIEW)
 ```
@@ -223,7 +196,8 @@ Each phase has a **specific skill sequence**. Follow the sequence in order. Each
 **Rules:**
 - `/taku-build` auto-selects mode: parallel (5+ tasks, subagents available) or sequential (1-3 tasks)
 - User can override mode at any time
-- TDD is enforced inside both modes — `/taku-tdd` is called by the build skill
+- TDD is enforced inside both modes via `references/tdd.md`
+- Worktree isolation is optional — use when feature needs a clean sandbox
 - After BUILD completes, **automatically route to REVIEW** — don't wait for user to ask
 
 **→ On completion: auto-route to REVIEW phase**
@@ -387,8 +361,8 @@ This is the complete sequence for a greenfield feature with all capabilities ava
 ```
 /taku-think (Quick/Design/Explore)
   → DESIGN.md approved
-    → /taku-plan-review → /taku-design-review → /taku-plan → PLAN.md
-      → /taku-worktree
+    → /taku-plan (review + plan writing)
+      → PLAN.md
         → /taku-build (parallel or sequential, TDD enforced)
           → /taku-review
             → /taku-debug (if tests fail)
@@ -409,19 +383,14 @@ This is the complete sequence for a greenfield feature with all capabilities ava
 
 ## 7. Slash Command Quick Reference
 
-| Command | Phase | Skill |
-|---------|-------|-------|
+| Command | Phase | Description |
+|---------|-------|-------------|
 | `/taku-think` | THINK | Adaptive Quick/Design/Explore |
-| `/taku-plan-review` | PLAN | Scope + architecture review |
-| `/taku-design-review` | PLAN | Design scoring |
-| `/taku-plan` | PLAN | Write plan |
-| `/taku-build` | BUILD | Parallel or sequential execution |
-| `/taku-tdd` | BUILD | RED-GREEN-REFACTOR |
-| `/taku-worktree` | BUILD | Workspace isolation |
-| `/taku-review` | REVIEW | Code review |
+| `/taku-plan` | PLAN | Scope review → design review → write plan |
+| `/taku-build` | BUILD | Parallel or sequential execution, TDD enforced |
+| `/taku-review` | REVIEW | Code review with auto-fix |
 | `/taku-debug` | TEST | Root cause investigation |
-| `/taku-reflect` | REFLECT | Learn + retro |
-| `/taku-write-skill` | META | Create new skill |
+| `/taku-reflect` | REFLECT | Learn + retro + write skill |
 
 ---
 
