@@ -31,8 +31,6 @@ Check enhanced capabilities. Store as session state. Missing = skip, don't block
 
 | Capability | Check | Enables |
 |------------|-------|---------|
-| Browser QA | `which gstack` OR browser tool | `/taku-qa`, `/taku-visual-review` |
-| Cross-model | `which codex` OR multi-model support | `/taku-cross-review` |
 | Image gen | image_generate tool | `/taku-brainstorm` design system previews |
 
 ### Project State Detection
@@ -56,9 +54,9 @@ DIRS_TOUCHED=$(git diff --name-only HEAD~1 2>/dev/null | xargs -I{} dirname {} 2
 
 | Tier | Criteria | Behavior |
 |------|----------|----------|
-| **Lightweight** | <50 files OR single-file change (1 dir touched) | Skip plan-review, skip security full scan (phases 1-5 only), skip visual-review. Use sequential build by default. |
-| **Standard** | 50-500 files, moderate scope | Full pipeline with all optional skills when capabilities allow. |
-| **Deep** | >500 files OR cross-cutting change (3+ dirs touched) | Full pipeline plus: architecture diagram mandatory, exhaustive QA tier, comprehensive security audit. |
+| **Lightweight** | <50 files OR single-file change (1 dir touched) | Skip plan-review. Use sequential build by default. |
+| **Standard** | 50-500 files, moderate scope | Full pipeline. |
+| **Deep** | >500 files OR cross-cutting change (3+ dirs touched) | Full pipeline plus: architecture diagram mandatory. |
 
 **Auto-reclassification:** If scope expands mid-sprint (e.g., a "simple bugfix" touches 6 files across 3 modules), escalate one tier. Log: `DEPTH ESCALATION: Lightweight → Standard (reason: scope expanded to N files across M modules)`.
 
@@ -250,24 +248,10 @@ Each phase has a **specific skill sequence**. Follow the sequence in order. Each
 
 ```
 ┌─────────────────────────────────────┐
-│ Step 1: /taku-review              │
+│ /taku-review                        │
 │ Reads: git diff                     │
 │ Auto-fixes: Critical + Important    │
-└──────────────┬──────────────────────┘
-               │
-               ▼
-┌─────────────────────────────────────┐
-│ Step 2: /taku-cross-review        │
-│ (if cross-model capability)        │
-│ Reads: git diff                     │
-│ Cross-model analysis                │
-└──────────────┬──────────────────────┘
-               │
-               ▼
-┌─────────────────────────────────────┐
-│ Step 3: /taku-visual-review       │
-│ (if browser capability + has UI)   │
-│ Before/after screenshots            │
+│ Two-pass: Critical → Informational  │
 └──────────────┬──────────────────────┘
                │
                ▼
@@ -283,8 +267,6 @@ Each phase has a **specific skill sequence**. Follow the sequence in order. Each
 
 **Rules:**
 - `/taku-review` is always run — it's the minimum
-- `/taku-cross-review` is optional but recommended (skip if no capability)
-- `/taku-visual-review` is conditional: only for projects with UI + browser capability
 - **Critical findings block progress.** Fix them before moving to TEST.
 - Important findings: fix if possible, note if not
 - After all reviews pass, **automatically route to TEST**
@@ -293,45 +275,32 @@ Each phase has a **specific skill sequence**. Follow the sequence in order. Each
 
 ### TEST Phase
 
-**Entry:** Code reviewed. Not yet tested.
-
-**Skill Sequence:**
+**Entry:** Code reviewed. Ready for testing.
 
 ```
 ┌─────────────────────────────────────┐
-│ Step 1: /taku-qa                  │
-│ (if browser capability)            │
-│ Tier: auto-select based on scope   │
-│ Fix loop: test → fix → verify      │
+│ Run full test suite                 │
+│ Execute project's test command      │
+│ Collect pass/fail results           │
 └──────────────┬──────────────────────┘
                │
-               ▼
-┌─────────────────────────────────────┐
-│ Step 2: /taku-cso                 │
-│ (security audit)                   │
-│ 14-phase scan                       │
-│ Gate: 8/10 confidence              │
-└──────────────┬──────────────────────┘
-               │
-               ▼
-┌─────────────────────────────────────┐
-│ Step 3: /taku-verify              │
-│ Evidence-based completion gate      │
-│ Run verification commands           │
-│ Show output                         │
-└──────────────┬──────────────────────┘
-               │
-               ▼
-         (auto-route to REFLECT)
+         ┌─────┴──────┐
+         │ failures?  │
+         └─────┬──────┘
+           yes │       │ no
+               ▼       ▼
+┌──────────────────┐  ┌──────────────────────┐
+│ /taku-debug      │  │ All tests pass       │
+│ Root cause       │  │ → auto-route REFLECT │
+│ investigation    │  └──────────────────────┘
+└──────────────────┘
 ```
 
 **Rules:**
-- `/taku-qa` is conditional: requires browser capability. Without it, rely on unit tests + verify
-- `/taku-cso` is recommended for all features. For bugfixes, run a lighter scan (phases 1-5, 10 only)
-- `/taku-verify` is always run — it's the final evidence gate
-- **If QA health score < 4: DO NOT PROCEED.** Go back to BUILD to fix critical issues.
-- **If verify fails: DO NOT PROCEED.** Fix and re-verify.
-- `/taku-debug` is invoked on-demand within this phase if something breaks during QA
+- Run the project's full test suite
+- **If tests fail:** invoke `/taku-debug` for systematic root cause investigation
+- **Iron Law:** No completion claims without fresh verification evidence. "It should work" is not a completion statement. Run the command, read the output, then claim the result.
+- `/taku-debug` is also invoked on-demand at any phase when encountering unexpected behavior
 
 **→ On completion: auto-route to REFLECT phase**
 
@@ -375,7 +344,7 @@ The sprint **auto-progresses** between phases. The agent should NOT wait for the
 | PLAN | BUILD | PLAN.md written and self-reviewed |
 | BUILD | REVIEW | All tasks in PLAN.md marked DONE |
 | REVIEW | TEST | All Critical findings fixed |
-| TEST | REFLECT | Health score ≥ 4 AND verify passes |
+| TEST | REFLECT | Test suite passes |
 
 ### Pause Points (require user action)
 
@@ -390,8 +359,7 @@ The sprint **auto-progresses** between phases. The agent should NOT wait for the
 | Exception | Action |
 |-----------|--------|
 | Review finds Critical issues | Fix in BUILD, re-run REVIEW (loop max 3 times, then ask user) |
-| QA health score < 4 | Fix in BUILD, re-run TEST (loop max 3 times, then ask user) |
-| Verify fails | Fix in BUILD, re-run verify (loop max 3 times, then ask user) |
+| Tests fail | Invoke /taku-debug, fix root cause, re-run tests (loop max 3 times, then ask user) |
 | Build BLOCKED | Report what's blocking, ask user for context |
 | Build NEEDS_CONTEXT | Answer questions, re-dispatch |
 | 3 consecutive phase loops | Stop, present status to user, ask for direction |
@@ -435,9 +403,9 @@ This is the complete sequence for a greenfield feature with all capabilities ava
     → /taku-plan-review → /taku-design-review → /taku-plan → PLAN.md
       → /taku-worktree
         → /taku-build (parallel or sequential, TDD enforced)
-          → /taku-review → /taku-cross-review → /taku-visual-review
-            → /taku-qa → /taku-cso → /taku-verify
-                → /taku-reflect
+          → /taku-review
+            → /taku-debug (if tests fail)
+              → /taku-reflect
 ```
 
 **Shortcuts by task type:**
@@ -447,7 +415,7 @@ This is the complete sequence for a greenfield feature with all capabilities ava
 | bugfix | `/taku-debug` → `/taku-build` → `/taku-review` |
 | hotfix | `/taku-build` (skip review for urgency) |
 | refactor | `/taku-review` → `/taku-build` → `/taku-review` |
-| review | `/taku-review` → `/taku-cross-review` (optional) |
+| review | `/taku-review` |
 | idea | `/taku-office-hours` → (ask user if they want to continue) |
 
 ---
@@ -465,13 +433,7 @@ This is the complete sequence for a greenfield feature with all capabilities ava
 | `/taku-tdd` | BUILD | RED-GREEN-REFACTOR |
 | `/taku-worktree` | BUILD | Workspace isolation |
 | `/taku-review` | REVIEW | Code review |
-| `/taku-cross-review` | REVIEW | Cross-model opinion |
-| `/taku-visual-review` | REVIEW | Visual QA |
-| `/taku-review-collab` | REVIEW | Dispatch/receive review |
-| `/taku-qa` | TEST | Browser QA (with --report-only) |
-| `/taku-cso` | TEST | Security audit |
-| `/taku-debug` | TEST | Root cause |
-| `/taku-verify` | TEST | Evidence gate |
+| `/taku-debug` | TEST | Root cause investigation |
 | `/taku-reflect` | REFLECT | Learn + retro |
 | `/taku-write-skill` | META | Create new skill |
 
@@ -487,4 +449,5 @@ This is the complete sequence for a greenfield feature with all capabilities ava
 | "I'll add tests later" | You won't. |
 | "This is just a quick hack" | There are no quick hacks in production. |
 | "Skip review, it's fine" | The bugs you catch in review are the ones that cost the most in production. |
-| "We can skip QA" | You can. You'll regret it. |
+| "We can skip testing" | You can. You'll regret it. |
+| "It should work" | Run the verification. Confidence is not evidence. |

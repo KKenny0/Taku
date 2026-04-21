@@ -150,7 +150,7 @@ For dimensions scoring 8+, a brief note is fine. For dimensions below 8, the fix
 
 Append a `## Design Review` section to the design doc with the scorecard and all fixes.
 
-If overall score is 8+: "Design is implementation-ready. Run taku-visual-review after implementation for visual QA."
+If overall score is 8+: "Design is implementation-ready."
 
 If overall score is below 8: "Design needs revision. Address the fixes above before proceeding to build."
 

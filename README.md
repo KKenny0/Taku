@@ -45,12 +45,7 @@ Each phase has dedicated skills with iron-clad rules, anti-rationalization guard
 | **Build** | `/taku-build` | Parallel or sequential execution with mode auto-selection |
 | | `/taku-tdd` | RED-GREEN-REFACTOR enforcement |
 | **Review** | `/taku-review` | Pattern-based code review with auto-fix |
-| | `/taku-cross-review` | Second opinion from a different AI model |
-| | `/taku-visual-review` | Before/after visual QA with screenshots |
-| **Test** | `/taku-qa` | Test → find bugs → fix → verify (with `--report-only` mode) |
-| | `/taku-cso` | 14-phase security audit with OWASP + STRIDE |
-| | `/taku-debug` | 4-phase root cause investigation |
-| | `/taku-verify` | Evidence-based completion — no "should work" without proof |
+| **Test** | `/taku-debug` | 4-phase root cause investigation |
 | **Reflect** | `/taku-reflect` | Learn (quick) or retro (weekly) with mode selection |
 
 

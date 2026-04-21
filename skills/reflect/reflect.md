@@ -66,7 +66,7 @@ Learnings live in `.taku/learnings/{project-slug}.jsonl`. Each line:
 
 ### Auto-Capture
 
-Other Taku skills log learnings automatically. When /taku-review, /taku-reflect, or /taku-cso discovers a non-obvious pattern or pitfall, they append to the learnings file.
+Other Taku skills log learnings automatically. When /taku-review or /taku-reflect discovers a non-obvious pattern or pitfall, they append to the learnings file.
 
 ---
 
