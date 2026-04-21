@@ -20,21 +20,20 @@ Three modes adapt to request complexity. No ceremony for simple requests. Full r
 Analyze both **what the user says** and **how mature the request is**. Don't rely on keywords alone.
 
 **Quick** — when ALL are true:
-- The request is specific: you can name the exact change without ambiguity
-- There is exactly one reasonable implementation path (no architectural decisions)
-- The user's framing already contains constraints or success criteria
-- A senior engineer would glance at this and start coding without a whiteboard
+- The request names specific files, modules, or functions to change
+- The implied action is singular: add, rename, fix, or rewire one thing
+- The user's framing includes constraints or success criteria (explicit or clearly implied)
+- No architectural decision is needed — there's one obvious place to put the code
 
 **Design** — the default for feature work:
-- The request describes something to build, but the "how" is open
-- Multiple architectural choices exist (data model, component structure, integration points)
-- The user may not have thought through error handling, edge cases, or testing
+- The request names a feature area (e.g. "settings page", "notifications") rather than specific files
+- The "how" is ambiguous: data model, component structure, or integration points are open
+- Multiple modules or services are involved, and their boundaries need defining
 
 **Explore** — for idea-stage thinking:
-- The request is about **whether** to build, not **how** to build
-- The user is exploring a problem space: no concrete feature description yet
-- Product/market questions dominate: who needs this, is there demand, what's the wedge
-- OR the user explicitly says "I have an idea", "should we build this", "what if"
+- The request has no success criteria — the user can't yet describe what "done" looks like
+- The framing is a question: "should we build", "what if", "I'm thinking about"
+- Product/market concerns dominate: who needs this, is there demand, what's the wedge
 
 **Edge case — "Build me a SaaS platform":** The user said "build" but the request is idea-stage (no constraints, no feature list, no success criteria). This is Explore, not Design. The signal is request maturity, not phrasing.
 
@@ -55,9 +54,13 @@ For requests where full design process is wasteful. Not "no thinking" — right-
 
 2. **User confirms.** If they correct you, adjust and re-confirm.
 
-3. **Write a mini design** — 3-5 sentences covering what, why, and how. Either:
-   - Append to an existing DESIGN.md as a new section, OR
-   - Write directly into PLAN.md if the change is small enough that design and plan are the same thing
+3. **Write a mini design** using this template. Either append to DESIGN.md as a new section, or write directly into PLAN.md if the change is small enough that design and plan are the same thing:
+
+   - **Change:** One sentence describing what to change
+   - **Why:** One sentence on motivation
+   - **Touch Points:** Files/modules affected
+   - **Risks:** Most likely thing to get wrong
+   - **Done When:** How to verify completion
 
 4. **Go.** Route to `/taku-plan` (or proceed to build if plan already exists).
 
@@ -92,6 +95,8 @@ Ask **one at a time**. Prefer multiple choice when possible. Focus on:
 
 Skip questions the user already answered in their initial request. If they gave a thorough description, move on.
 
+**Hard cap:** Maximum 2 clarifying questions per session. If you have enough information to form a conservative but executable design, stop asking and present the design.
+
 ### Propose 2-3 Approaches
 
 Present distinct options with trade-offs:
@@ -103,6 +108,7 @@ Approach A: {name} (recommended)
   Risk:    Low/Med/High
   Pros:    2-3 bullets
   Cons:    2-3 bullets
+  Why not: 1-2 sentences explaining why you're not recommending this
 
 Approach B: {name}
   ...
@@ -123,7 +129,18 @@ Scale depth to complexity: a few sentences for moderate changes, a paragraph per
 
 ### Write DESIGN.md
 
-Save the approved design to `DESIGN.md` at the project root. Include:
+Save the approved design to `DESIGN.md` at the project root. Use the template matching the project's depth-tier (detected in SKILL.md pre-flight; if unknown, use Standard).
+
+**Lightweight tier** (for small, focused changes):
+
+- Problem statement
+- Recommended approach with rationale
+- Touch points: files and modules affected
+- Risks
+- Done when: success criteria
+
+**Standard / Deep tier** (default; for anything cross-module or architecturally significant):
+
 - Problem statement
 - Recommended approach with rationale
 - Architecture and component breakdown
@@ -265,6 +282,29 @@ For Quick mode, "design" can be 3-5 sentences. For Design mode, it's DESIGN.md. 
 
 "This is too simple to need a design" — that's where unexamined assumptions cause the most wasted work. The design can be short. But present it and get approval.
 
+## Think Outcomes
+
+Every think session ends with one of:
+
+- **Proceed to Plan** — Design approved, ready for `/taku-plan`
+- **Proceed to Design** — (Explore only) Idea validated, needs full Design mode before planning
+- **Need More Information** — Blocking unknowns prevent a decision. List what's needed and stop.
+- **Do Not Build Yet** — After exploration, the right answer is to wait. Record why in explore notes or DESIGN.md.
+
+Not every think session leads to code. "Do Not Build Yet" is a valid, disciplined outcome.
+
+## Think → Plan Handoff
+
+Before routing to `/taku-plan`, verify ALL of these exist:
+
+- **Approved design:** DESIGN.md approved by user, or Quick mode mini design confirmed
+- **Recommended approach:** One chosen approach with rationale — not just a list of options
+- **Resolved open questions:** Every open question is either answered or explicitly recorded as an accepted unknown
+- **Success criteria:** Concrete, testable definition of "done"
+- **Scope boundaries:** What's in scope and what's deliberately out of scope
+
+If any are missing, resolve them before handing off. The plan skill cannot fill design gaps.
+
 ---
 
 ## Scope Assessment
@@ -310,33 +350,6 @@ Before any mode's main flow, check scope:
 
 ## Design System Mode (UI-Heavy Projects)
 
-A sub-mode within Design mode. Only activates when the user says "design system", "brand identity", "visual identity", "design tokens", or the project explicitly needs aesthetic direction. For most backend/CLI/API projects, this section never triggers.
+Only activates on keywords: "design system", "brand identity", "visual identity", "design tokens". For backend/CLI/API projects, skip entirely.
 
-### Phase 1: Product Context
-
-Gather: target audience, core emotion (trust/speed/delight/calm), competitive set (3-5 products), anti-patterns (what to avoid), constraints (dark mode, RTL, accessibility).
-
-### Phase 2: Competitive Research
-
-For each competitor: one thing done well (steal the principle), one thing done poorly (avoid the trap).
-
-### Phase 3: Full Proposal
-
-- **Aesthetic direction:** Specific, not "clean and modern"
-- **Typography:** No Inter/Roboto/system-ui as primary. Name exact typeface. Define size scale, heading/body contrast ratio ≥ 1.5x, line heights
-- **Color system:** CSS custom properties. Dark mode variants. WCAG AA contrast (4.5:1 body, 3:1 large text)
-- **Spacing scale:** Base unit (4px or 8px), defined scale (4/8/12/16/24/32/48/64/96)
-- **Layout grid:** Columns, gutters, max-width
-- **Motion:** Duration scale (150/300/500ms), easing curves, prefers-reduced-motion
-
-### Phase 4: SAFE/RISK Breakdown
-
-Classify every design decision. If 3+ are RISK, simplify.
-
-### Phase 5: Preview (Optional)
-
-If image generation available: component showcase and sample page. Skip if unavailable.
-
-### Phase 6: Output
-
-Append `## Design System` section to DESIGN.md with all tokens. No placeholders.
+Full workflow (6 phases: product context → competitive research → proposal → SAFE/RISK breakdown → preview → output) is in `references/design-system.md`. Load it when triggered.
