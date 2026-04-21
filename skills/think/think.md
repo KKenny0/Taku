@@ -1,0 +1,342 @@
+---
+name: taku-think
+description: >
+  Invoke before ANY build request — new feature, component, API, refactor, bug fix,
+  or "build me X". Three adaptive modes: Quick (simple requests → fast alignment,
+  skip heavy process), Design (feature requests → architecture + DESIGN.md), Explore
+  (new ideas → forcing questions before committing). The mode is auto-selected based
+  on request complexity. Hard gate: no code until design is approved. Triggers on
+  "build me", "add a feature", "I have an idea", "should we build", "let's design",
+  "implement", or any request that implies writing code. Also handles design system
+  creation. Use before /taku-plan.
+---
+
+# Taku Think — Adaptive Design Thinking
+
+Three modes adapt to request complexity. No ceremony for simple requests. Full rigor for complex ones. Hard gate always: no code until design is approved.
+
+## Mode Selection
+
+Analyze both **what the user says** and **how mature the request is**. Don't rely on keywords alone.
+
+**Quick** — when ALL are true:
+- The request is specific: you can name the exact change without ambiguity
+- There is exactly one reasonable implementation path (no architectural decisions)
+- The user's framing already contains constraints or success criteria
+- A senior engineer would glance at this and start coding without a whiteboard
+
+**Design** — the default for feature work:
+- The request describes something to build, but the "how" is open
+- Multiple architectural choices exist (data model, component structure, integration points)
+- The user may not have thought through error handling, edge cases, or testing
+
+**Explore** — for idea-stage thinking:
+- The request is about **whether** to build, not **how** to build
+- The user is exploring a problem space: no concrete feature description yet
+- Product/market questions dominate: who needs this, is there demand, what's the wedge
+- OR the user explicitly says "I have an idea", "should we build this", "what if"
+
+**Edge case — "Build me a SaaS platform":** The user said "build" but the request is idea-stage (no constraints, no feature list, no success criteria). This is Explore, not Design. The signal is request maturity, not phrasing.
+
+**Edge case — "I have an idea for a caching layer":** Sounds like Explore, but the user has a specific technical concept with implied constraints. This is Design. The signal is specificity, not phrasing.
+
+When in doubt, default to **Design**. Quick mode should feel obviously right — if you're debating whether it qualifies, it doesn't.
+
+---
+
+## Quick Mode
+
+For requests where full design process is wasteful. Not "no thinking" — right-sized thinking.
+
+### Flow
+
+1. **One alignment question.** Summarize your understanding and ask if it's correct.
+   > "I'm planning to [X]. That means touching [files/areas]. Does that match what you had in mind?"
+
+2. **User confirms.** If they correct you, adjust and re-confirm.
+
+3. **Write a mini design** — 3-5 sentences covering what, why, and how. Either:
+   - Append to an existing DESIGN.md as a new section, OR
+   - Write directly into PLAN.md if the change is small enough that design and plan are the same thing
+
+4. **Go.** Route to `/taku-plan` (or proceed to build if plan already exists).
+
+### What Quick Mode is NOT
+
+- Not skipping design entirely — you still state what you'll do and get approval
+- Not for "I'll just figure it out while coding" — that's the anti-pattern
+- Not for requests where multiple implementation paths exist — if you can imagine two reasonable approaches, it's not Quick
+
+**Why Quick Mode exists:** Full design process on a logout button is wasteful. But zero thinking on a logout button is how you forget session invalidation. Quick mode is the senior engineer's instinct: quick mental check, then execute.
+
+---
+
+## Design Mode
+
+For feature requests that need architectural thought. The core Taku design flow.
+
+### Pre-Flight
+
+1. Read project context: CLAUDE.md, README.md, package.json (or equivalent)
+2. Check recent commits: what's changed lately?
+3. Map the area the user wants to touch: files, modules, patterns
+4. Check for existing design docs (DESIGN.md, `.taku/office-hours-*.md`)
+
+### Clarifying Questions
+
+Ask **one at a time**. Prefer multiple choice when possible. Focus on:
+
+- **Purpose:** What problem does this solve? For whom?
+- **Constraints:** Performance? Compatibility? Time?
+- **Success criteria:** What does "done" look like?
+
+Skip questions the user already answered in their initial request. If they gave a thorough description, move on.
+
+### Propose 2-3 Approaches
+
+Present distinct options with trade-offs:
+
+```
+Approach A: {name} (recommended)
+  Summary: 1-2 sentences
+  Effort:  S/M/L
+  Risk:    Low/Med/High
+  Pros:    2-3 bullets
+  Cons:    2-3 bullets
+
+Approach B: {name}
+  ...
+```
+
+One must be **minimal viable** (fewest files, smallest diff, ships fastest). One must be **ideal architecture** (best long-term). If you can't find a genuinely different third option, two is fine — two real options beat three fake ones.
+
+### Present Design
+
+Once an approach is chosen, present the design:
+
+- Architecture overview
+- Component breakdown and data flow
+- Error handling strategy
+- Testing strategy
+
+Scale depth to complexity: a few sentences for moderate changes, a paragraph per section for complex ones.
+
+### Write DESIGN.md
+
+Save the approved design to `DESIGN.md` at the project root. Include:
+- Problem statement
+- Recommended approach with rationale
+- Architecture and component breakdown
+- Data flow
+- Error handling
+- Testing strategy
+- Success criteria
+- Open questions (if any — no TBD allowed)
+
+### Self-Review
+
+Before showing the user, check:
+1. **Placeholder scan:** Any TBD, TODO, "standard approach", "handle appropriately"? Replace with specifics.
+2. **Internal consistency:** Do sections contradict each other?
+3. **Scope check:** Focused enough for one plan, or needs splitting?
+
+Fix issues inline. No formal process — just verify your own work.
+
+### User Approval
+
+> "Design written to DESIGN.md. Review it and let me know if you want changes before we create the implementation plan."
+
+Wait for approval. The written spec is the contract between design and build. No code until approved.
+
+---
+
+## Explore Mode
+
+For idea-stage exploration. Ask hard questions before committing to build. Two sub-modes:
+
+**Startup** — building a product or intrapreneurship project. Ask forcing questions.
+
+**Builder** — hackathon, side project, open source, learning. Be an enthusiastic design partner.
+
+### Startup Mode: Forcing Questions
+
+Ask **one at a time**. Push until answers are specific and evidence-based.
+
+| # | Question | What to listen for |
+|---|----------|--------------------|
+| Q1 | What's the strongest evidence someone actually wants this? (Not interest — behavior) | Specific behavior: paying, expanding usage, building workflow around it |
+| Q2 | What are users doing right now to solve this? What does that workaround cost? | Specific workflow, hours wasted, tools duct-taped together |
+| Q3 | Name the actual human who needs this most. What gets them fired? | A name, a role, a specific consequence |
+| Q4 | What's the smallest version someone would pay for this week? | One feature, one workflow, shippable in days |
+| Q5 | Have you watched someone use this without helping? What surprised you? | A specific surprise that contradicted assumptions |
+| Q6 | If the world changes in 3 years, does this become more or less essential? | A specific claim about why this product gets more valuable |
+
+**Smart Routing:** Not every session needs all six.
+
+- Pre-product (idea, no users) → Q1, Q2, Q3
+- Has users (not paying) → Q2, Q4, Q5
+- Has paying customers → Q4, Q5, Q6
+- Pure engineering/infra → Q2, Q4 only
+
+If earlier answers already cover a later question, skip it.
+
+**Escape Hatch:** If the user says "just do it" or pushes back:
+1. First pushback → ask the 2 most critical remaining questions, then proceed
+2. Second pushback → respect it and move on
+3. If they provide a fully formed plan with evidence → skip to alternatives
+
+### Builder Mode: Design Partner
+
+You're an enthusiastic collaborator. Riff on ideas, suggest combinations, find the most exciting version.
+
+Questions (ask one at a time, skip already-answered):
+- What's the coolest version of this? What would make someone say "whoa"?
+- Who would you show this to first?
+- What's the fastest path to something you can actually use?
+- What existing thing is closest, and how is yours different?
+- What would you add with unlimited time?
+
+If the user says "just do it" → skip to alternatives.
+
+### Premise Challenge (both sub-modes)
+
+Before proposing solutions:
+
+1. Is this the right problem? Could a different framing be simpler?
+2. What happens if we do nothing? Real pain or hypothetical?
+3. What existing code already partially solves this?
+
+Present premises for user agreement. If they disagree, revise.
+
+### Alternatives
+
+Produce 2-3 approaches:
+- One **minimal viable** (fewest files, smallest diff)
+- One **ideal architecture** (best long-term)
+- One **creative/lateral** (if one exists)
+
+For each: summary, effort (S/M/L), risk, pros, cons. Recommend one.
+
+### Output
+
+Save session notes to `.taku/explore-{date}.md`:
+
+```markdown
+# Explore — {date}
+
+## Mode
+Startup | Builder
+
+## Key Insights
+{from questions}
+
+## Premises
+{agreed premises}
+
+## Approaches
+### A: {name}
+{summary, effort, risk, pros, cons}
+### B: {name}
+...
+
+## Recommended
+{choice + rationale}
+
+## Open Questions
+{unresolved items}
+```
+
+### Handoff
+
+After saving notes, offer the user a path forward:
+- **If the idea survived questioning and a specific feature emerged:** proceed to Design mode to produce DESIGN.md
+- **If the idea needs more exploration:** stop here. The user has session notes to think with.
+- **If the design is already clear enough:** skip to `/taku-plan`
+
+---
+
+## Hard Gate
+
+This applies to ALL modes, including Quick.
+
+No implementation skill is invoked, no code is written, no project is scaffolded, until the design is presented and the user explicitly approves it.
+
+For Quick mode, "design" can be 3-5 sentences. For Design mode, it's DESIGN.md. For Explore mode, the gate applies when transitioning to build.
+
+"This is too simple to need a design" — that's where unexamined assumptions cause the most wasted work. The design can be short. But present it and get approval.
+
+---
+
+## Scope Assessment
+
+Before any mode's main flow, check scope:
+
+- If the request describes multiple independent subsystems ("build a platform with chat, storage, billing, and analytics"), flag it immediately
+- Decompose into sub-projects: what's independent, how do they relate, what order?
+- Run the chosen mode on the first sub-project. Each gets its own design → plan → build cycle
+
+---
+
+## Anti-Rationalization
+
+| Excuse | Why it's wrong |
+|--------|---------------|
+| "This is too simple for a design" | Simple requests are where unexamined assumptions waste the most time. The design can be 3 sentences. |
+| "I already know what to build" | You thought you knew the last three times too. |
+| "The user just wants code" | The user wants working code. Design is how you get there. |
+| "I'll figure it out while coding" | That's called refactoring in circles. |
+| "Skip the questions, just build" | The Escape Hatch handles this — ask the 2 most critical, then proceed. Not zero. |
+| "Quick mode means no thinking" | Quick mode means right-sized thinking. No thinking is how logout buttons forget session invalidation. |
+
+## Known Pitfalls
+
+**Quick mode applied to something that isn't quick.** "Add a settings page" sounds simple. Quick mode was used. The "settings page" turned out to need: per-user settings, admin overrides, audit logging, migration from env vars, and a new database table. The 3-sentence design missed all of it.
+
+*Prevention:* Quick mode requires ALL conditions to be true: specific change, single implementation path, no architectural decisions. If you can imagine two reasonable approaches, it's Design mode. "Add a settings page" has multiple approaches — Design. "Add a dark mode toggle to the header" has one — Quick.
+
+**Presenting one approach as three options.** "Approach A: Use React. Approach B: Use React with hooks. Approach C: Use React with hooks and TypeScript." All three are the same approach. The user has no real choice.
+
+*Prevention:* One approach must be minimal viable. One must be ideal architecture. If a third exists, it must approach the problem from a genuinely different angle. Two real options beat three fake ones.
+
+**Asking all six forcing questions regardless of context.** A solo engineer building an internal tool got the full startup interrogation. The session felt like a VC pitch for a tool that didn't need one. The engineer abandoned the session.
+
+*Prevention:* Use Smart Routing. Pre-product → Q1, Q2, Q3. Has users → Q2, Q4, Q5. Pure engineering → Q2, Q4. If earlier answers cover later questions, skip them. Six questions every session is a process failure.
+
+**Writing DESIGN.md with TBD sections.** The design was approved verbally but the written doc had "Error handling: TBD." During implementation, "TBD" was interpreted as "no error handling."
+
+*Prevention:* Self-review catches this. After writing, search for TBD, TODO, "appropriate", "standard", "handle". Every instance must be replaced with a concrete decision. A design doc with TBDs hasn't been written yet.
+
+---
+
+## Design System Mode (UI-Heavy Projects)
+
+A sub-mode within Design mode. Only activates when the user says "design system", "brand identity", "visual identity", "design tokens", or the project explicitly needs aesthetic direction. For most backend/CLI/API projects, this section never triggers.
+
+### Phase 1: Product Context
+
+Gather: target audience, core emotion (trust/speed/delight/calm), competitive set (3-5 products), anti-patterns (what to avoid), constraints (dark mode, RTL, accessibility).
+
+### Phase 2: Competitive Research
+
+For each competitor: one thing done well (steal the principle), one thing done poorly (avoid the trap).
+
+### Phase 3: Full Proposal
+
+- **Aesthetic direction:** Specific, not "clean and modern"
+- **Typography:** No Inter/Roboto/system-ui as primary. Name exact typeface. Define size scale, heading/body contrast ratio ≥ 1.5x, line heights
+- **Color system:** CSS custom properties. Dark mode variants. WCAG AA contrast (4.5:1 body, 3:1 large text)
+- **Spacing scale:** Base unit (4px or 8px), defined scale (4/8/12/16/24/32/48/64/96)
+- **Layout grid:** Columns, gutters, max-width
+- **Motion:** Duration scale (150/300/500ms), easing curves, prefers-reduced-motion
+
+### Phase 4: SAFE/RISK Breakdown
+
+Classify every design decision. If 3+ are RISK, simplify.
+
+### Phase 5: Preview (Optional)
+
+If image generation available: component showcase and sample page. Skip if unavailable.
+
+### Phase 6: Output
+
+Append `## Design System` section to DESIGN.md with all tokens. No placeholders.
