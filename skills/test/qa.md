@@ -4,7 +4,7 @@ description: >
   Full QA with fix loop (default) or findings-only report (--report-only). Test
   a web application, find bugs, fix them (or just report them). Three tiers:
   QUICK (5 min), STANDARD (15 min), EXHAUSTIVE (30+ min). Produces health scores,
-  before/after evidence, and ship-readiness summary. Enhanced dep: browser tool
+  before/after evidence, and release-readiness summary. Enhanced dep: browser tool
   (REQUIRED for web QA). Use when asked to "qa", "test this", "find bugs",
   "test and fix", "just report bugs", "qa report only", or "test but don't fix".
 allowed-tools:

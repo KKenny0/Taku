@@ -237,4 +237,4 @@ Ask for help rather than guessing.
 
 ## Completion
 
-After all tasks: run full test suite, route to REVIEW phase (/taku-review) or offer branch completion (/taku-finish).
+After all tasks: run full test suite, route to REVIEW phase (/taku-review).

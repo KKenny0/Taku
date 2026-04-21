@@ -12,7 +12,7 @@ description: >
 
 # Taku — Cross-Platform Development Sprint Framework
 
-A structured sprint pipeline: **Think → Plan → Build → Review → Test → Ship → Reflect**.
+A structured sprint pipeline: **Think → Plan → Build → Review → Test → Reflect**.
 
 This file is the **orchestrator**. It doesn't do the work — it determines which skills to invoke, in what order, based on project state and task type. Every sub-skill is a focused, composable file under `skills/`.
 
@@ -33,7 +33,6 @@ Check enhanced capabilities. Store as session state. Missing = skip, don't block
 |------------|-------|---------|
 | Browser QA | `which gstack` OR browser tool | `/taku-qa`, `/taku-visual-review` |
 | Cross-model | `which codex` OR multi-model support | `/taku-cross-review` |
-| GitHub | `which gh` && `gh auth status` | `/taku-ship`, `/taku-deploy` |
 | Image gen | image_generate tool | `/taku-brainstorm` design system previews |
 
 ### Project State Detection
@@ -75,12 +74,11 @@ Before routing, classify the task. This determines which phases to run.
 
 | Type | Trigger Phases | Typical Request |
 |------|---------------|-----------------|
-| **feature** | THINK → PLAN → BUILD → REVIEW → TEST → SHIP → REFLECT | "Build me a user dashboard" |
-| **bugfix** | TEST (debug) → BUILD → REVIEW → SHIP | "The login form doesn't work" |
-| **refactor** | REVIEW → BUILD → TEST → SHIP | "Clean up the auth module" |
-| **hotfix** | BUILD → SHIP (skip review for critical) | "Production is down, fix it now" |
+| **feature** | THINK → PLAN → BUILD → REVIEW → TEST → REFLECT | "Build me a user dashboard" |
+| **bugfix** | TEST (debug) → BUILD → REVIEW | "The login form doesn't work" |
+| **refactor** | REVIEW → BUILD → TEST | "Clean up the auth module" |
+| **hotfix** | BUILD (skip review for critical) | "Production is down, fix it now" |
 | **review** | REVIEW only | "Review my PR" |
-| **ship** | SHIP only | "Ship this branch" |
 | **idea** | THINK only | "I have an idea for..." |
 
 ### Classification Rules
@@ -89,7 +87,6 @@ Before routing, classify the task. This determines which phases to run.
 - Contains "urgent", "production down", "emergency", "hotfix" → **hotfix**
 - Contains "refactor", "clean up", "reorganize", "improve" → **refactor**
 - Contains "review", "PR", "look at this code" → **review**
-- Contains "ship", "deploy", "merge", "release" → **ship**
 - Contains "idea", "thinking about", "what if", "should we" → **idea**
 - Everything else → **feature**
 
@@ -104,7 +101,7 @@ After classifying the task type, declare a scope mode. This governs how aggressi
 | **hold** | Bug fix, hotfix, or tight-constraint change | Scope locked. Implement exactly what's needed. Any deviation requires stopping and asking. |
 | **cut** | Plan is too large, or depth-tier mismatch | Strip to the minimum that solves the real problem. List every cut with one-line justification. User approves the cuts. |
 
-**Auto-selection:** feature + greenfield → `expand` | feature + existing → `shape` | bugfix/hotfix → `hold` | refactor → `shape` | review/ship → `hold` | idea → `expand`
+**Auto-selection:** feature + greenfield → `expand` | feature + existing → `shape` | bugfix/hotfix → `hold` | refactor → `shape` | review → `hold` | idea → `expand`
 
 The user can override the auto-selected mode at any time.
 
@@ -113,7 +110,6 @@ The user can override the auto-selected mode at any time.
 - **PLAN:** `expand` = run all reviews, `hold` = skip reviews, write plan directly
 - **BUILD:** `expand` = suggest improvements, `hold` = implement exactly, no suggestions
 - **REVIEW/TEST:** All modes = full discipline (quality is non-negotiable)
-- **SHIP:** `cut` = minimal ship (no doc sync), others = full pipeline
 - **REFLECT:** `expand` = deep retro, `hold` = quick learn only
 
 ---
@@ -326,57 +322,22 @@ Each phase has a **specific skill sequence**. Follow the sequence in order. Each
 └──────────────┬──────────────────────┘
                │
                ▼
-         (auto-route to SHIP)
+         (auto-route to REFLECT)
 ```
 
 **Rules:**
 - `/taku-qa` is conditional: requires browser capability. Without it, rely on unit tests + verify
 - `/taku-cso` is recommended for all features. For bugfixes, run a lighter scan (phases 1-5, 10 only)
 - `/taku-verify` is always run — it's the final evidence gate
-- **If QA health score < 4: DO NOT SHIP.** Go back to BUILD to fix critical issues.
-- **If verify fails: DO NOT SHIP.** Fix and re-verify.
+- **If QA health score < 4: DO NOT PROCEED.** Go back to BUILD to fix critical issues.
+- **If verify fails: DO NOT PROCEED.** Fix and re-verify.
 - `/taku-debug` is invoked on-demand within this phase if something breaks during QA
 
-**→ On completion: auto-route to SHIP phase**
-
-### SHIP Phase
-
-**Entry:** All tests pass. All reviews clear. Ready to ship.
-
-**Skill Sequence:**
-
-```
-┌─────────────────────────────────────┐
-│ Step 1: /taku-ship                │
-│ Pipeline: sync → test → review →   │
-│ version → changelog → push → PR     │
-└──────────────┬──────────────────────┘
-               │
-               ▼
-┌─────────────────────────────────────┐
-│ Step 2: /taku-deploy              │
-│ (if deploy capability)             │
-│ Merge → CI → deploy → health check │
-└──────────────┬──────────────────────┘
-               │
-               ▼
-┌─────────────────────────────────────┐
-│ Step 3: /taku-finish              │
-│ 4 options: merge/PR/keep/discard   │
-│ Cleanup worktree                    │
-└─────────────────────────────────────┘
-```
-
-**Rules:**
-- `/taku-ship` is always run (includes documentation sync)
-- `/taku-deploy` is conditional: requires deploy platform detection
-- `/taku-finish` is always run to clean up
-
-**→ On completion: route to REFLECT phase (or stop if user doesn't want retro)**
+**→ On completion: auto-route to REFLECT phase**
 
 ### REFLECT Phase
 
-**Entry:** Code shipped.
+**Entry:** Code tested and verified.
 
 **Skill Sequence:**
 
@@ -414,8 +375,7 @@ The sprint **auto-progresses** between phases. The agent should NOT wait for the
 | PLAN | BUILD | PLAN.md written and self-reviewed |
 | BUILD | REVIEW | All tasks in PLAN.md marked DONE |
 | REVIEW | TEST | All Critical findings fixed |
-| TEST | SHIP | Health score ≥ 4 AND verify passes |
-| SHIP | REFLECT | Ship/deploy complete |
+| TEST | REFLECT | Health score ≥ 4 AND verify passes |
 
 ### Pause Points (require user action)
 
@@ -424,7 +384,6 @@ The sprint **auto-progresses** between phases. The agent should NOT wait for the
 | THINK | After brainstorming | "I've drafted DESIGN.md. Review and approve to proceed, or tell me what to change." |
 | PLAN | After writing-plans | "PLAN.md is ready. Review the tasks. Type 'go' to start building." |
 | REVIEW | Critical findings | "Found {N} critical issues. Fixing now..." (auto-fix, no pause) |
-| SHIP | Before pushing | "About to push and create PR. Confirm?" |
 
 ### Exception Handling
 
@@ -447,14 +406,13 @@ At any point, the agent can report sprint status:
 SPRINT STATUS
 ═════════════
 Task type: feature
-Current phase: BUILD (3/7 tasks complete)
+Current phase: BUILD (3/6 tasks complete)
   ✓ office-hours — done
   ✓ brainstorming — DESIGN.md approved
   ✓ planning — PLAN.md written (8 tasks)
   → building — in progress (task 4: user authentication)
   ○ review — pending
   ○ test — pending
-  ○ ship — pending
   ○ reflect — pending
 
 Artifacts:
@@ -479,7 +437,6 @@ This is the complete sequence for a greenfield feature with all capabilities ava
         → /taku-build (parallel or sequential, TDD enforced)
           → /taku-review → /taku-cross-review → /taku-visual-review
             → /taku-qa → /taku-cso → /taku-verify
-              → /taku-ship → /taku-deploy → /taku-finish
                 → /taku-reflect
 ```
 
@@ -487,11 +444,10 @@ This is the complete sequence for a greenfield feature with all capabilities ava
 
 | Type | Flow |
 |------|------|
-| bugfix | `/taku-debug` → `/taku-build` → `/taku-review` → `/taku-ship` |
-| hotfix | `/taku-build` → `/taku-ship` (skip review for urgency) |
-| refactor | `/taku-review` → `/taku-build` → `/taku-review` → `/taku-ship` |
+| bugfix | `/taku-debug` → `/taku-build` → `/taku-review` |
+| hotfix | `/taku-build` (skip review for urgency) |
+| refactor | `/taku-review` → `/taku-build` → `/taku-review` |
 | review | `/taku-review` → `/taku-cross-review` (optional) |
-| ship | `/taku-ship` → `/taku-finish` |
 | idea | `/taku-office-hours` → (ask user if they want to continue) |
 
 ---
@@ -516,9 +472,6 @@ This is the complete sequence for a greenfield feature with all capabilities ava
 | `/taku-cso` | TEST | Security audit |
 | `/taku-debug` | TEST | Root cause |
 | `/taku-verify` | TEST | Evidence gate |
-| `/taku-ship` | SHIP | Ship + doc sync pipeline |
-| `/taku-deploy` | SHIP | Deploy + verify |
-| `/taku-finish` | SHIP | Branch completion |
 | `/taku-reflect` | REFLECT | Learn + retro |
 | `/taku-write-skill` | META | Create new skill |
 
@@ -534,4 +487,4 @@ This is the complete sequence for a greenfield feature with all capabilities ava
 | "I'll add tests later" | You won't. |
 | "This is just a quick hack" | There are no quick hacks in production. |
 | "Skip review, it's fine" | The bugs you catch in review are the ones that cost the most in production. |
-| "We can ship without QA" | You can. You'll regret it. |
+| "We can skip QA" | You can. You'll regret it. |

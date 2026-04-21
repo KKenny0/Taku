@@ -4,7 +4,7 @@
 
 <h1 align="center">Taku 琢</h1>
 
-<p align="center"><strong>Structured AI-assisted development — from idea to shipped code.</strong></p>
+<p align="center"><strong>Structured AI-assisted development — from idea to verified code.</strong></p>
 
 A discipline-first development sprint framework that adapts to your project's scale. Opinionated workflows, anti-rationalization guards, and evidence-based gates keep AI agents honest — from first idea to production deploy.
 
@@ -21,14 +21,14 @@ Taku (琢) means to carve jade — to reveal the shape that was always inside th
 | 切 | Cut | Think | Cut through ambiguity — force clarity before code |
 | 磋 | Grind | Plan | Grind the problem into concrete, executable tasks |
 | 琢 | Carve | Build → Review → Test | Carve the solution, then inspect and verify |
-| 磨 | Polish | Ship → Reflect | Polish to production grade, learn from the process |
+| 磨 | Polish | Reflect | Polish and learn from the process |
 
 ## The Sprint Pipeline
 
-A structured 7-phase pipeline that turns ideas into shipped, tested, reviewed code:
+A structured 6-phase pipeline that turns ideas into tested, verified code:
 
 ```
-Think → Plan → Build → Review → Test → Ship → Reflect
+Think → Plan → Build → Review → Test → Reflect
 ```
 
 Each phase has dedicated skills with iron-clad rules, anti-rationalization guards, and evidence-based gates. The agent can't skip steps, can't fake completions, and can't rationalize shortcuts.
@@ -51,8 +51,6 @@ Each phase has dedicated skills with iron-clad rules, anti-rationalization guard
 | | `/taku-cso` | 14-phase security audit with OWASP + STRIDE |
 | | `/taku-debug` | 4-phase root cause investigation |
 | | `/taku-verify` | Evidence-based completion — no "should work" without proof |
-| **Ship** | `/taku-ship` | Full pipeline: test → review → version → changelog → push → PR → doc sync |
-| | `/taku-deploy` | Merge → CI → deploy → verify production health |
 | **Reflect** | `/taku-reflect` | Learn (quick) or retro (weekly) with mode selection |
 
 

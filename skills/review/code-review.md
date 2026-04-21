@@ -182,7 +182,7 @@ If no issues: "Pre-Landing Review: No issues found."
 - Read the FULL diff before commenting. Don't flag issues already addressed.
 - Be terse. One line problem, one line fix.
 - Only flag real problems. Skip anything that's fine.
-- Never commit, push, or create PRs. That's /taku-ship's job.
+- Never commit, push, or create PRs. Focus on reviewing, not shipping.
 - Verify your claims. Cite specific lines. Never say "probably fine."
 
 ## Known Pitfalls

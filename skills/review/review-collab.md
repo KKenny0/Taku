@@ -124,7 +124,7 @@ If you pushed back and were wrong: state correction factually, fix it. No apolog
 ## Integration with Taku Pipeline
 
 After /taku-build: review each task as it completes.
-Before /taku-ship: final review gate, all critical and important findings resolved.
+Before completing: final review gate, all critical and important findings resolved.
 
 ## Anti-Rationalization
 

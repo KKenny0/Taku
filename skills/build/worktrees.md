@@ -134,7 +134,7 @@ git worktree remove ".worktrees/$BRANCH_NAME"
 
 *What went wrong:* The Cleanup step was never executed. After merging, developers moved on without removing worktrees.
 
-*Prevention:* Add worktree cleanup to the post-merge routine. After `/taku-finish` completes Option 1 (merge locally) or Option 4 (discard), remove the worktree immediately. List stale worktrees with `git worktree list` periodically.
+*Prevention:* Add worktree cleanup to the post-merge routine. After merging or discarding a branch, remove the worktree immediately. List stale worktrees with `git worktree list` periodically.
 
 ## Completion
 
