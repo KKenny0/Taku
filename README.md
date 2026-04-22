@@ -13,12 +13,10 @@
 Taku is a structured development workflow for coding agents. It turns vague prompts and overconfident code generation into a repeatable sprint:
 
 ```text
-Think -> Plan -> Build -> Review -> Verify -> Reflect
+Think               -> Plan            -> Build            -> Review             -> Verify           -> Reflect
+Frame the Problem      Shape the Plan     Craft the Build     Inspect and Refine    Verify the Truth    Return with Insight
+辨势明题                定策成局           执工成形            照鉴纠偏               验真定因            藏锋归心
 ```
-
-<p align="center">
-  <img src="promo/readme-phase-flow.svg" alt="Taku six-phase flow: Think, Plan, Build, Review, Verify, Reflect — 切磋琢磨" width="100%" />
-</p>
 
 This repository is the current `v0.2.0` skill pack. It includes:
 
