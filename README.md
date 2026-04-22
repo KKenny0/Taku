@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="logo.svg" alt="Taku 琢" width="180" />
+  <img src="logo.png" alt="Taku 琢" width="180" />
 </p>
 
 <h1 align="center">Taku 琢</h1>
@@ -149,7 +149,7 @@ Taku/
 ├── SKILL.md              # Main orchestrator, version 0.2.0
 ├── README.md
 ├── DESIGN.md             # Historical design doc; useful context, not the source of truth for latest messaging
-├── logo.svg
+├── logo.png
 ├── skills/
 │   ├── think/
 │   ├── plan/
