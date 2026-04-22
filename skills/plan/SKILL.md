@@ -88,7 +88,7 @@ Every plan starts with:
 ```markdown
 # [Feature Name] Implementation Plan
 
-> **For agentic workers:** Use /taku-build or /taku-build (sequential) to implement this plan.
+> **For agentic workers:** Use `/taku-build` to implement this plan. The build agent should choose sequential, parallel, or hybrid execution unless the user explicitly overrides it.
 
 **Goal:** [One sentence]
 
@@ -177,12 +177,16 @@ Save to `PLAN.md` at project root (or user-specified location).
 
 After saving:
 
-"Plan saved to `PLAN.md`. Two execution options:
+"Plan saved to `PLAN.md`. If the plan is self-reviewed and within the approved scope, continue directly to BUILD.
 
-1. **Subagent-Driven** (/taku-build) — parallel subagents per task
-2. **Sequential** (/taku-build sequential) — execute in this session
+At BUILD start, choose the execution mode yourself: sequential, parallel, or hybrid wave-based execution.
 
-Which approach?"
+Announce a short BUILD PREFLIGHT that includes:
+- chosen mode
+- one-line reason
+- execution waves when applicable, with `wave-slug: [task-slug, ...]`
+
+Only stop before BUILD if the plan changed scope materially, introduced a costly or risky action, or left a key ambiguity unresolved."
 
 ---
 

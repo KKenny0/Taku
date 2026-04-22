@@ -1,17 +1,18 @@
 ---
 name: taku-build
 description: >
-  Execute an approved implementation plan. Two execution modes: subagent/parallel
-  (default for 5+ tasks, dispatches one agent per task) and sequential (step-by-step
-  with checkpoints). TDD enforced on all code. Optional worktree isolation for
-  feature branches. Triggers after /taku-plan, or on "build this", "implement the plan",
-  "start coding", "run the plan", "execute tasks". Also handles worktree setup on
+  Execute an approved implementation plan. Three execution modes: sequential,
+  parallel, and hybrid wave-based execution. The agent chooses the mode and
+  continues immediately, while still honoring explicit user overrides. TDD is
+  enforced on all code. Optional worktree isolation for feature branches. Triggers
+  after /taku-plan, or on "build this", "implement the plan", "start coding",
+  "run the plan", "execute tasks". Also handles worktree setup on
   "create a worktree", "isolated environment", "new branch workspace".
 ---
 
-# Taku Build — Parallel or Sequential Execution
+# Taku Build — Autonomous Execution
 
-Execute PLAN.md tasks. Two modes, auto-selected.
+Execute PLAN.md tasks. Choose the execution mode yourself and continue immediately.
 
 ## Pre-Build Check
 
@@ -25,32 +26,79 @@ Before starting implementation:
 
 ## Mode Selection
 
-| Factor | Subagent (parallel) | Sequential |
-|--------|-------------------|------------|
-| Task count | 5+ tasks | 1-3 tasks |
-| Subagent support | Available | Unavailable or user prefers |
-| User wants to watch | No | Yes |
-| Independent tasks | Yes → big speedup | No speedup |
-| Large project | Best fit | Slow but safe |
+Mode selection is agent-owned.
 
-**Default:** Subagent if 5+ tasks and subagents available. Sequential otherwise.
+- Choose the execution mode yourself and continue immediately.
+- Do not ask the user to choose a mode unless the user explicitly requests an override, or the choice would change risk/cost in a way that needs product input.
+- The user may override the mode at any time.
+- Always explain the chosen mode in one short reason statement.
+- For hybrid and multi-task parallel runs, expose execution waves so the user can see which `wave-slug` contains which `task-slug` values.
 
-**Override:** User can specify "parallel" or "sequential" at any time.
+| Mode | Use When | Shape |
+|------|----------|-------|
+| Sequential | Tasks are tightly coupled, each step depends on the latest result, or conflict/rework risk is high | End-to-end in order |
+| Parallel | Most tasks are independent and boundaries are clear | One or more parallel waves |
+| Hybrid | The plan is best executed in waves: waves depend on earlier waves, but tasks inside a wave can run in parallel | Sequential waves with parallel work inside each wave |
+
+### Execution Waves
+
+When tasks are grouped into waves:
+
+1. Prefer existing identifiers from the plan.
+2. If the plan has no wave IDs, generate stable `wave-1`, `wave-2`, `wave-3` style slugs from the dependency grouping.
+3. Reuse plan task IDs when available. Otherwise, derive stable kebab-case `task-slug` values from task titles.
+4. Keep the same wave and task slugs for the full BUILD lifecycle.
+
+Before execution, announce the schedule in this shape:
+
+```text
+BUILD PREFLIGHT
+- Mode: hybrid
+- Reason: work is best executed in 3 waves
+- Waves:
+  - wave-1: [task-slug-a, task-slug-b]
+  - wave-2: [task-slug-c, task-slug-d]
+  - wave-3: [task-slug-e]
+- Worktree: not needed
+- TDD: enabled
+- Next: start wave-1
+```
+
+During execution, report wave progress in this shape:
+
+```text
+BUILD UPDATE
+- Completed: wave-1
+- Tasks: [task-slug-a, task-slug-b]
+- Result: tests passed
+- Next: start wave-2
+```
+
+After execution, summarize completed waves in this shape:
+
+```text
+BUILD COMPLETE
+- Executed waves:
+  - wave-1: [task-slug-a, task-slug-b]
+  - wave-2: [task-slug-c, task-slug-d]
+  - wave-3: [task-slug-e]
+- Next: REVIEW
+```
 
 ---
 
-## Subagent Mode (Parallel)
+## Parallel Mode
 
-Execute PLAN.md by dispatching subagents — one per task, with two-stage review after each. Independent tasks run in parallel. Dependent tasks run sequentially.
+Execute PLAN.md by dispatching subagents. Independent tasks run in parallel, with reconciliation after each wave.
 
-**Announce:** "Using /taku-build (parallel mode)."
+**Announce:** Use the BUILD PREFLIGHT format and show the parallel wave layout.
 
 ### Core Loop
 
 ```
 Read PLAN.md
     → Parse tasks, build dependency DAG
-    → Group: independent tasks (parallel) vs dependent tasks (sequential)
+    → Group tasks into execution waves
     → Dispatch independent tasks in parallel
     → Wait for completion (push-based)
     → Reconcile: check conflicts, run integration tests
@@ -67,6 +115,7 @@ Parse each task in PLAN.md:
 2. **Build DAG** — task A depends on task B if A modifies files B creates/depends on
 3. **Topological sort** — identify waves of independent tasks
 4. **Label each task** — `parallel-ready` or `blocked-by: [task IDs]`
+5. **Assign slugs** — every wave gets a `wave-slug`; every task gets a stable `task-slug`
 
 If any file appears in more than one task, mark those tasks as dependent — they must run sequentially.
 
@@ -148,11 +197,39 @@ Reconciliation is never optional. After every parallel wave, always check for co
 
 ---
 
+## Hybrid Mode
+
+Use hybrid mode when the plan is best executed in waves.
+
+- Waves themselves run sequentially because later waves depend on earlier ones.
+- Within a wave, independent tasks may run in parallel.
+- Choose hybrid when full parallelism creates too much conflict or uncertainty, but full sequential execution would be unnecessarily slow.
+
+**Announce:** Use the BUILD PREFLIGHT format and show every planned wave with its `wave-slug` and `task-slug` list.
+
+### Hybrid Loop
+
+```
+Read PLAN.md
+    → Parse tasks, build dependency DAG
+    → Partition the plan into execution waves
+    → Run wave-1
+    → Reconcile and report wave-1 completion
+    → Run next unblocked wave
+    → Repeat until all waves complete
+    → Final integration review
+    → Route to REVIEW phase
+```
+
+Use the same dependency and reconciliation rules as parallel mode. The difference is scheduling: waves are the first-class unit, and each wave may contain either parallel work or a single sequential task.
+
+---
+
 ## Sequential Mode
 
 Execute PLAN.md task by task with checkpoints.
 
-**Announce:** "Using /taku-build (sequential mode)."
+**Announce:** Use a concise BUILD PREFLIGHT. You may omit the wave list, or present the full run as `wave-1` when that helps the user track progress.
 
 ### Step 1: Load and Review
 
@@ -175,7 +252,7 @@ If a step seems wrong, raise it before deviating — don't silently adapt.
 
 ### Step 3: Checkpoints
 
-After each task, briefly summarize: what was done, test results, deviations.
+After each task, briefly summarize: what was done, test results, deviations. If you are presenting the run as a single wave, keep the `wave-slug` stable across updates.
 
 ### Step 4: Complete
 
@@ -197,6 +274,8 @@ After all tasks: run full test suite, announce completion, route to REVIEW phase
 - Re-review after every fix
 - Provide complete context upfront
 - Follow TDD for all code changes
+- Show the chosen mode and execution waves before starting
+- Keep `wave-slug` and `task-slug` values stable in every progress update
 - Stop and ask when stuck
 
 ## When to Stop

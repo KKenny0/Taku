@@ -44,7 +44,7 @@ Instead of one giant prompt, Taku gives the agent a sprint structure:
 
 - **Think** when the request is still ambiguous
 - **Plan** before touching code in non-trivial work
-- **Build** against explicit tasks, with TDD and optional parallel execution
+- **Build** against explicit tasks, with TDD, agent-owned mode selection, and optional wave-based parallelism
 - **Review** against the actual diff, not hand-wavy intent
 - **Test** by investigating root cause instead of thrashing
 - **Reflect** only when there is something worth preserving
@@ -59,7 +59,7 @@ The repository has been simplified around six entry skills:
 |------|------|------|
 | Think | `/taku-think` | Adaptive design thinking with Quick, Design, and Explore modes |
 | Plan | `/taku-plan` | Scope review, architecture review, UI design review, then executable `PLAN.md` |
-| Build | `/taku-build` | Sequential or subagent-based execution with TDD and optional worktree isolation |
+| Build | `/taku-build` | Agent-chosen sequential / parallel / hybrid execution with TDD, wave visibility, and optional worktree isolation |
 | Review | `/taku-review` | Diff-based code review with scope drift checks and fix-first posture |
 | Test | `/taku-debug` | 4-phase root cause investigation for bugs, regressions, and failures |
 | Reflect | `/taku-reflect` | Learning capture, retro, and skill codification when explicitly invoked |
@@ -91,12 +91,21 @@ The goal is not a pretty plan. The goal is a plan the agent can actually land.
 
 ### 3. It makes build execution explicit
 
-`/taku-build` supports two real modes:
+`/taku-build` now owns the execution decision and continues directly into BUILD once the plan is self-reviewed and still within the approved scope.
+
+It supports three execution shapes:
 
 - **Sequential** when the task is small or tightly coupled
 - **Parallel** when tasks are independent and subagents can safely split the work
+- **Hybrid** when execution is best expressed as waves: waves run in order, while tasks inside a wave may run in parallel
 
-That means Taku can stay tight for small changes and still accelerate larger sprints.
+For `parallel` and `hybrid` runs, the agent is expected to show execution waves in user-facing updates:
+
+- each wave gets a stable `wave-slug`
+- each task keeps a stable `task-slug`
+- preflight, progress, and completion updates show which wave ran and which task slugs it included
+
+That means Taku can stay tight for small changes, accelerate larger sprints, and still keep the user oriented during execution.
 
 ### 4. It does not confuse "review" with "looks fine to me"
 
@@ -193,7 +202,7 @@ Recommended entry points:
 
 - `/taku-think` when the request is still fuzzy
 - `/taku-plan` when design is approved and buildable tasks are needed
-- `/taku-build` when `PLAN.md` is ready
+- `/taku-build` when `PLAN.md` is ready; the build agent should choose sequential / parallel / hybrid unless you explicitly override it
 - `/taku-review` before shipping
 - `/taku-debug` when something breaks
 - `/taku-reflect` when a pattern is worth saving
@@ -230,6 +239,7 @@ Taku is not a clone of either. It is a narrower, more opinionated synthesis arou
 The current repo already has the core sprint spine in place. The obvious next layer is not "more commands", but sharper execution quality:
 
 - tighter handoff contracts between phases
+- more explicit BUILD scheduling and wave visibility during long-running execution
 - stronger review/test coverage for real-world repo changes
 - better packaging and distribution ergonomics
 - clearer examples of how to use Taku inside active product work

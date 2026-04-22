@@ -199,9 +199,12 @@ Each phase has a **specific skill sequence**. Follow the sequence in order. Each
 │ Pre-check: worktree setup if needed │
 │   (load references/worktrees.md)    │
 │ Auto-selects execution mode:        │
-│   Parallel — 5+ tasks, subagents    │
-│   Sequential — 1-3 tasks, in-loop   │
+│   Sequential — tightly coupled work │
+│   Parallel — independent task waves │
+│   Hybrid — sequential waves +       │
+│             parallel work inside    │
 │ TDD enforced (load references/)     │
+│ BUILD PREFLIGHT shows mode + waves  │
 │ 2-stage review per task             │
 │ Dispatches subagents per task       │
 └──────────────┬──────────────────────┘
@@ -211,8 +214,10 @@ Each phase has a **specific skill sequence**. Follow the sequence in order. Each
 ```
 
 **Rules:**
-- `/taku-build` auto-selects mode: parallel (5+ tasks, subagents available) or sequential (1-3 tasks)
+- `/taku-build` chooses the execution mode itself: sequential, parallel, or hybrid
 - User can override mode at any time
+- Hybrid is wave-based: waves run in order, and independent work inside a wave may run in parallel
+- For hybrid and complex parallel runs, surface execution waves as `wave-slug: [task-slug, ...]`
 - TDD is enforced inside both modes via `references/tdd.md`
 - Worktree isolation is optional — use when feature needs a clean sandbox
 - After BUILD completes, **automatically route to REVIEW** — don't wait for user to ask
@@ -316,6 +321,24 @@ Each phase has a **specific skill sequence**. Follow the sequence in order. Each
 
 The sprint **auto-progresses** between phases. The agent should NOT wait for the user to say "now review" or "now test" — it should proactively move to the next phase.
 
+### Execution Autonomy Policy
+
+Default: continue between phases without asking for permission.
+
+Ask only when:
+- scope changes materially
+- a destructive or costly action is required
+- ambiguity affects public behavior, interfaces, or acceptance criteria
+- repeated verification failure requires a tradeoff decision
+- the user explicitly asked to stay interactive
+
+Do not ask when:
+- choosing sequential / parallel / hybrid build mode
+- grouping tasks into execution waves
+- routing from PLAN to BUILD after approved design + self-reviewed plan
+- starting planned verification, review, or test steps
+- moving from BUILD to REVIEW or REVIEW to TEST under normal flow
+
 ### Auto-Progress Triggers
 
 | From | To | Trigger |
@@ -331,7 +354,7 @@ The sprint **auto-progresses** between phases. The agent should NOT wait for the
 | Phase | Pause Condition | What to Ask |
 |-------|----------------|-------------|
 | THINK | After brainstorming | "I've drafted DESIGN.md. Review and approve to proceed, or tell me what to change." |
-| PLAN | After writing-plans | "PLAN.md is ready. Review the tasks. Type 'go' to start building." |
+| PLAN | Plan changed scope, introduced costly risk, or left a key ambiguity unresolved | "PLAN.md is ready, but I found a material issue before BUILD: {issue}. Resolve this first, then continue." |
 | REVIEW | Critical findings | "Found {N} critical issues. Fixing now..." (auto-fix, no pause) |
 
 ### Exception Handling
@@ -379,9 +402,9 @@ This is the complete sequence for a greenfield feature with all capabilities ava
 ```
 /taku-think (Quick/Design/Explore)
   → DESIGN.md approved
-    → /taku-plan (review + plan writing)
-      → PLAN.md
-        → /taku-build (parallel or sequential, TDD enforced)
+        → /taku-plan (review + plan writing)
+          → PLAN.md
+        → /taku-build (agent-chosen sequential / parallel / hybrid, TDD enforced)
           → /taku-review
             → /taku-debug (if tests fail)
               → sprint complete
@@ -406,7 +429,7 @@ This is the complete sequence for a greenfield feature with all capabilities ava
 |---------|-------|-------------|
 | `/taku-think` | THINK | Adaptive Quick/Design/Explore |
 | `/taku-plan` | PLAN | Scope review → design review → write plan |
-| `/taku-build` | BUILD | Parallel or sequential execution, TDD enforced |
+| `/taku-build` | BUILD | Agent-chosen sequential / parallel / hybrid execution with wave visibility, TDD enforced |
 | `/taku-review` | REVIEW | Code review with auto-fix |
 | `/taku-debug` | TEST | Root cause investigation |
 | `/taku-reflect` | REFLECT | Learn + retro + write skill |
