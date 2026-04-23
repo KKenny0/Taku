@@ -68,6 +68,8 @@ Use `DEPTH_TIER` (set by the orchestrator's pre-flight) to pick the plan templat
 | **Standard** | 50-500 files, moderate scope | Full template with Execution Hints |
 | **Deep** | >500 files OR cross-cutting change (3+ dirs touched) | Standard + mandatory architecture diagram in header |
 
+**Auto-reclassification:** If scope expands mid-sprint (e.g., a "simple bugfix" touches 6 files across 3 modules), escalate one tier. Log: `DEPTH ESCALATION: Lightweight -> Standard (reason: scope expanded to N files across M modules)`.
+
 ### Prerequisites
 
 - Approved `DESIGN.md` exists
@@ -151,8 +153,12 @@ For Lightweight tier only. Use this instead of the full Plan Document Header + T
 ```markdown
 # [Feature Name] Plan
 
+> **Build Agent Contract:**
+> - **Required:** Goal, Tech Stack, all Tasks (Spec + Files)
+> - **Skip during execution:** Execution Hints (not needed for Lightweight)
+
 **Goal:** [One sentence]
-**Files:** [List of files to create/modify]
+**Tech Stack:** [Key technologies]
 
 ### Task 1: [Name]
 **Depends on:** none
@@ -209,6 +215,7 @@ After writing the complete plan, run this against the design doc:
 3. **Type consistency:** Do types, method signatures, and names match across tasks?
 4. **Dependency integrity:** Every `Depends on` reference points to a real task. No circular dependencies. Tasks that can run in parallel have no mutual dependency.
 5. **Spec verifiability:** Every task's spec describes concrete, testable behavior — not vague intent.
+6. **Spec testability:** Can each spec's key assertions be written as automated test cases? Flag specs where testability is unclear — e.g., "handles edge cases gracefully" without specifying what "graceful" means.
 
 Find issues? Fix inline.
 

@@ -132,30 +132,16 @@ These degrade quality over time:
 - Missing null/undefined checks after optional access
 - Type assertions that override the compiler
 
-### Confidence Scores
+### Action Matrix
 
-Every finding includes confidence (1-10):
+| | High Confidence (7-10) | Low Confidence (1-6) |
+|---|---|---|
+| **Critical / Important** | Auto-fix immediately | Flag with caveat; fix if pattern is clear |
+| **Minor / Nit** | Batch-ask (Step 6b) | Appendix only |
 
-**Why explicit confidence:** Low-confidence findings waste reviewer time and erode trust. A finding at 3/10 is speculation — it belongs in an appendix, not in the main review. The confidence score forces honest assessment and helps the developer prioritize which findings to investigate first.
-
-| Score | Meaning | Display |
-|-------|---------|---------|
-| 9-10 | Verified with code evidence | Show normally |
-| 7-8 | Strong pattern match | Show normally |
-| 5-6 | Could be false positive | Show with caveat |
-| 3-4 | Suspicious but may be fine | Appendix only |
-| 1-2 | Speculation | Report only if Critical |
+**Why a 2x2 matrix:** The previous system had 20 possible combinations (4 severity x 5 confidence tiers) but only 3 action levels. The 2x2 matrix maps every finding to a clear action. Low-confidence findings don't get auto-fixed — they get caveats or appendix placement. High-confidence findings get action proportional to severity.
 
 Format: `[SEVERITY] (confidence: N/10) file:line — description`
-
-### Severity Levels
-
-| Level | Meaning | Action |
-|-------|---------|--------|
-| **Critical** | Exploitable or data-loss bug | Auto-fix immediately |
-| **Important** | Real bug, production impact | Auto-fix immediately |
-| **Minor** | Code quality, no immediate impact | Flag for awareness |
-| **Nit** | Style, naming, convention | Mention in passing |
 
 ## Step 6: Fix-First Review
 
@@ -194,7 +180,10 @@ Apply fixes where user chose "Fix." Commit separately.
 ```
 Pre-Landing Review: N issues (X auto-fixed, Y asked, Z skipped)
   Critical: N  Important: N  Minor: N  Nit: N
+  Status: DONE | DONE_WITH_CONCERNS (if Minor findings remain)
 ```
+
+If no issues: "Pre-Landing Review: No issues found. Status: DONE."
 
 If no issues: "Pre-Landing Review: No issues found."
 

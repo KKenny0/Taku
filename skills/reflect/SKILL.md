@@ -41,38 +41,37 @@ Capture only what the user explicitly wants to preserve so future sessions can r
 Learnings live in `.taku/learnings/{project-slug}.jsonl`. Each line:
 
 ```json
-{"id":"L2026-04-21-001","timestamp":"2026-04-21T12:00:00Z","type":"preference","context":"Multi-file repository change","learning":"User prefers plan-first before non-trivial edits","action":"Start with code reading and short execution plan","confidence":"high","apply_when":{"task_types":["feature","refactor","bugfix"],"keywords":["multi-file","plan","design"]},"status":"active"}
+{"id":"L2026-04-21-001","timestamp":"2026-04-21T12:00:00Z","type":"preference/high","context":"Multi-file repository change","learning":"User prefers plan-first before non-trivial edits","action":"Start with code reading and short execution plan","apply_when":{"task_types":["feature","refactor","bugfix"],"keywords":["multi-file","plan","design"]},"status":"active"}
 ```
 
 ### Types
+
+Each type includes a confidence suffix: `/high`, `/medium`, or `/low`.
 
 - **pattern** — A reusable approach that worked well
 - **pitfall** — A mistake to avoid
 - **preference** — A user-stated preference or convention
 - **discovery** — A non-obvious insight about the codebase
 
-### Confidence
-
-- **high** — Verified by testing or user confirmation
-- **medium** — Observed pattern, likely correct
-- **low** — Hypothesis, needs validation
+Confidence meanings: **high** — verified by testing or user confirmation. **medium** — observed pattern, likely correct. **low** — hypothesis, needs validation.
 
 ### Required Fields
 
-- `id` — Stable identifier for reference and deduplication
-- `timestamp` — ISO8601 UTC timestamp
-- `type` — `pattern|pitfall|preference|discovery`
+**Auto-generated** (no user confirmation needed):
+- `id` — Stable identifier, auto-generated as `L{date}-{seq}`
+- `timestamp` — ISO8601 UTC, auto-generated
+- `status` — Defaults to `active`; only changes during PRUNE
+
+**User confirms:**
+- `type` — `pattern|pitfall|preference|discovery` with `/confidence` suffix (e.g., `pattern/high`, `pitfall/medium`)
 - `context` — What work this came from
 - `learning` — The reusable takeaway
 - `action` — What future sessions should do
-- `confidence` — `high|medium|low`
-- `apply_when.task_types` — Zero or more of `feature|bugfix|refactor|hotfix|review|idea`
-- `apply_when.keywords` — Simple keyword hooks for later recall
-- `status` — `active|stale`
+- `apply_when` — Task types and keywords for later recall (`task_types` + `keywords`)
 
 ### Operations
 
-**ADD:** Gather `type`, `context`, `learning`, `action`, `confidence`, and a minimal `apply_when` block. Append to JSONL only after the user confirms the learning should be kept.
+**ADD:** Gather `type` (with confidence suffix), `context`, `learning`, `action`, and a minimal `apply_when` block. Append to JSONL only after the user confirms the learning should be kept.
 
 **SEARCH:** `grep -i "QUERY" .taku/learnings/{slug}.jsonl`. Present matches grouped by type.
 
@@ -210,7 +209,7 @@ Quick summary:
 Keep upgrades narrow. Only suggest these two:
 
 1. **Project-level constraint candidate**
-   - Condition: `type=preference`, `confidence=high`, repeated or confirmed 2+ times
+   - Condition: `type=preference/high`, repeated or confirmed 2+ times
    - Suggestion: propose upgrading the preference into `AGENTS.md` if present, otherwise `CLAUDE.md`
    - Rule: never write the file automatically; ask the user first
 

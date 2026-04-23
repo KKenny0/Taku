@@ -52,13 +52,7 @@ CHANGED_FILES=$(git diff --name-only HEAD~1 2>/dev/null | wc -l)
 DIRS_TOUCHED=$(git diff --name-only HEAD~1 2>/dev/null | xargs -I{} dirname {} 2>/dev/null | sort -u | wc -l)
 ```
 
-| Tier | Criteria | Behavior |
-|------|----------|----------|
-| **Lightweight** | <50 files OR single-file change (1 dir touched) | Skip plan-review. Use sequential build by default. |
-| **Standard** | 50-500 files, moderate scope | Full pipeline. |
-| **Deep** | >500 files OR cross-cutting change (3+ dirs touched) | Full pipeline plus: architecture diagram mandatory. |
-
-**Auto-reclassification:** If scope expands mid-sprint (e.g., a "simple bugfix" touches 6 files across 3 modules), escalate one tier. Log: `DEPTH ESCALATION: Lightweight → Standard (reason: scope expanded to N files across M modules)`.
+Tier criteria and template mapping are defined in the Plan phase (`skills/plan/SKILL.md` Template Selection). The orchestrator detects file counts and stores the result as `DEPTH_TIER`.
 
 Store as `DEPTH_TIER` session state. All phase routing reads this value.
 
@@ -370,6 +364,18 @@ Do not ask when:
 | Build BLOCKED | Report what's blocking, ask user for context |
 | Build NEEDS_CONTEXT | Answer questions, re-dispatch |
 | 3 consecutive phase loops | Stop, present status to user, ask for direction |
+
+### Phase Completion Status
+
+Every phase reports completion using a shared vocabulary:
+
+| Status | Meaning | Orchestrator Action |
+|--------|---------|-------------------|
+| **DONE** | Fully complete, no remaining issues | Auto-progress to next phase |
+| **DONE_WITH_CONCERNS** | Complete with non-blocking issues | Log concerns, auto-progress |
+| **BLOCKED** | Needs external input or decision | Pause, report to user |
+
+**Why shared vocabulary:** When the orchestrator routes between phases, it needs to know whether a phase completed or hit a blocker. Without shared status, each phase invents its own language, and the orchestrator can't make consistent routing decisions. Debug already uses this vocabulary; extending it to all phases makes auto-progression reliable.
 
 ---
 

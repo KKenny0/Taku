@@ -53,6 +53,8 @@ Gather context before forming any hypothesis. This is evidence collection, not p
 
 5. **Gather evidence in multi-component systems.** When the system has layers (API → service → database), add diagnostic logging at each boundary. Run once. See WHERE it breaks. Then investigate THAT layer.
 
+**Budget check:** If INVESTIGATE exceeds 10 minutes or produces >20 evidence items without convergence toward a root cause hypothesis, pause and present findings so far. This is not failure — it's scope-aware investigation. Complex distributed systems sometimes need a narrower scope before continuing.
+
 Output: **Root cause hypothesis** — a specific, testable claim about what is wrong and why.
 
 ### Phase 2: PATTERN
@@ -74,6 +76,7 @@ Also check:
 - Working examples in the same codebase — what does the same thing correctly?
 - TODOS.md for related known issues
 - Git log for prior fixes in the same area. Recurring bugs in the same files are an architectural smell, not a coincidence.
+- `.taku/learnings/{project-slug}.jsonl` — similar bug patterns, prior root causes, known pitfalls from previous debug sessions
 
 If the pattern isn't obvious, search the web for "{framework} {error type}" (sanitize first: strip hostnames, IPs, file paths, customer data).
 
