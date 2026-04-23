@@ -44,9 +44,30 @@ Intent: <1-line summary>
 Delivered: <1-line summary>
 ```
 
-This is informational, not a gate. Continue to Step 4.
+This is informational, not a gate. Continue to Step 3b.
 
 **Why scope check before code review:** If the diff includes unrelated changes, reviewing those wastes effort. If requirements are missing, no amount of code review will catch them. Scope check focuses the code review on the right surface area.
+
+## Step 3b: Spec Compliance Check
+
+If PLAN.md exists, verify that the implementation matches the plan's specs — not just that the right files were touched, but that the right behavior was built.
+
+Read each task's **Spec** and **TDD anchor** from PLAN.md. For each spec assertion, search the diff for corresponding implementation:
+
+- **MATCHED** — Spec assertion has implementing code and a test
+- **MISSING** — Spec assertion not addressed in the diff
+- **DIFFERENT** — Implementation exists but contradicts the spec
+
+Output:
+```
+Spec Compliance: [FULL / PARTIAL / DRIFT]
+  Task 1: N/N specs matched
+  Task 2: N/N specs matched [MISSING: ...] [DIFFERENT: ...]
+```
+
+MISSING or DIFFERENT items are promoted to Critical in Step 5. This check ensures the review catches behavioral drift even when code quality is high.
+
+**Why spec compliance matters:** A scope check verifies the right files were touched. A code review verifies the code is well-written. But neither catches the case where well-written code implements the wrong behavior — a function that returns 401 when the spec says 403, or a cache that stores data the spec says should expire. Spec compliance closes this gap.
 
 ## Step 4: Get the Diff
 

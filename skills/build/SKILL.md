@@ -138,35 +138,31 @@ Every subagent receives structured context built from the plan:
 
 ### Task: {task_name}
 **From plan:** PLAN.md
-**Priority:** {high|medium|low}
-**Model recommendation:** {fast|standard|powerful}
-
-### What to implement
-{task_description_from_plan}
+**Depends on:** {task_ids or "none"}
 
 ### Files to modify
 - Create: `{exact_path}`
 - Modify: `{exact_path}:{line_range}`
 - Test: `{exact_path}`
 
-### Code to write
-{exact_code_from_plan}
+### Spec
+{spec_from_plan}
 
-### Tests to write
-{test_code_from_plan}
+### TDD Anchor
+{tdd_anchor_from_plan}
 
 ### Verification
-- Run: `{command}`
-- Expected: `{output}`
+- Run tests for TDD anchor
+- Expected: all assertions pass
 
 ### Constraints
-- Follow TDD: test first, then implement (see references/tdd.md)
+- Follow TDD: write the anchor test first, then implement (see references/tdd.md)
 - Commit after each passing test
 - If blocked, report BLOCKED with reason
 - Do NOT modify files outside the list above
 ```
 
-For dependent tasks, include relevant code from completed tasks in the context. Reference exact file paths and line numbers. The implementer should never guess at interfaces.
+For dependent tasks, include relevant specs and file paths from completed tasks in the context. The implementer should never guess at interfaces.
 
 ### Status Handling
 
