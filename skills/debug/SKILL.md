@@ -127,9 +127,9 @@ Fix the root cause, not the symptom.
 
 3. **Verify the fix.** Test passes? Full suite passes? Original bug scenario resolved?
 
-4. **Blast radius check.** If the fix touches more than 5 files, stop and ask. A bug fix that large usually means you're fixing the wrong thing.
+4. **Blast radius check.** If the fix touches more than 5 files, pause and justify each one. If the justification is sound (e.g., a cross-service API change with matching test files), proceed. If changes span more than 3 subsystems, consider splitting into multiple focused fix PRs.
 
-**Why the 5-file limit:** A genuine root cause fix is usually localized — it changes one thing in one place. If you're touching 5+ files, you're likely fixing symptoms across multiple layers rather than the single source. Stop and re-investigate.
+**Why the 5-file guideline:** A genuine root cause fix is usually localized — it changes one thing in one place. If you're touching 5+ files, you're likely fixing symptoms across multiple layers rather than the single source. But some fixes are genuinely cross-cutting (e.g., renaming a shared interface). The guideline catches shallow fixes without blocking legitimate broad fixes.
 
 5. **Run the full test suite.** Paste the output. No regressions.
 

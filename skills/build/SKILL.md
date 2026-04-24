@@ -246,11 +246,30 @@ For each task:
 
 If a step seems wrong, raise it before deviating — don't silently adapt.
 
-### Step 3: Checkpoints
+### Step 3: Two-Stage Review
 
-After each task, briefly summarize: what was done, test results, deviations. If you are presenting the run as a single wave, keep the `wave-slug` stable across updates.
+After each task completes, run the same two-stage review as Parallel mode:
 
-### Step 4: Complete
+**Stage 1: Spec Compliance** — Does the implementation match the plan spec? All assertions met? Nothing extra or missing?
+
+**Stage 2: Code Quality** — Well-built? Naming, structure, coverage, edge cases.
+
+Fix issues between stages. Don't proceed to the next task until both stages pass.
+
+### Step 4: Checkpoints
+
+After each task, report progress in BUILD UPDATE format:
+
+```text
+BUILD UPDATE
+- Completed: wave-1 (or task-slug for sequential)
+- Tasks: [task-slug]
+- Result: spec compliance passed, code quality passed
+- Deviations: [none | description]
+- Next: [task-slug or REVIEW]
+```
+
+### Step 5: Complete
 
 After all tasks: run full test suite, announce completion, route to REVIEW phase.
 

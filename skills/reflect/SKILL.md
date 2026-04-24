@@ -198,7 +198,7 @@ Save to `.taku/retros/{date}.md`. Append trends to `.taku/retros/trends.jsonl`.
 
 Codify recurring patterns into reusable skills, but only after the user confirms they want to write one.
 
-Full process in `references/writing-skills.md`. Load it and follow the instructions.
+Full process in `references/writing-skills.md`. Load it and follow the instructions. That reference is substantial (~200 lines) with its own anti-rationalization table and known pitfalls — it functions as a self-contained skill within the reflect directory, not a lightweight helper.
 
 Quick summary:
 - Choose skill type: TECHNIQUE (concrete method), PATTERN (mental model), REFERENCE (lookup table)

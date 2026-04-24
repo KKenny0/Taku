@@ -197,6 +197,7 @@ Ask **one at a time**. Push until answers are specific and evidence-based.
 - Has users (not paying) → Q2, Q4, Q5
 - Has paying customers → Q4, Q5, Q6
 - Pure engineering/infra → Q2, Q4 only
+- Feature idea ("should we build X?") → Q1, Q4, Q2
 
 If earlier answers already cover a later question, skip it.
 
