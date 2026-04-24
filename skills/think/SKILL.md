@@ -7,8 +7,11 @@ description: >
   (new ideas → forcing questions before committing). The mode is auto-selected based
   on request complexity. Hard gate: no code until design is approved. Triggers on
   "build me", "add a feature", "I have an idea", "should we build", "let's design",
-  "implement", or any request that implies writing code. Also handles design system
-  creation. Use before /taku-plan.
+  "implement", "帮我做", "加个功能", "我有个想法", "建一个", "设计一下", "要不要做",
+  "想想怎么做", "需求分析", or any request that implies writing code. Also handles
+  design system creation. Also use when the user describes what they want built
+  without explicitly saying "build" — if they describe a desired end state, this
+  skill applies. Use before /taku-plan.
 ---
 
 # Taku Think — Adaptive Design Thinking

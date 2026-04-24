@@ -6,7 +6,9 @@ description: >
   metrics, team breakdowns, trends), and Write Skill (codify recurring learnings into reusable skills).
   Triggers on "what have we learned", "add learning", "show learnings", "weekly retro",
   "what did we ship", "engineering retrospective", "write a skill", "create a skill",
-  or "codify this pattern".
+  "codify this pattern", "总结一下", "学到了什么", "记录一下", "回顾这周",
+  "做个retro", "写个技能", "把这个模式固化". Also invoke when the user expresses
+  satisfaction or frustration after completing work — these are natural reflection moments.
 allowed-tools:
   - Bash
   - Read

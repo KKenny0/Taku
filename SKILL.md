@@ -6,7 +6,8 @@ description: >
   CLI tool, web app, library, infrastructure, or "build me X". If code will be
   written, tests will run, or a PR will be created, this is the entry point.
   Also triggers on "start a sprint", "plan this feature", "review my code",
-  "ship this", "let's think through this idea", or any request that implies
+  "ship this", "let's think through this idea", "做个XX", "帮我写", "开始开发",
+  "规划一下", "修个bug", "重构一下", or any request that implies
   building software. Do NOT answer directly — route through the sprint pipeline.
 ---
 

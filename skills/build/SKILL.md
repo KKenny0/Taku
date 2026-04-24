@@ -1,13 +1,11 @@
 ---
 name: taku-build
 description: >
-  Execute an approved implementation plan. Three execution modes: sequential,
-  parallel, and hybrid wave-based execution. The agent chooses the mode and
-  continues immediately, while still honoring explicit user overrides. TDD is
-  enforced on all code. Optional worktree isolation for feature branches. Triggers
-  after /taku-plan, or on "build this", "implement the plan", "start coding",
-  "run the plan", "execute tasks". Also handles worktree setup on
-  "create a worktree", "isolated environment", "new branch workspace".
+  Execute an approved implementation plan. Triggers after /taku-plan, or on
+  "build this", "implement the plan", "start coding", "run the plan",
+  "execute tasks", "写代码", "开始实现", "执行计划", "开发吧", "开始写".
+  Also handles worktree setup on "create a worktree", "isolated environment",
+  "new branch workspace", "创建工作树".
 ---
 
 # Taku Build — Autonomous Execution

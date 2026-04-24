@@ -1,6 +1,6 @@
 ---
 name: taku-review
-description: Use after implementation is complete. Triggers after /taku-build or /taku-build (sequential mode). Analyzes diffs for security issues, bugs, and code quality. Run when asked to "review this", "check my diff", "code review", or before shipping. Proactively invoke when the user is about to merge or land code changes.
+description: Use after implementation is complete. Triggers after /taku-build. Analyzes diffs for security issues, bugs, and code quality. Run when asked to "review this", "check my diff", "code review", "审查代码", "看看有什么问题", "检查一下", "准备合并", "代码质量", or before shipping. Proactively invoke when the user is about to merge or land code changes.
 allowed-tools:
   - Bash
   - Read

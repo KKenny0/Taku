@@ -6,7 +6,8 @@ description: >
   which step to start from based on project state. Invoke when DESIGN.md exists and
   is approved. Triggers on "write the plan", "create implementation plan", "plan this",
   "review this plan", "scope check", "architecture review", "design review",
-  "is this plan buildable", "what could go wrong", or after /taku-think completes.
+  "is this plan buildable", "what could go wrong", "写计划", "制定方案",
+  "规划实施", "架构评审", "这个方案可行吗", "有什么风险", or after /taku-think completes.
 ---
 
 # Taku Plan — Review + Plan Pipeline

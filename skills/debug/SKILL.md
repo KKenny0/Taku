@@ -4,8 +4,10 @@ description: >
   Use when verification fails or when encountering any bug or unexpected behavior
   whose cause is not yet known. Systematic root cause investigation with 4 phases.
   Triggers on "debug this", "fix this bug", "why is this broken", "investigate this
-  error", "it was working yesterday", or after the VERIFY phase fails. Do not use
-  this skill as a generic "run tests" wrapper; use it when troubleshooting is required.
+  error", "it was working yesterday", "调试", "找bug", "为什么出错",
+  "这个报错什么原因", "排查问题", "不工作了", or after the VERIFY phase fails.
+  Do not use this skill as a generic "run tests" wrapper; use it when
+  troubleshooting is required.
 ---
 
 # taku-debug — 4-Phase Root Cause Investigation
