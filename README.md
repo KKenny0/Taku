@@ -7,13 +7,7 @@
 <p align="center"><strong>A disciplined sprint system for AI-assisted software delivery.</strong></p>
 
 <p align="center">
-  Think clearly. Plan concretely. Build with TDD. Review the diff. Debug the root cause. Capture what mattered.
-</p>
-
-<p align="center">
-  Taku helps coding agents ship reliable software through a structured six-phase sprint:
-  clarify the problem, produce an executable plan, build with visible structure,
-  review the actual diff, verify with evidence, and debug from root cause when checks fail.
+  <img src="assets/taku-six-phase-sprint.png" alt="Taku six-phase sprint: Think, Plan, Build, Review, Debug, and Reflect, with verification as the evidence gate." />
 </p>
 
 > 如切如磋，如琢如磨
