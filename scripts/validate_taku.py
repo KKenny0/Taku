@@ -56,7 +56,7 @@ def parse_frontmatter(path: Path) -> tuple[dict[str, str], str]:
 
 
 def skill_files(root: Path) -> list[Path]:
-    return [root / "SKILL.md"] + sorted((root / "skills").glob("*/SKILL.md"))
+    return sorted((root / "skills").glob("*/SKILL.md"))
 
 
 def check_frontmatter(root: Path, errors: list[str]) -> None:
@@ -140,9 +140,7 @@ def check_reflect_script(root: Path, errors: list[str], strict: bool) -> None:
 
 
 def check_agents_metadata(root: Path, errors: list[str]) -> None:
-    paths = [root / "agents" / "openai.yaml"] + [
-        root / "skills" / phase / "agents" / "openai.yaml" for phase in PHASES
-    ]
+    paths = [root / "skills" / phase / "agents" / "openai.yaml" for phase in PHASES]
     for path in paths:
         if not path.exists():
             errors.append(f"{path.relative_to(root)}: missing UI metadata")

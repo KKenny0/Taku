@@ -61,7 +61,7 @@ Skip when: no UI, or project uses an existing design system without customizatio
 
 ### Template Selection
 
-Use `DEPTH_TIER` (set by the orchestrator's pre-flight) to pick the plan template:
+Use `DEPTH_TIER` (set by the think phase or user) to pick the plan template:
 
 | Tier | Criteria | Template |
 |------|----------|----------|

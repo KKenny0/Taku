@@ -1,3 +1,0 @@
-display_name: Taku
-short_description: Route software work through the Taku sprint workflow.
-default_prompt: Use Taku to classify this development task and route it through the right sprint phase.

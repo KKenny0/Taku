@@ -8,8 +8,8 @@ description: >
   feature", "I have an idea", "should we build", "let's design", "设计一下",
   "需求分析", "我有个想法", or when the user describes a desired end state but
   implementation choices or success criteria are not yet settled. Also handles
-  design system creation. Bug fixes and refactors use the orchestrator's debug or
-  review paths unless they need fresh design decisions.
+  design system creation. Bug fixes and refactors use `/taku-debug` or
+  `/taku-review` directly unless they need fresh design decisions.
 ---
 
 # Taku Think — Adaptive Design Thinking

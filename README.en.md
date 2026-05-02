@@ -122,7 +122,7 @@ It supports three execution shapes:
 
 ### 5. It keeps verification and debugging distinct
 
-The fifth phase is a verification gate, not a second planning phase and not a vague "do some QA" instruction. The orchestrator runs the required checks. `/taku-debug` exists for the branch where those checks fail or behavior is already broken.
+The fifth phase is a verification gate, not a second planning phase and not a vague "do some QA" instruction. Run the required checks, then use `/taku-debug` when those checks fail or behavior is already broken.
 
 Taku's debug flow is evidence-first:
 
@@ -274,11 +274,8 @@ Use the same repository as a skill pack, then follow the adapter notes in `platf
 
 ```text
 Taku/
-├── SKILL.md              # Main orchestrator, version 0.2.0
 ├── README.md
 ├── logo.png
-├── agents/
-│   └── openai.yaml       # UI metadata
 ├── evals/
 │   ├── README.md
 │   └── real_task_scenarios.json
