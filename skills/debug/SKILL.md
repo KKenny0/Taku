@@ -32,6 +32,13 @@ Every fix that doesn't address root cause makes the next bug harder to find. If 
 
 Violating the letter of this process is violating the spirit of debugging.
 
+**Mandatory sequence enforcement:** Before writing ANY code change, you MUST:
+1. Complete Phase 1 (INVESTIGATE) — gather evidence, reproduce, trace data flow
+2. Complete Phase 2 (PATTERN) — match against known patterns
+3. Complete Phase 3 (HYPOTHESIS) — rank and test hypotheses
+
+Only after all three phases may you proceed to Phase 4 (IMPLEMENT). If you find yourself writing a fix before producing a DEBUG REPORT, stop and go back to Phase 1.
+
 ## The 4 Phases
 
 ### Phase 1: INVESTIGATE

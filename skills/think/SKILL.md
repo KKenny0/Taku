@@ -55,13 +55,15 @@ For requests where full design process is wasteful. Not "no thinking" — right-
 
 2. **User confirms.** If they correct you, adjust and re-confirm.
 
-3. **Write a mini design** using this template. Either append to DESIGN.md as a new section, or write directly into PLAN.md if the change is small enough that design and plan are the same thing:
+3. **Write a mini design.** This is mandatory — even for one-line changes. The mini design is the gate that prevents Quick mode from becoming "no mode." Either append to DESIGN.md as a new section, or write directly into PLAN.md if the change is small enough that design and plan are the same thing:
 
    - **Change:** One sentence describing what to change
    - **Why:** One sentence on motivation
    - **Touch Points:** Files/modules affected
    - **Risks:** Most likely thing to get wrong
    - **Done When:** How to verify completion
+
+   **Do not proceed to step 4 until this mini design is written and visible to the user.**
 
 4. **Go.** Route to `/taku-plan` (or proceed to build if plan already exists).
 
