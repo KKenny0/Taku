@@ -188,6 +188,10 @@ The fifth phase is a verification gate, not a second planning phase. When checks
 - evidence-based verification
 - root-cause debugging
 
+## Case Studies
+
+> Three concrete failures Taku's discipline prevented in real eval scenarios: [View Case Studies](CASE_STUDIES.md)
+
 ## When to Use Which Command
 
 | Your situation | Suggested entry point |

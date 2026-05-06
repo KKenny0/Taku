@@ -188,6 +188,10 @@ Review 产物进入 `DESIGN.md`，`PLAN.md` 保持纯执行内容——goal、ta
 - 基于证据的 verification
 - 根因导向的 debugging
 
+## Case Studies
+
+> Taku 的纪律机制在真实 eval 中阻止了哪些失败？三个具体案例：[查看 Case Studies](CASE_STUDIES.md)
+
 ## 使用场景
 
 | 你的情况 | 建议入口 |

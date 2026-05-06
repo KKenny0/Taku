@@ -1,13 +1,19 @@
 ---
 name: taku-debug
 description: >
-  Use when verification fails or when encountering any bug or unexpected behavior
-  whose cause is not yet known. Systematic root cause investigation with 4 phases.
-  Triggers on "debug this", "fix this bug", "why is this broken", "investigate this
-  error", "it was working yesterday", "调试", "找bug", "为什么出错",
-  "这个报错什么原因", "排查问题", "不工作了", or after the VERIFY phase fails.
-  Do not use this skill as a generic "run tests" wrapper; use it when
-  troubleshooting is required.
+  When the user reports a bug, crash, error, or anything that is broken or behaving
+  unexpectedly, invoke this skill FIRST — before writing any code or proposing any fix.
+  This skill is the mandatory entry point for ALL bug-fix tasks. The user expects you
+  to investigate root cause systematically before fixing. Without this skill, you will
+  likely fix the symptom instead of the cause, which is the #1 debugging failure mode.
+  Use this skill whenever the user says anything like: "fix this bug", "crashes",
+  "returns null", "500 error", "not working", "wrong result", "throws exception",
+  "timeout", "silent failure", "was working yesterday", "broke after deploy",
+  "sometimes fails", "only in production", "works locally but not in CI/staging",
+  "CLI crashes", "config missing", "test fails", or describes any error/stack trace.
+  Also: "调试", "找bug", "报错", "排查问题", "不工作了", "挂了", "崩了", "数据不对".
+  Do NOT use for: lint fixes, dependency updates, adding features, refactoring,
+  or any task that is NOT about fixing broken behavior.
 ---
 
 # taku-debug — 4-Phase Root Cause Investigation
