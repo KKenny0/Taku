@@ -133,9 +133,10 @@ def check_reflect_script(root: Path, errors: list[str], strict: bool) -> None:
     if not path.exists():
         errors.append(f"{path.relative_to(root)}: missing")
         return
-    mode = path.stat().st_mode
-    if strict and not (mode & stat.S_IXUSR):
-        errors.append(f"{path.relative_to(root)}: not executable")
+    if platform.system() != "Windows":
+        mode = path.stat().st_mode
+        if strict and not (mode & stat.S_IXUSR):
+            errors.append(f"{path.relative_to(root)}: not executable")
     text = path.read_text(encoding="utf-8")
     for command in ("add", "search", "prune", "export", "bootstrap-check", "bootstrap-install"):
         if f'"{command}"' not in text:
