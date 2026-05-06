@@ -104,6 +104,6 @@ Eval rt-08（2026-05-05）：29 turns, $0.85。Agent 使用真实 git 历史，�
 - **9/10 programmatic evals** via `claude -p` — 覆盖全部 7 个 skills
 - **1 interactive dogfood task** — 完整 Think → Plan → Build → Review 流程
 - **结果** — 5 PASS, 3 PARTIAL, 0 FAIL, 1 SKIP + interactive all PASS
-- **总成本** ~$6.11，平均每场景 ~$0.38
+- **总成本** ~$3.42，平均每场景 ~$0.38
 
 完整评估报告见 [`evals/evidence-report.md`](evals/evidence-report.md)。
