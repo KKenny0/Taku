@@ -24,10 +24,6 @@
   <code>Context Compact</code>
 </p>
 
-<p align="center">
-  <img src="assets/taku-six-phase-sprint.png" alt="Taku six-phase sprint: Think, Plan, Build, Review, Debug, and Reflect, with verification as the evidence gate" />
-</p>
-
 > 如切如磋，如琢如磨 — Remove ambiguity until the shape is correct.
 
 Taku is a set of workflow skills for Claude Code / coding agents that decompose real engineering tasks into Think → Plan → Build → Review → Verify → Reflect, with `/taku-compact` for long-task context control.
