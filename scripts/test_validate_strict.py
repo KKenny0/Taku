@@ -11,7 +11,13 @@ from pathlib import Path
 from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from validate_taku import check_install_safe_references, check_reflect_script, check_skill_inventory
+from validate_taku import (
+    check_compact_source_labels,
+    check_evidence_assets,
+    check_install_safe_references,
+    check_reflect_script,
+    check_skill_inventory,
+)
 
 
 def _make_learnings(root: Path, executable: bool = True) -> Path:
@@ -97,3 +103,39 @@ def test_installed_skills_cannot_reference_root_templates() -> None:
         errors: list[str] = []
         check_install_safe_references(root, errors)
         assert any("non-installed runtime reference" in e for e in errors), errors
+
+
+def test_compact_source_label_contract_rejects_missing_label() -> None:
+    """Compact contracts must expose the strict six-label vocabulary."""
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        for rel in (
+            "skills/compact/SKILL.md",
+            "skills/compact/references/compact-brief.md",
+            "templates/compact-brief.md",
+        ):
+            path = root / rel
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text("Allowed source values: file, git, tool, user, inferred\n", encoding="utf-8")
+        errors: list[str] = []
+        check_compact_source_labels(root, errors)
+        assert any("unknown" in e for e in errors), errors
+
+
+def test_evidence_assets_require_case_studies() -> None:
+    """Evidence assets should include the public case-study evidence wall."""
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        for rel in (
+            "evals/evidence-report.md",
+            "scripts/eval_summary.py",
+            "scripts/test_eval_summary.py",
+            "scripts/test_data/eval_entries.jsonl",
+            "CASE_STUDIES.md",
+        ):
+            path = root / rel
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text("", encoding="utf-8")
+        errors: list[str] = []
+        check_evidence_assets(root, errors)
+        assert any("expected at least 5 failure-prevention cases" in e for e in errors), errors

@@ -28,6 +28,23 @@ EVAL_REQUIRED_FIELDS = {
     "pass_criteria",
     "observed_failure_mode",
 }
+COMPACT_SOURCE_LABELS = {"file", "git", "tool", "user", "inferred", "unknown"}
+EVAL_FAILURE_TOPICS = {
+    "scope drift": ("scope drift", "scope creep"),
+    "missing verification": ("missing verification", "unverified", "verification evidence"),
+    "symptom fix": ("symptom fix", "symptom-level", "root cause"),
+    "weak review": ("weak review", "sql injection", "critical issue"),
+    "context loss": ("context loss", "compact resume", "resume source"),
+    "memory pollution": ("memory pollution", "long-term memory", "learnings"),
+    "build review handoff": ("build/review", "handoff", "task ledger"),
+    "approved deviation": ("approved deviation", "approved deviations"),
+}
+REQUIRED_EVIDENCE_ASSETS = (
+    "evals/evidence-report.md",
+    "scripts/eval_summary.py",
+    "scripts/test_eval_summary.py",
+    "scripts/test_data/eval_entries.jsonl",
+)
 
 
 def default_repo_root() -> Path:
@@ -272,6 +289,65 @@ def check_evaluation_suite(root: Path, errors: list[str]) -> None:
             f"{path.relative_to(root)}: scenarios do not cover phase(s): {', '.join(missing_phase_coverage)}"
         )
 
+    suite_text = json.dumps(scenarios, sort_keys=True).lower()
+    missing_topics = [
+        topic
+        for topic, needles in EVAL_FAILURE_TOPICS.items()
+        if not any(needle in suite_text for needle in needles)
+    ]
+    if missing_topics:
+        errors.append(f"{path.relative_to(root)}: scenarios miss failure topic(s): {', '.join(missing_topics)}")
+
+
+def check_compact_source_labels(root: Path, errors: list[str]) -> None:
+    paths = [
+        root / "skills" / "compact" / "SKILL.md",
+        root / "skills" / "compact" / "references" / "compact-brief.md",
+        root / "templates" / "compact-brief.md",
+    ]
+    for path in paths:
+        if not path.exists():
+            errors.append(f"{path.relative_to(root)}: missing compact source-label contract")
+            continue
+        text = path.read_text(encoding="utf-8")
+        missing = sorted(label for label in COMPACT_SOURCE_LABELS if label not in text)
+        if missing:
+            errors.append(f"{path.relative_to(root)}: missing compact source label(s): {', '.join(missing)}")
+
+
+def check_evidence_assets(root: Path, errors: list[str]) -> None:
+    for rel in REQUIRED_EVIDENCE_ASSETS:
+        if not (root / rel).exists():
+            errors.append(f"{rel}: missing required evidence/tooling asset")
+
+    case_studies = root / "CASE_STUDIES.md"
+    if not case_studies.exists():
+        errors.append("CASE_STUDIES.md: missing public evidence wall")
+    else:
+        case_count = len(re.findall(r"^## Case \d+:", case_studies.read_text(encoding="utf-8"), re.M))
+        if case_count < 5:
+            errors.append(f"CASE_STUDIES.md: expected at least 5 failure-prevention cases, found {case_count}")
+
+
+def check_readme_claims(root: Path, errors: list[str]) -> None:
+    required_links = ("CASE_STUDIES.md", "evals/evidence-report.md")
+    for name in ("README.md", "README.zh.md"):
+        path = root / name
+        if not path.exists():
+            errors.append(f"{name}: missing")
+            continue
+        text = path.read_text(encoding="utf-8")
+        lowered = text.lower()
+        if "delivery harness" not in lowered and "交付 harness" not in lowered:
+            errors.append(f"{name}: missing delivery harness positioning")
+        if "failure" not in lowered and "失败" not in text:
+            errors.append(f"{name}: missing failure-prevention positioning")
+        for link in required_links:
+            if link not in text:
+                errors.append(f"{name}: missing evidence link {link}")
+        if "six-phase workflow" in lowered[:1200] or "六阶段" in text[:1200]:
+            errors.append(f"{name}: first screen still leads with six-phase workflow instead of failure prevention")
+
 
 def check_python_runtime(errors: list[str]) -> None:
     if sys.version_info < (3, 8):
@@ -340,6 +416,9 @@ def main(argv: list[str] | None = None) -> int:
     check_agents_metadata(root, errors)
     check_trigger_text(root, errors)
     check_evaluation_suite(root, errors)
+    check_compact_source_labels(root, errors)
+    check_evidence_assets(root, errors)
+    check_readme_claims(root, errors)
     if args.install:
         check_installation(root, Path(args.skills_dir).expanduser().resolve(), errors, warnings)
 

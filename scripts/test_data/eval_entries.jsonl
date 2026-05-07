@@ -1,0 +1,10 @@
+{"id": "rt-01", "title": "Small bugfix", "verdict": "PARTIAL", "cost": 0.08, "failure_prevention": {"prevented": true, "failure_mode": "bugfix without regression anchor"}, "net_verdict": "net_positive", "friction_score": 1}
+{"id": "rt-02", "title": "Ambiguous feature request", "verdict": "PASS", "cost": 0.29, "net_verdict": "net_positive", "friction_score": 2}
+{"id": "rt-03", "title": "Compact feature flag", "verdict": "PARTIAL", "cost": 0.15, "net_verdict": "neutral", "friction_score": 2}
+{"id": "rt-04", "title": "Build execution mode", "verdict": "SKIP", "cost": 0.0, "net_verdict": "net_positive", "friction_score": 2}
+{"id": "rt-05", "title": "Review no diff", "verdict": "PASS", "cost": 0.25, "net_verdict": "net_positive", "friction_score": 2}
+{"id": "rt-06", "title": "SQL injection \u2705 critical finding", "verdict": "PASS", "cost": 0.25, "failure_prevention": {"prevented": true, "failure_mode": "weak review missed critical issue"}}
+{"id": "rt-07", "title": "Reflect learning flow", "verdict": "PASS", "cost": 0.74}
+{"id": "rt-08", "title": "Retro limited history \u2014 anti-fabrication", "verdict": "PASS", "cost": 0.85, "failure_prevention": {"prevented": true, "failure_mode": "fabricated trend from thin evidence"}}
+{"id": "rt-09", "title": "Compact design discussion", "verdict": "PARTIAL", "cost": 0.39, "failure_prevention": {"prevented": true, "failure_mode": "context loss in chat-only design"}}
+{"id": "rt-10", "title": "Compact debug \u26a0 root cause captured", "verdict": "PASS", "cost": 0.67, "failure_prevention": {"prevented": true, "failure_mode": "unsourced verification claim"}}

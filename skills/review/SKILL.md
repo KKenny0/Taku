@@ -10,211 +10,166 @@ allowed-tools:
   - Glob
 ---
 
-# Pattern-Based Code Review
+# Taku Review - Delivery Gate
 
-Analyze the current branch's diff against the base branch for structural issues that tests don't catch. Fix-first, not read-only.
+Review decides whether the change can ship. It is not a long critique and it is
+not a nit collector.
 
 Rule labels: `[IRON LAW]` means a non-negotiable correctness constraint. `[GUIDANCE]` means a strong default that may adapt when context justifies it.
 
-## Step 1: Detect Base Branch
+[IRON LAW] Hard stops come before concerns. Do not bury a blocking delivery
+failure under style comments.
+
+## Review Contract
+
+Read the current diff against the base branch or, when there is no remote diff,
+the local dirty diff. Then output exactly three sections:
+
+```text
+HARD STOPS
+- [none | blocking finding list]
+
+CONCERNS
+- [none | non-blocking risks worth fixing or noting]
+
+SUMMARY
+- Changed files: [...]
+- Verification evidence: [...]
+- Scope/spec status: clean | drift | requirements missing | unknown
+- Residual risk: none | [...]
+- Status: DONE | BLOCKED | DONE_WITH_CONCERNS
+```
+
+Use `BLOCKED` whenever a hard stop exists. Use `DONE_WITH_CONCERNS` only when
+remaining issues are non-blocking and explicitly listed.
+
+## Step 1: Detect Base and Diff
+
+Run the repo-appropriate equivalent of:
 
 ```bash
 git remote get-url origin 2>/dev/null
 git branch --show-current
 git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's|refs/remotes/origin/||'
+git status --short
+git diff --stat
 ```
 
-Detect platform (GitHub/GitLab/unknown) and determine the base branch. If no PR exists, use the default branch. Print the base branch name for all subsequent steps.
+If on the base branch with no local diff, stop cleanly:
 
-## Step 2: Check Branch
+```text
+HARD STOPS
+- none
 
-1. If on the base branch: "Nothing to review, you're on the base branch." Stop.
-2. Fetch and diff: `git fetch origin <base> --quiet && git diff origin/<base> --stat`
-3. If no diff: stop with the same message.
+CONCERNS
+- none
 
-## Step 3: Scope Drift Check
-
-Read commit messages and any plan file (PLAN.md, .taku/*.md). Compare stated intent against files changed.
-
-- **Scope creep:** files changed unrelated to intent
-- **Missing requirements:** intent items not addressed in the diff
-- **Unverified completion:** summary claims success without command output or explicit user evidence
-
-Output:
-```
-Scope Check: [CLEAN / DRIFT DETECTED / REQUIREMENTS MISSING]
-Intent: <1-line summary>
-Delivered: <1-line summary>
+SUMMARY
+- Changed files: []
+- Verification evidence: not applicable; no diff
+- Scope/spec status: clean
+- Residual risk: none
+- Status: DONE
 ```
 
-This is a gate. `DRIFT DETECTED`, `REQUIREMENTS MISSING`, or unverified completion claims are Critical findings unless the user explicitly approved the deviation before review.
+Do not invent findings when no code changed.
 
-**Why scope check before code review:** If the diff includes unrelated changes, reviewing those wastes effort. If requirements are missing, no amount of code review will catch them. Scope check focuses the code review on the right surface area.
+## Step 2: Reconstruct Intent
 
-## Step 3b: Spec Compliance Check
+Read the strongest available intent source:
 
-If PLAN.md exists, verify that the implementation matches the plan's specs — not just that the right files were touched, but that the right behavior was built.
+- Build ledger from `/taku-build`
+- `PLAN.md`
+- approved Quick mini design
+- `DESIGN.md`
+- user request in the current session
+- commit messages
 
-Read each task's **Spec** and **TDD anchor** from PLAN.md. For each spec assertion, search the diff for corresponding implementation:
+Then compare intent to delivered changes.
 
-- **MATCHED** — Spec assertion has implementing code and a test
-- **MISSING** — Spec assertion not addressed in the diff
-- **DIFFERENT** — Implementation exists but contradicts the spec
+Hard stops:
 
-Output:
-```
-Spec Compliance: [FULL / PARTIAL / DRIFT]
-  Task 1: N/N specs matched
-  Task 2: N/N specs matched [MISSING: ...] [DIFFERENT: ...]
-```
+- **Scope drift:** unrelated files, behavior, or refactors not approved.
+- **Missing requirement:** approved behavior absent from the diff.
+- **Unapproved deviation:** Build recorded a deviation that was not approved.
 
-MISSING or DIFFERENT items are promoted to Critical in Step 5. Missing or contradictory verification evidence is also Critical when the implementation claims completion. This check ensures the review catches behavioral drift even when code quality is high.
+Approved deviations are not hard stops, but must be listed in `SUMMARY`.
 
-**Why spec compliance matters:** A scope check verifies the right files were touched. A code review verifies the code is well-written. But neither catches the case where well-written code implements the wrong behavior — a function that returns 401 when the spec says 403, or a cache that stores data the spec says should expire. Spec compliance closes this gap.
+## Step 3: Check Verification Evidence
 
-## Step 4: Get the Diff
+Review the observed evidence, not confidence statements.
 
-```bash
-git fetch origin <base> --quiet
-git diff origin/<base>
-```
+Hard stops:
 
-Read the full diff. This is your review input.
+- The implementation claims completion but no test/build/lint/manual command
+  evidence is visible.
+- Verification output is stale or from before the relevant code changed.
+- Required TDD anchor or reproduction check is missing.
 
-## Step 5: Two-Pass Review
+If evidence is unavailable because the repo has no harness, say what was used
+instead. Do not claim tests passed unless output or explicit user evidence shows
+that.
 
-Apply these check categories in two passes.
+## Step 4: Critical Pattern Pass
 
-### Pass 1 — Critical
+Read the full diff before commenting. Search for production-risk patterns:
 
-These are bugs that blow up in production:
+- SQL/query injection from string-built user input
+- Prompt injection or unvalidated LLM output crossing a trust boundary
+- Missing auth checks or overly broad permissions
+- Conditional side effects hidden in ternaries, short-circuits, or optional chaining
+- Race conditions, shared mutable state, or non-atomic read/modify/write
+- Resource leaks that can exhaust connections, files, streams, or listeners
 
-**Why Critical first, separate pass:** Critical findings change code. If you review everything at once, you risk flagging code that will be rewritten by a Critical fix. Pass 1 identifies what must change; fix those first; then Pass 2 reviews the remaining diff with fresh eyes.
+High-confidence critical/security bugs are hard stops. Apply a fix directly
+only when the correct change is clear from local context. Otherwise provide the
+smallest safe recommendation and keep status `BLOCKED`.
 
-**SQL injection risk**
-- String concatenation or interpolation in SQL queries
-- Missing parameterized queries
-- Raw SQL without sanitization
+## Step 5: Concern Pass
 
-**LLM trust boundary**
-- User input passed directly to LLM prompts without sanitization
-- No output validation after LLM response
-- Prompt injection vectors (user-controlled system prompts)
+Only after hard stops are handled, list non-blocking risks:
 
-**Conditional side effects**
-- Mutations hidden in ternaries, short-circuits, or optional chaining
-- Side effects in conditionals that only execute sometimes
-- `&&` used for side effects (e.g., `condition && mutate()`)
+- error paths that degrade behavior but do not block shipping
+- weak type/null handling with bounded blast radius
+- missing cleanup where impact is limited
+- maintainability issues that make a follow-up risky
 
-**Auth gaps**
-- Missing auth checks on routes or API endpoints
-- Overly permissive scopes or wildcard permissions
-- Auth bypasses in error paths
+Skip nit floods. If a style pattern matters, mention it once.
 
-**Race conditions**
-- Shared mutable state without locks
-- Read-modify-write without atomic operations
-- Concurrent access to non-thread-safe resources
+## Auto-Fix Policy
 
-### Pass 2 — Informational
+- Auto-fix Critical and Important findings when the fix is clear and locally
+  verifiable.
+- After an auto-fix, run the smallest relevant verification.
+- Do not commit, push, or open a PR.
+- Do not mix review with broad refactoring.
 
-These degrade quality over time:
+## Output Rules
 
-**Resource leaks**
-- Unclosed connections, file handles, or streams
-- Missing cleanup in error paths
-- Event listeners not removed on unmount
-
-**Error handling**
-- Swallowed errors (empty catch blocks)
-- Missing error paths for async operations
-- Errors that return undefined instead of meaningful values
-
-**Type safety**
-- `any` casts that hide bugs
-- Missing null/undefined checks after optional access
-- Type assertions that override the compiler
-
-### Action Matrix
-
-| | High Confidence (7-10) | Low Confidence (1-6) |
-|---|---|---|
-| **Critical / Important** | Auto-fix immediately | Flag with caveat; fix if pattern is clear |
-| **Minor / Nit** | Batch-ask (Step 6b) | Appendix only |
-
-**Why a 2x2 matrix:** The previous system had 20 possible combinations (4 severity x 5 confidence tiers) but only 3 action levels. The 2x2 matrix maps every finding to a clear action. Low-confidence findings don't get auto-fixed — they get caveats or appendix placement. High-confidence findings get action proportional to severity.
-
-Format: `[SEVERITY] (confidence: N/10) file:line — description`
-
-## Step 6: Fix-First Review
-
-Every finding gets action.
-
-### 6a: Auto-fix Critical and Important
-
-Apply the fix directly. Output one line per fix:
-`[AUTO-FIXED] [file:line] Problem → what you did`
-
-Do not commit, push, or create PRs. Leave modified files in the worktree for the outer shipping flow.
-
-### 6b: Batch-ask about Minor findings
-
-If Minor findings remain, present in one batch:
-
-```
-N minor issues found:
-
-1. [MINOR] file:line — description
-   Fix: recommendation
-   → A) Fix  B) Skip
-
-RECOMMENDATION: Fix because...
-```
-
-### 6c: Apply user-approved fixes
-
-Apply fixes where user chose "Fix." Do not commit.
-
-## Step 7: Output Summary
-
-```
-Pre-Landing Review: N issues (X auto-fixed, Y asked, Z skipped)
-  Critical: N  Important: N  Minor: N  Nit: N
-  Modified files: [list]
-  Verification evidence: [commands observed | missing]
-  Scope/spec status: [clean | drift | requirements missing]
-  Remaining concerns: [none | list]
-  Residual risk: [none | list]
-  Status: DONE | DONE_WITH_CONCERNS (if Minor findings remain)
-```
-
-If no issues: "Pre-Landing Review: No issues found. Status: DONE."
-
-## Important Rules
-
-- Read the FULL diff before commenting. Don't flag issues already addressed.
-- Be terse. One line problem, one line fix.
-- Only flag real problems. Skip anything that's fine.
-- Never commit, push, or create PRs. Focus on reviewing, not shipping.
-- Never accept "implemented" or "verified" without evidence in the diff, test output, or explicit user-provided command output.
-- Verify your claims. Cite specific lines. Never say "probably fine."
+- `HARD STOPS` must appear first.
+- Every hard stop needs a file/line or artifact reference when available.
+- `SUMMARY` must include changed files, verification evidence, residual risk,
+  and status.
+- If Review finds scope drift, missing requirements, or missing verification,
+  status is `BLOCKED` until fixed or explicitly approved by the user.
 
 ## Known Pitfalls
 
-**Auto-fixing without understanding the full context.** The diff showed a SQL query with string concatenation. The reviewer auto-fixed it with parameterized queries. The fix broke the application because the query was dynamically constructed across three functions — the parameterized version couldn't handle the dynamic table name.
+**Nit flood hides the real issue.** A review produced 40 style comments and one
+SQL injection finding. The developer fixed the easy comments and missed the
+security bug.
 
-*What went wrong:* The Critical auto-fix was applied based on a pattern match without understanding how the code actually used the query. "SQL injection risk" was the correct pattern, but the fix was wrong for this specific usage.
+Prevention: hard stops first; concerns second; style notes only when they change
+delivery risk.
 
-*Prevention:* Auto-fix Critical and Important findings, but verify the fix compiles and tests pass immediately after. If the fix breaks something, read the surrounding context before re-fixing. Pattern matching catches issues; understanding context produces correct fixes.
+**Review accepts a build summary as evidence.** The summary said "tests pass",
+but no command output was visible.
 
-**Flagging issues already addressed later in the diff.** The reviewer flagged a missing null check on line 45. But line 62 in the same diff added a null-safe wrapper that handles it. The finding was correct in isolation but wrong in context.
+Prevention: completion claims need observed command output, diff evidence, or
+explicit user-provided evidence.
 
-*What went wrong:* The Important Rule says "Read the FULL diff before commenting." The reviewer processed the diff linearly, flagging issues as they appeared, rather than reading the entire diff first.
+**Scope drift looks like cleanup.** A task approved `--json` output, but the diff
+also rewrote command discovery.
 
-*Prevention:* Step 5 (Two-Pass Review) applies checks to the FULL diff, not line by line. Read everything first. Then review. A finding in the first half of the diff may be addressed in the second half.
-
-**Nit-finding explosion drowning real issues.** The review produced 47 findings: 2 Critical, 3 Important, 6 Minor, and 36 Nits about naming conventions, comment style, and formatting. The 5 real findings were buried in noise. The developer fixed all 36 Nits first (easy wins) and missed one Critical.
-
-*What went wrong:* The reviewer treated every style observation as a finding. Nit severity exists to de-prioritize these, but 36 of them still dominated the output.
-
-*Prevention:* "Only flag real problems. Skip anything that's fine." Nits should be rare — mention 2-3 at most in passing, not catalogued. If the code style is consistently different from your preference, make ONE note about the pattern, not 36 individual findings. The signal-to-noise ratio determines whether the review is useful.
+Prevention: reconstruct intent before code-quality review. Good code outside
+scope is still a delivery failure.
