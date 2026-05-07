@@ -90,7 +90,7 @@ Before writing tasks, map every file that will be created or modified:
 
 ### Task Granularity
 
-Each task is a coherent unit of work — one responsibility, one set of files, one TDD anchor. The TDD cycle (write test → verify fail → implement → verify pass → commit) is enforced by `references/tdd.md` at build time, not repeated in every task.
+Each task is a coherent unit of work — one responsibility, one set of files, one TDD anchor. The TDD cycle (write test → verify fail → implement → verify pass) is enforced by `/taku-build` at build time, not repeated in every task.
 
 Instead of enumerating every TDD step per task, define WHAT the task must deliver: behavior, contracts, key assertions, and edge cases. The build agent reads the spec and applies TDD against it.
 
@@ -98,7 +98,7 @@ Instead of enumerating every TDD step per task, define WHAT the task must delive
 
 ### Plan Document Header
 
-Use `templates/plan.md` as the starting scaffold for Standard and Deep plans. The rules below override the template if they differ.
+Use `references/plan.md` as the local starting scaffold for Standard and Deep plans. The rules below override the scaffold if they differ.
 
 Every plan starts with:
 
@@ -261,7 +261,7 @@ Only stop before BUILD if the plan changed scope materially, introduced a costly
 
 **TDD ordering violated — code step before test step.** The implementer wrote the function, then wrote tests that pass against it — proving nothing.
 
-*Prevention:* TDD is enforced by `references/tdd.md` at build time, not by the plan. Each task's spec defines testable behavior, and the build agent applies the write-test-first cycle automatically.
+*Prevention:* TDD is enforced by `/taku-build` at build time, not by the plan. Each task's spec defines testable behavior, and the build agent applies the write-test-first cycle automatically.
 
 **Plan exceeds 15 tasks / 130+ steps.** Context limits were hit at task 14. The second half produced degraded quality.
 

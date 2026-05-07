@@ -11,7 +11,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from validate_taku import check_reflect_script
+from validate_taku import check_install_safe_references, check_reflect_script, check_skill_inventory
 
 
 def _make_learnings(root: Path, executable: bool = True) -> Path:
@@ -69,3 +69,31 @@ def test_missing_commands_error_on_all_platforms() -> None:
                 check_reflect_script(root / platform_name, errors, strict=True)
             missing = [e for e in errors if "missing command" in e]
             assert missing, f"Expected missing-command errors on {platform_name}, got: {errors}"
+
+
+def test_skill_inventory_requires_exact_taku_commands() -> None:
+    """Validator should reject extra installed skill directories."""
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        for skill in ("think", "plan", "build", "review", "debug", "reflect", "compact", "extra"):
+            skill_dir = root / "skills" / skill
+            skill_dir.mkdir(parents=True)
+            (skill_dir / "SKILL.md").write_text("---\nname: taku\n---\n", encoding="utf-8")
+        errors: list[str] = []
+        check_skill_inventory(root, errors)
+        assert any("unexpected skill directory" in e for e in errors), errors
+
+
+def test_installed_skills_cannot_reference_root_templates() -> None:
+    """Installed skills must not depend on root-level runtime templates."""
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        skill_dir = root / "skills" / "think"
+        skill_dir.mkdir(parents=True)
+        (skill_dir / "SKILL.md").write_text(
+            "Use templates/design-doc.md as the scaffold.\n",
+            encoding="utf-8",
+        )
+        errors: list[str] = []
+        check_install_safe_references(root, errors)
+        assert any("non-installed runtime reference" in e for e in errors), errors

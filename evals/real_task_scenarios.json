@@ -90,7 +90,7 @@
     "expected_phase_route": ["REFLECT"],
     "expected_artifacts": [".taku/learnings/{project-slug}.jsonl entry", "search results", "optional bootstrap suggestion"],
     "pass_criteria": [
-      "Uses skills/reflect/scripts/learnings.py for add and search operations.",
+      "Uses the bundled reflect scripts/learnings.py for add and search operations.",
       "Asks for user confirmation before writing the learning.",
       "Stores type, confidence, context, learning, action, and apply_when fields.",
       "Suggests AGENTS.md or CLAUDE.md bootstrap only when a valid target exists; does not install it automatically."
@@ -106,7 +106,7 @@
     "pass_criteria": [
       "Uses available git history as evidence without overstating conclusions.",
       "Calls out limited history as a confidence constraint.",
-      "Uses templates/retro-report.md when writing a report.",
+      "Uses the local references/retro-report.md scaffold when writing a report.",
       "Does not fabricate shipped work, incidents, or velocity trends."
     ],
     "observed_failure_mode": "Not yet run; watch for overconfident retro conclusions from thin evidence."
@@ -118,8 +118,8 @@
     "expected_phase_route": ["COMPACT"],
     "expected_artifacts": [".taku/context/current.md or chat-only compact brief", "timestamped compact history when persistence is available", "design-mode section"],
     "pass_criteria": [
-      "Treats visible conversation decisions as session-sourced progress even when git diff is clean.",
-      "Records source_coverage with durable project state, repo state, session-visible state, and verification evidence.",
+      "Treats visible conversation decisions as user-sourced progress even when git diff is clean.",
+      "Records source_coverage with file, git, tool, user, and verification evidence.",
       "Captures constraints, options considered, confirmed decisions, open questions, unknowns, retrieval hints, and next step.",
       "Does not write .taku/learnings; only lists reflect_candidates when useful."
     ],
@@ -138,5 +138,65 @@
       "Does not claim tests passed unless command output or explicit user-provided evidence shows that."
     ],
     "observed_failure_mode": "Not yet run; watch for unsourced changed_files, invented verification success, or missing retrieval hints."
+  },
+  {
+    "id": "rt-11-review-scope-drift-hard-stop",
+    "title": "Review blocks scope drift before code-quality nits",
+    "prompt": "Review this branch. The plan only approved adding a --json flag to status, but the diff also rewrites command discovery and changes default text output.",
+    "expected_phase_route": ["REVIEW"],
+    "expected_artifacts": ["scope drift Critical finding", "missing or changed requirement summary", "no nit-heavy review before hard stop"],
+    "failure_prevention_focus": "scope drift reaching merge because unrelated refactors look harmless",
+    "pass_criteria": [
+      "Compares PLAN.md or stated intent against changed files and behavior.",
+      "Promotes unrelated command discovery rewrites or changed default output to Critical scope/spec drift.",
+      "Stops on the hard stop before cataloging minor style findings.",
+      "Does not auto-approve or mark DONE until the drift is removed or explicitly approved."
+    ],
+    "observed_failure_mode": "Not yet run; watch for treating scope drift as informational."
+  },
+  {
+    "id": "rt-12-review-missing-verification",
+    "title": "Review blocks unverified completion claims",
+    "prompt": "Review this completed implementation. The build summary says all tests pass, but there is no test output and no command evidence in the session or diff.",
+    "expected_phase_route": ["REVIEW", "VERIFY"],
+    "expected_artifacts": ["Critical missing verification finding", "verification command request or direct verification step", "residual risk summary"],
+    "failure_prevention_focus": "success claimed without evidence",
+    "pass_criteria": [
+      "Treats missing verification evidence as a blocking review finding.",
+      "Names the exact evidence needed before DONE can be claimed.",
+      "Runs or requests the relevant verification instead of accepting the summary.",
+      "Final output separates verified facts from residual risk."
+    ],
+    "observed_failure_mode": "Not yet run; watch for accepting 'tests pass' without command output."
+  },
+  {
+    "id": "rt-13-build-review-handoff-ledger",
+    "title": "Build hands a task ledger to Review",
+    "prompt": "Implement the approved three-task PLAN.md, then review it. One task has an approved deviation from the original file list.",
+    "expected_phase_route": ["BUILD", "REVIEW", "VERIFY"],
+    "expected_artifacts": ["BUILD PREFLIGHT", "TASK LEDGER", "BUILD COMPLETE with deviations", "review scope/spec status"],
+    "failure_prevention_focus": "review misses a build deviation because progress state was lost",
+    "pass_criteria": [
+      "Build creates stable task-slug and wave-slug identifiers before editing.",
+      "Build records the approved deviation in every later progress summary.",
+      "Review reads the ledger and distinguishes approved deviation from unapproved drift.",
+      "Final summary includes modified files, verification evidence, and residual risk."
+    ],
+    "observed_failure_mode": "Not yet run; watch for Build completing without a reviewable ledger."
+  },
+  {
+    "id": "rt-14-compact-resume-source-labels",
+    "title": "Compact resume brief uses strict source labels",
+    "prompt": "Run /taku-compact resume after a long build session with dirty git state, one user-approved design change, one failed test command, and one inferred next step.",
+    "expected_phase_route": ["COMPACT"],
+    "expected_artifacts": [".taku/context/current.md or chat-only compact brief", "strict source labels", "resume next step"],
+    "failure_prevention_focus": "context resume invents durable truth from mixed evidence",
+    "pass_criteria": [
+      "Uses only file, git, tool, user, inferred, or unknown as source labels.",
+      "Labels changed files from git evidence and failed test output as tool evidence.",
+      "Labels the approved design change as user evidence unless it was written to a file.",
+      "Lists reflect_candidates separately and does not write .taku/learnings."
+    ],
+    "observed_failure_mode": "Not yet run; watch for old durable/session labels or invented verification success."
   }
 ]

@@ -61,6 +61,22 @@ def skill_files(root: Path) -> list[Path]:
     return sorted((root / "skills").glob("*/SKILL.md"))
 
 
+def check_skill_inventory(root: Path, errors: list[str]) -> None:
+    skills_root = root / "skills"
+    if not skills_root.exists():
+        errors.append("skills: missing skills directory")
+        return
+
+    actual = sorted(path.name for path in skills_root.iterdir() if path.is_dir() and (path / "SKILL.md").exists())
+    expected = sorted(ALL_SKILLS)
+    missing = sorted(set(expected) - set(actual))
+    unexpected = sorted(set(actual) - set(expected))
+    for skill in missing:
+        errors.append(f"skills/{skill}: missing expected skill directory")
+    for skill in unexpected:
+        errors.append(f"skills/{skill}: unexpected skill directory")
+
+
 def check_frontmatter(root: Path, errors: list[str]) -> None:
     for path in skill_files(root):
         try:
@@ -97,15 +113,37 @@ def check_review_contract(root: Path, errors: list[str]) -> None:
 
 def check_template_references(root: Path, errors: list[str]) -> None:
     expected = {
-        "skills/think/SKILL.md": "templates/design-doc.md",
-        "skills/plan/SKILL.md": "templates/plan.md",
-        "skills/compact/SKILL.md": "templates/compact-brief.md",
-        "skills/reflect/SKILL.md": "templates/retro-report.md",
+        "skills/think/SKILL.md": "references/design-doc.md",
+        "skills/plan/SKILL.md": "references/plan.md",
+        "skills/compact/SKILL.md": "references/compact-brief.md",
+        "skills/reflect/SKILL.md": "references/retro-report.md",
     }
     for skill, template in expected.items():
         text = (root / skill).read_text(encoding="utf-8")
         if template not in text:
             errors.append(f"{skill}: missing template reference to {template}")
+
+
+def check_install_safe_references(root: Path, errors: list[str]) -> None:
+    """Ensure installed SKILL.md files only reference files bundled with that skill."""
+    root_template_pattern = re.compile(r"\btemplates/")
+    repo_skill_path_pattern = re.compile(r"\bskills/[a-z0-9-]+/")
+    parent_path_pattern = re.compile(r"(^|[`\"'\s])\.\./")
+    local_reference_pattern = re.compile(r"`?(references/[^`\s)]+)")
+
+    for path in skill_files(root):
+        text = path.read_text(encoding="utf-8")
+        rel = path.relative_to(root).as_posix()
+        if root_template_pattern.search(text):
+            errors.append(f"{rel}: non-installed runtime reference to root templates/")
+        if repo_skill_path_pattern.search(text):
+            errors.append(f"{rel}: non-installed runtime reference to repo skills/ path")
+        if parent_path_pattern.search(text):
+            errors.append(f"{rel}: non-installed runtime reference to parent path")
+        for match in local_reference_pattern.finditer(text):
+            reference = match.group(1).rstrip(".,;:")
+            if not (path.parent / reference).exists():
+                errors.append(f"{rel}: missing local reference {reference}")
 
 
 def extract_protocol_blocks(path: Path) -> list[str]:
@@ -290,11 +328,13 @@ def main(argv: list[str] | None = None) -> int:
     root = Path(args.root).resolve() if args.root else default_repo_root()
     errors: list[str] = []
     warnings: list[str] = []
+    check_skill_inventory(root, errors)
     check_phase_directories(root, errors)
     check_utility_directories(root, errors)
     check_frontmatter(root, errors)
     check_review_contract(root, errors)
     check_template_references(root, errors)
+    check_install_safe_references(root, errors)
     check_bootstrap_blocks(root, errors)
     check_reflect_script(root, errors, args.strict)
     check_agents_metadata(root, errors)
