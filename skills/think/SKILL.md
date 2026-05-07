@@ -16,7 +16,7 @@ description: >
 
 Three modes adapt to request complexity. No ceremony for simple requests. Full rigor for complex ones.
 
-Shared discipline: when this repository is available, use `../shared/discipline-principles.md` for Taku-wide `[IRON LAW]` and `[GUIDANCE]` semantics.
+Rule labels: `[IRON LAW]` means a non-negotiable correctness constraint. `[GUIDANCE]` means a strong default that may adapt when context justifies it.
 
 [IRON LAW] No implementation until the selected design path is approved.
 

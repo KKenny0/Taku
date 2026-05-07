@@ -23,7 +23,7 @@ allowed-tools:
 
 Three modes: capture learnings (default), weekly retrospective, or codify recurring patterns into skills.
 
-Shared discipline: when this repository is available, use `../shared/discipline-principles.md` for Taku-wide `[IRON LAW]` and `[GUIDANCE]` semantics.
+Rule labels: `[IRON LAW]` means a non-negotiable correctness constraint. `[GUIDANCE]` means a strong default that may adapt when context justifies it.
 
 ## Mode Selection
 

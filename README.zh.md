@@ -49,8 +49,8 @@ framework。它真正耐用的价值，是一组防止 agentic coding 失败的�
 scope drift、事后合理化、缺少证据的完成声明，以及只修症状不找根因。
 
 当前方向是 **principles over procedures**。各阶段 skill 保留自己需要的本地
-流程，但共享纪律语言收敛到 `skills/shared/discipline-principles.md`，让 Taku
-随着模型能力提升自然变轻，而不是变成更硬的流程笼子。
+流程，并在每个已安装 skill 内保留极简规则标签，让 Taku 随着模型能力提升
+自然变轻，而不是变成更硬的流程笼子。
 
 ## 30 秒理解
 
