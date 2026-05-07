@@ -1,0 +1,8 @@
+{"id": "rt-01", "title": "Small bugfix", "verdict": "PARTIAL", "cost": 0.08}
+{"id": "rt-02", "title": "Ambiguous feature request", "verdict": "PASS", "cost": 0.29}
+{"id": "rt-03", "title": "Compact feature flag", "verdict": "PARTIAL", "cost": 0.15}
+{"id": "rt-04", "title": "Build execution mode", "verdict": "SKIP", "cost": 0.0}
+{"id": "rt-05", "title": "Review no diff", "verdict": "PASS", "cost": 0.25}
+{"id": "rt-06", "title": "SQL injection review", "verdict": "PASS", "cost": 0.25}
+{"id": "rt-07", "title": "Reflect learning flow", "verdict": "PASS", "cost": 0.74}
+{"id": "rt-08", "title": "Retro limited history", "verdict": "PASS", "cost": 0.85}

@@ -4,14 +4,18 @@
 
 <h1 align="center">Taku 琢</h1>
 
-<p align="center"><strong>Disciplined coding delivery for agents when scope, review, and verification matter.</strong></p>
+<p align="center"><strong>A disciplined coding delivery harness for agents when scope, review, and verification matter.</strong></p>
 
 <p align="center">
   <a href="README.zh.md">中文 README</a>
   ·
   <a href="#quick-install">Quick Install</a>
   ·
-  <a href="#core-workflow">Core Workflow</a>
+  <a href="CASE_STUDIES.md">Case Studies</a>
+  ·
+  <a href="evals/evidence-report.md">Evidence</a>
+  ·
+  <a href="#core-workflow">Workflow</a>
   ·
   <a href="#faq">FAQ</a>
 </p>
@@ -26,30 +30,44 @@
 
 > 如切如磋，如琢如磨 — Remove ambiguity until the shape is correct.
 
-Taku is a coding delivery discipline pack for Claude Code / coding agents. It routes real repository work through Think -> Plan -> Build -> Review -> Verify -> Reflect, with `/taku-compact` for long-task context control.
+Taku is a coding delivery harness for Claude Code / coding agents. It is not
+trying to make models weaker or more scripted. It keeps the few gates that still
+matter when models get stronger: scope, evidence, review, root cause, and
+recoverable context.
 
 ## Why Taku
 
-The most common failures when using coding agents:
+AI coding failures usually happen at delivery time, not generation time. The
+model can write plausible code quickly; the expensive misses are:
 
 - **Scope drift** — requirements silently expand during implementation
+- **Missing requirements** — the code is clean but does not implement the agreed behavior
 - **Weak review** — code "looks fine" but trust-boundary bugs and conditional side effects are missed
-- **Random patching** — the AI keeps changing code until the output changes, then calls it solved
+- **Missing verification** — success is claimed without command evidence
+- **Symptom patching** — the AI changes code until the output changes, then calls it solved
 - **Context loss** — the agent forgets earlier decisions and constraints in long tasks
 - **Long-term memory pollution** — the agent writes low-quality "learnings" that add noise to future tasks
 
-Taku prevents these failures with a structured delivery loop.
+Taku prevents these failures with delivery gates, not ceremony. The workflow is
+the mechanism; failure prevention is the product.
+
+Evidence:
+
+- [Failure-prevention case studies](CASE_STUDIES.md)
+- [Evaluation and dogfood evidence report](evals/evidence-report.md)
+- [Real-task eval scenarios](evals/real_task_scenarios.json)
 
 ## Design Philosophy
 
-Taku is a coding delivery discipline pack, not a generic workflow framework,
+Taku is a coding delivery harness, not a generic workflow framework,
 protocol, or domain-pack system. Its durable value is the set of judgment constraints that prevent
 agentic coding failures: scope drift, post-hoc rationalization, weak evidence,
 and symptom-level fixes.
 
-The current direction is **principles over procedures**. Phase skills keep the
-local process they need, and each installed skill carries its own compact rule
-labels so the pack can get lighter instead of more rigid as models improve.
+The current direction is **principles over procedures**. A good harness aligns
+with how the model works; it does not fight the model. As models improve, Taku
+should get lighter by removing weak-model workarounds while preserving the gates
+that prevent expensive delivery failures.
 
 ## 30-Second Overview
 
@@ -114,6 +132,22 @@ Expected shape:
 3. `/taku-plan` writes a compact plan or the agent proceeds inline when appropriate
 4. `/taku-build` implements with a test anchor, then routes to review and verification
 
+### First-Run Smoke Checklist
+
+Use this to confirm a new install is healthy:
+
+```bash
+npx skills add KKenny0/Taku -l
+python3 scripts/validate_taku.py --strict
+```
+
+Expected:
+
+- exactly 7 skills are listed: `taku-think`, `taku-plan`, `taku-build`, `taku-review`, `taku-debug`, `taku-reflect`, `taku-compact`
+- Quick mode can run a tiny task with a chat-visible mini design
+- Build reports `BUILD PREFLIGHT`, `BUILD UPDATE`, and `BUILD COMPLETE`
+- Review reports `HARD STOPS`, `CONCERNS`, and `SUMMARY`
+
 ## Core Workflow
 
 | Phase   | Command         | Use it when                               | Main output                                            |
@@ -136,6 +170,9 @@ Expected shape:
 `/taku-compact` supports `resume`, `handoff`, `debug`, `review`, `design`, and `research` modes. It only preserves active task context; long-term learnings still require user-approved `/taku-reflect`.
 
 ## What Makes It Different
+
+Taku's public surface is the same 7 commands, but the product core is narrower:
+Build and Review make delivery state visible enough to block bad handoffs.
 
 ### 1. It scales the process to the task
 
@@ -208,6 +245,18 @@ The fifth phase is a verification gate, not a second planning phase. When checks
 | Long task, need to hand off or resume   | `/taku-compact`                          |
 | Want to capture learnings or do a retro | `/taku-reflect`                          |
 
+## When Not To Use Taku
+
+Use a direct prompt or a lighter habit skill when the task is:
+
+- a one-off tiny edit with no review or verification risk
+- writing, reading, research, or health-audit work
+- a broad engineering habit improvement where no repo change is being delivered
+- exploratory conversation where you do not intend to implement anything
+
+Taku is strongest when a real repository change has scope, review, verification,
+debugging, or long-session recovery risk.
+
 ## Installation Details
 
 ### Individual Skill Install
@@ -267,8 +316,10 @@ Taku/
 ├── logo.png
 ├── evals/
 │   ├── README.md
+│   ├── evidence-report.md
 │   └── real_task_scenarios.json
 ├── scripts/
+│   ├── eval_summary.py
 │   └── validate_taku.py  # Self-checks for this skill pack
 ├── skills/
 │   ├── think/
@@ -314,7 +365,14 @@ Run the built-in self-check before publishing changes:
 python3 scripts/validate_taku.py
 ```
 
-The default validator also checks the real-task evaluation suite in `evals/`. Those scenarios are manual regression tests for routing and artifacts, not a synthetic benchmark. Use them when changing phase instructions, install behavior, or README claims.
+The default validator also checks the real-task evaluation suite, compact source
+labels, evidence assets, and README claim drift. Those
+scenarios are manual regression tests for routing and artifacts, not a synthetic
+benchmark. Use them when changing phase instructions, install behavior, or
+README claims.
+
+Root `templates/` are authoring copies only. Installed skills must use their own
+local `references/` and `scripts/` directories at runtime.
 
 ## Who This Is For
 
@@ -360,7 +418,7 @@ Taku stands on two strong foundations:
 - **[Superpowers](https://github.com/obra/superpowers)** by [Jesse Vincent](https://github.com/obra): engineering discipline, TDD enforcement, systematic debugging, and evidence-based completion
 - **[gstack](https://github.com/garrytan/gstack)** by [Garry Tan](https://github.com/garrytan): sprint thinking, product pressure-testing, QA methodology, and parallel execution patterns
 
-Taku is not a clone of either. It is a narrower, more opinionated synthesis around a six-phase workflow and reusable agent habits.
+Taku is not a clone of either. It is a narrower synthesis around coding delivery gates and reusable agent habits.
 
 ## License
 

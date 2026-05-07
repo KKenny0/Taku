@@ -14,6 +14,15 @@ This directory holds a small manual regression suite for Taku behavior. It is no
 - `failure_prevention_focus` — optional note describing the concrete delivery
   failure this scenario is meant to prevent
 
+Dogfood summaries live in `evidence-report.md`. Each summary records:
+
+- route used
+- evidence source
+- prevented failure
+- raw prompting comparison
+- friction score
+- net verdict
+
 ## How To Run
 
 1. Create or choose a disposable repo with enough structure for the scenario.
@@ -24,6 +33,11 @@ This directory holds a small manual regression suite for Taku behavior. It is no
 6. Update `observed_failure_mode` with the concrete miss, or `Passed on YYYY-MM-DD: <short note>`.
 
 Keep observations specific. "Bad output" is not useful; "Skipped `/taku-debug` and patched before root-cause investigation" is useful. Prefer failure-prevention language: "Blocked unapproved scope drift before merge" is stronger evidence than "Review was thorough."
+
+For dogfood, treat retrospective evidence honestly. Mark whether the record came
+from a current session, a commit, an existing evidence report, or a resumed
+session recap. Do not claim fresh verification unless the command output was
+actually observed.
 
 ## Validation
 

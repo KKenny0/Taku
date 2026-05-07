@@ -4,14 +4,18 @@
 
 <h1 align="center">Taku 琢</h1>
 
-<p align="center"><strong>面向 coding agent 的可靠交付纪律：当 scope、review 和 verification 很重要时使用。</strong></p>
+<p align="center"><strong>面向 coding agent 的可靠交付 harness：当 scope、review 和 verification 很重要时使用。</strong></p>
 
 <p align="center">
   <a href="README.md">English</a>
   ·
   <a href="#快速安装">快速安装</a>
   ·
-  <a href="#核心工作流">核心工作流</a>
+  <a href="CASE_STUDIES.md">案例</a>
+  ·
+  <a href="evals/evidence-report.md">证据</a>
+  ·
+  <a href="#核心工作流">工作流</a>
   ·
   <a href="#faq">FAQ</a>
 </p>
@@ -26,29 +30,36 @@
 
 > 如切如磋，如琢如磨 — 持续消除歧义，直到问题的形状足够准确。
 
-Taku 是一组面向 Claude Code / coding agent 的 coding delivery discipline skills，把真实仓库工作拆成 Think -> Plan -> Build -> Review -> Verify -> Reflect，并通过 `/taku-compact` 控制长任务上下文。
+Taku 是一组面向 Claude Code / coding agent 的 coding delivery harness。它不是把模型锁进固定流程，而是保留那些模型变强后仍然重要的交付门禁：scope、evidence、review、root cause 和可恢复上下文。
 
 ## 为什么需要 Taku
 
-使用 coding agent 时最常见的失败：
+AI coding 的失败通常发生在 delivery，而不是 generation。模型可以很快写出看起来合理的代码，真正昂贵的是这些交付失败：
 
 - **Scope drift** — 需求在实现过程中悄悄膨胀
+- **Missing requirement** — 代码写得不错，但没有实现已确认的行为
 - **弱 review** — 代码"看起来没问题"，但 trust-boundary bug 和条件副作用被忽略
-- **随机 patch** — AI 反复修改代码直到输出变化，然后宣布已解决
+- **Missing verification** — 没有命令证据就宣布完成
+- **症状 patch** — AI 反复修改代码直到输出变化，然后宣布已解决
 - **上下文丢失** — 长任务中 agent 忘记之前的决策和约束
 - **长期记忆污染** — agent 频繁写入低质量"经验"，后续任务被噪声干扰
 
-Taku 用结构化的交付循环防止这些失败。
+Taku 用交付门禁防止这些失败。流程只是实现机制，failure prevention 才是产品核心。
+
+证据：
+
+- [Failure-prevention case studies](CASE_STUDIES.md)
+- [Evaluation and dogfood evidence report](evals/evidence-report.md)
+- [Real-task eval scenarios](evals/real_task_scenarios.json)
 
 ## 设计哲学
 
-Taku 是面向 coding agent 的交付纪律 skill pack，不是通用 workflow
+Taku 是面向 coding agent 的交付 harness，不是通用 workflow
 framework、protocol 或 domain-pack 系统。它真正耐用的价值，是一组防止 agentic coding 失败的判断约束：
 scope drift、事后合理化、缺少证据的完成声明，以及只修症状不找根因。
 
-当前方向是 **principles over procedures**。各阶段 skill 保留自己需要的本地
-流程，并在每个已安装 skill 内保留极简规则标签，让 Taku 随着模型能力提升
-自然变轻，而不是变成更硬的流程笼子。
+当前方向是 **principles over procedures**。好的 harness 对齐模型运作原理，
+不与模型能力对抗。模型越强，Taku 应该越轻：删除弱模型补丁，保留防止高成本交付失败的门禁。
 
 ## 30 秒理解
 
@@ -113,6 +124,22 @@ python3 scripts/validate_taku.py --install
 3. `/taku-plan` 写紧凑计划，或任务足够小时轻量交接
 4. `/taku-build` 基于 test anchor 实现，然后进入 review 和 verification
 
+### First-Run Smoke Checklist
+
+用这个 checklist 确认新安装可用：
+
+```bash
+npx skills add KKenny0/Taku -l
+python3 scripts/validate_taku.py --strict
+```
+
+预期：
+
+- 只列出 7 个 skills：`taku-think`、`taku-plan`、`taku-build`、`taku-review`、`taku-debug`、`taku-reflect`、`taku-compact`
+- Quick mode 能用 chat-visible mini design 跑一个小任务
+- Build 输出 `BUILD PREFLIGHT`、`BUILD UPDATE`、`BUILD COMPLETE`
+- Review 输出 `HARD STOPS`、`CONCERNS`、`SUMMARY`
+
 ## 核心工作流
 
 | 阶段    | 命令            | 使用时机                   | 主要输出                                    |
@@ -135,6 +162,8 @@ python3 scripts/validate_taku.py --install
 `/taku-compact` 支持 `resume`、`handoff`、`debug`、`review`、`design` 和 `research` modes。它只整理当前任务上下文；长期经验通过 `/taku-reflect` 经用户批准后沉淀。
 
 ## Taku 的不同之处
+
+Taku 的公开命令仍然是 7 个，但产品核心更窄：Build 和 Review 让交付状态足够可审计，从而阻止坏 handoff。
 
 ### 1. 根据任务规模调整流程强度
 
@@ -207,6 +236,17 @@ Review 产物进入 `DESIGN.md`，`PLAN.md` 保持纯执行内容——goal、ta
 | 长任务要交接或恢复           | `/taku-compact`                          |
 | 想沉淀经验或做回顾           | `/taku-reflect`                          |
 
+## 什么时候不该用 Taku
+
+这些情况更适合 direct prompt 或更轻的 habit skill：
+
+- 没有 review / verification 风险的一次性极小改动
+- 写作、阅读、研究、health audit
+- 不涉及真实 repo change 的泛工程习惯增强
+- 只聊天探索、暂时不准备实现
+
+Taku 最适合真实仓库变更，尤其是有 scope、review、verification、debugging 或长任务恢复风险时。
+
 ## 安装详情
 
 ### 单独安装某个 skill
@@ -266,8 +306,10 @@ Taku/
 ├── logo.png
 ├── evals/
 │   ├── README.md
+│   ├── evidence-report.md
 │   └── real_task_scenarios.json
 ├── scripts/
+│   ├── eval_summary.py
 │   └── validate_taku.py  # skill pack 自检脚本
 ├── skills/
 │   ├── think/
@@ -312,7 +354,9 @@ Taku 的方法可以跨平台使用。基于 subagents 的 parallelism 取决于
 python3 scripts/validate_taku.py
 ```
 
-默认 validator 也会检查 `evals/` 中的真实任务评估套件。这些场景是用来回归验证 routing 与 artifacts 的手动测试，不是 synthetic benchmark。修改阶段说明、安装行为或 README 主张时，应该使用这些场景做行为检查。
+默认 validator 也会检查真实任务评估套件、compact source labels、evidence assets 和 README claim drift。这些场景是用来回归验证 routing 与 artifacts 的手动测试，不是 synthetic benchmark。修改阶段说明、安装行为或 README 主张时，应该使用这些场景做行为检查。
+
+根目录 `templates/` 只是 authoring copies。安装后的 skills 运行时必须使用各自本地的 `references/` 和 `scripts/`。
 
 ## 适合谁使用
 
@@ -358,7 +402,7 @@ Taku 建立在两个重要基础之上：
 - **[Superpowers](https://github.com/obra/superpowers)** by [Jesse Vincent](https://github.com/obra)：engineering discipline、TDD enforcement、systematic debugging、evidence-based completion。
 - **[gstack](https://github.com/garrytan/gstack)** by [Garry Tan](https://github.com/garrytan)：sprint thinking、product pressure-testing、QA methodology、parallel execution patterns。
 
-Taku 是围绕六阶段 workflow 和可复用 agent habits 做出的更窄、更强调工程纪律的综合设计。
+Taku 是围绕 coding delivery gates 和可复用 agent habits 做出的更窄、更强调工程纪律的综合设计。
 
 ## License
 
