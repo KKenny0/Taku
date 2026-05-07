@@ -11,7 +11,7 @@ description: >
 Use `/taku-compact` to compress active work into a recoverable brief. It is a
 bonus utility skill, not a seventh Taku phase.
 
-Shared discipline: when this repository is available, use `../shared/discipline-principles.md` for Taku-wide `[IRON LAW]` and `[GUIDANCE]` semantics.
+Rule labels: `[IRON LAW]` means a non-negotiable correctness constraint. `[GUIDANCE]` means a strong default that may adapt when context justifies it.
 
 Compact preserves current task state. Reflect preserves long-term learnings.
 Never write `.taku/learnings` from this skill. You may list

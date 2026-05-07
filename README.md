@@ -50,9 +50,8 @@ agentic coding failures: scope drift, post-hoc rationalization, weak evidence,
 and symptom-level fixes.
 
 The current direction is **principles over procedures**. Phase skills keep the
-local process they need, but shared discipline language lives in
-`skills/shared/discipline-principles.md` so the pack can get lighter instead of
-more rigid as models improve.
+local process they need, and each installed skill carries its own compact rule
+labels so the pack can get lighter instead of more rigid as models improve.
 
 ## 30-Second Overview
 
