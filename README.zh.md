@@ -4,14 +4,18 @@
 
 <h1 align="center">Taku 琢</h1>
 
-<p align="center"><strong>面向 coding agent 的工程工作流 skills，用来控制 scope、上下文与交付质量。</strong></p>
+<p align="center"><strong>面向 coding agent 的可靠交付 harness：当 scope、review 和 verification 很重要时使用。</strong></p>
 
 <p align="center">
   <a href="README.md">English</a>
   ·
   <a href="#快速安装">快速安装</a>
   ·
-  <a href="#核心工作流">核心工作流</a>
+  <a href="CASE_STUDIES.md">案例</a>
+  ·
+  <a href="evals/evidence-report.md">证据</a>
+  ·
+  <a href="#核心工作流">工作流</a>
   ·
   <a href="#faq">FAQ</a>
 </p>
@@ -26,31 +30,36 @@
 
 > 如切如磋，如琢如磨 — 持续消除歧义，直到问题的形状足够准确。
 
-Taku 是一组面向 Claude Code / coding agent 的 workflow skills，把真实工程任务拆成 Think → Plan → Build → Review → Verify → Reflect，并通过 `/taku-compact` 控制长任务上下文。
-
-> **状态：** Beta workflow，已通过 9 个 eval scenarios + interactive dogfood 验证（5 PASS, 3 PARTIAL, 0 FAIL）。Taku 是带明确取向的 agentic coding 流程，适合结构化工程任务；宿主不支持 subagents 时保留 wave plan 但按顺序执行。
+Taku 是一组面向 Claude Code / coding agent 的 coding delivery harness。它不是把模型锁进固定流程，而是保留那些模型变强后仍然重要的交付门禁：scope、evidence、review、root cause 和可恢复上下文。
 
 ## 为什么需要 Taku
 
-使用 coding agent 时最常见的失败：
+AI coding 的失败通常发生在 delivery，而不是 generation。模型可以很快写出看起来合理的代码，真正昂贵的是这些交付失败：
 
 - **Scope drift** — 需求在实现过程中悄悄膨胀
+- **Missing requirement** — 代码写得不错，但没有实现已确认的行为
 - **弱 review** — 代码"看起来没问题"，但 trust-boundary bug 和条件副作用被忽略
-- **随机 patch** — AI 反复修改代码直到输出变化，然后宣布已解决
+- **Missing verification** — 没有命令证据就宣布完成
+- **症状 patch** — AI 反复修改代码直到输出变化，然后宣布已解决
 - **上下文丢失** — 长任务中 agent 忘记之前的决策和约束
 - **长期记忆污染** — agent 频繁写入低质量"经验"，后续任务被噪声干扰
 
-Taku 用结构化的六阶段 workflow 解决这些问题。
+Taku 用交付门禁防止这些失败。流程只是实现机制，failure prevention 才是产品核心。
+
+证据：
+
+- [Failure-prevention case studies](CASE_STUDIES.md)
+- [Evaluation and dogfood evidence report](evals/evidence-report.md)
+- [Real-task eval scenarios](evals/real_task_scenarios.json)
 
 ## 设计哲学
 
-Taku 是面向 coding agent 的工程纪律 skill pack，不是通用 workflow
-framework。它真正耐用的价值，是一组防止 agentic coding 失败的判断约束：
+Taku 是面向 coding agent 的交付 harness，不是通用 workflow
+framework、protocol 或 domain-pack 系统。它真正耐用的价值，是一组防止 agentic coding 失败的判断约束：
 scope drift、事后合理化、缺少证据的完成声明，以及只修症状不找根因。
 
-当前方向是 **principles over procedures**。各阶段 skill 保留自己需要的本地
-流程，并在每个已安装 skill 内保留极简规则标签，让 Taku 随着模型能力提升
-自然变轻，而不是变成更硬的流程笼子。
+当前方向是 **principles over procedures**。好的 harness 对齐模型运作原理，
+不与模型能力对抗。模型越强，Taku 应该越轻：删除弱模型补丁，保留防止高成本交付失败的门禁。
 
 ## 30 秒理解
 
@@ -115,28 +124,46 @@ python3 scripts/validate_taku.py --install
 3. `/taku-plan` 写紧凑计划，或任务足够小时轻量交接
 4. `/taku-build` 基于 test anchor 实现，然后进入 review 和 verification
 
+### First-Run Smoke Checklist
+
+用这个 checklist 确认新安装可用：
+
+```bash
+npx skills add KKenny0/Taku -l
+python3 scripts/validate_taku.py --strict
+```
+
+预期：
+
+- 只列出 7 个 skills：`taku-think`、`taku-plan`、`taku-build`、`taku-review`、`taku-debug`、`taku-reflect`、`taku-compact`
+- Quick mode 能用 chat-visible mini design 跑一个小任务
+- Build 输出 `BUILD PREFLIGHT`、`BUILD UPDATE`、`BUILD COMPLETE`
+- Review 输出 `HARD STOPS`、`CONCERNS`、`SUMMARY`
+
 ## 核心工作流
 
-| 阶段 | 命令 | 使用时机 | 主要输出 |
-|---|---|---|---|
-| Think | `/taku-think` | 需求模糊或仍处于 idea 阶段 | 澄清后的 scope，`DESIGN.md` 中的设计决策 |
-| Plan | `/taku-plan` | 设计已确认，需要可执行任务 | 基于 spec 的 `PLAN.md`，含 dependency graph |
-| Build | `/taku-build` | `PLAN.md` 已准备好 | 已实现代码、测试、可见的构建进度 |
-| Review | `/taku-review` | 交付前 | diff review 结论，scope drift 检查 |
-| Debug | `/taku-debug` | 检查失败或行为异常 | 根因调查，定向修复 |
-| Reflect | `/taku-reflect` | 某个模式或经验值得保留 | 经用户批准的 learnings，可选 retro report |
+| 阶段    | 命令            | 使用时机                   | 主要输出                                    |
+| ------- | --------------- | -------------------------- | ------------------------------------------- |
+| Think   | `/taku-think`   | 需求模糊或仍处于 idea 阶段 | 澄清后的 scope，`DESIGN.md` 中的设计决策    |
+| Plan    | `/taku-plan`    | 设计已确认，需要可执行任务 | 基于 spec 的 `PLAN.md`，含 dependency graph |
+| Build   | `/taku-build`   | `PLAN.md` 已准备好         | 已实现代码、测试、可见的构建进度            |
+| Review  | `/taku-review`  | 交付前                     | diff review 结论，scope drift 检查          |
+| Debug   | `/taku-debug`   | 检查失败或行为异常         | 根因调查，定向修复                          |
+| Reflect | `/taku-reflect` | 某个模式或经验值得保留     | 经用户批准的 learnings，可选 retro report   |
 
 `/taku-think` 会根据任务复杂度自动选择 Quick、Design 或 Explore 模式——重要任务获得足够的流程，小任务避免过度仪式化。
 
 ### Bonus Utility Skills
 
-| Skill | 命令 | 使用时机 | 主要输出 |
-|---|---|---|---|
+| Skill   | 命令            | 使用时机                                             | 主要输出                                                         |
+| ------- | --------------- | ---------------------------------------------------- | ---------------------------------------------------------------- |
 | Compact | `/taku-compact` | 长任务上下文膨胀、交接、恢复、调试、审查、设计或研究 | 带 source tags、unknowns、retrieval hints 和下一步的可恢复 brief |
 
 `/taku-compact` 支持 `resume`、`handoff`、`debug`、`review`、`design` 和 `research` modes。它只整理当前任务上下文；长期经验通过 `/taku-reflect` 经用户批准后沉淀。
 
 ## Taku 的不同之处
+
+Taku 的公开命令仍然是 7 个，但产品核心更窄：Build 和 Review 让交付状态足够可审计，从而阻止坏 handoff。
 
 ### 1. 根据任务规模调整流程强度
 
@@ -162,21 +189,21 @@ Review 产物进入 `DESIGN.md`，`PLAN.md` 保持纯执行内容——goal、ta
 
 ### 6. 控制长期记忆写入
 
-`/taku-reflect` 默认需要人工触发。只有经过用户批准的 patterns、pitfalls、preferences 和 discoveries 才会被保留。`.taku/learnings/*.jsonl` 是 canonical source，由 `skills/reflect/scripts/learnings.py` 管理。
+`/taku-reflect` 默认需要人工触发。只有经过用户批准的 patterns、pitfalls、preferences 和 discoveries 才会被保留。`.taku/learnings/*.jsonl` 是 canonical source，由 reflect skill 自带的 `scripts/learnings.py` 管理。
 
 ### 7. 控制当前工作上下文
 
-`/taku-compact` 扫描 durable sources、git evidence 和 session state，生成结构化 brief。Brief 明确标注哪些结论来自项目文件、git、当前对话，哪些只是推断；证据不足时必须写 `unknown`。
+`/taku-compact` 扫描文件、git evidence、tool output 和用户可见 session state，生成结构化 brief。Brief 使用严格 source labels：`file`、`git`、`tool`、`user`、`inferred`、`unknown`。
 
 ### 常见失败模式
 
-| 常见失败 | Taku 的处理 |
-|---|---|
-| Scope 在实现中悄悄漂移 | `/taku-plan` 强制 scope review，build 时检查 drift |
+| 常见失败                         | Taku 的处理                                              |
+| -------------------------------- | -------------------------------------------------------- |
+| Scope 在实现中悄悄漂移           | `/taku-plan` 强制 scope review，build 时检查 drift       |
 | Review 流于形式，隐蔽 bug 被忽略 | `/taku-review` 读真实 diff，查 trust-boundary 等风险模式 |
-| AI 反复乱 patch，不找根因 | `/taku-debug` 排序假设，验证根因后再修复 |
-| 长任务上下文膨胀或丢失 | `/taku-compact` 写可恢复的 active-work brief |
-| Agent 持续写入低质量"经验" | `/taku-reflect` 需人工触发，仅保留批准内容 |
+| AI 反复乱 patch，不找根因        | `/taku-debug` 排序假设，验证根因后再修复                 |
+| 长任务上下文膨胀或丢失           | `/taku-compact` 写可恢复的 active-work brief             |
+| Agent 持续写入低质量"经验"       | `/taku-reflect` 需人工触发，仅保留批准内容               |
 
 ## Before / After
 
@@ -196,22 +223,29 @@ Review 产物进入 `DESIGN.md`，`PLAN.md` 保持纯执行内容——goal、ta
 - 基于证据的 verification
 - 根因导向的 debugging
 
-## Case Studies
-
-> 9 个 eval scenarios + interactive dogfood：5 PASS, 3 PARTIAL, 0 FAIL, 1 SKIP。Taku 的纪律机制在真实 eval 中阻止了哪些失败？三个具体案例：[查看 Case Studies](CASE_STUDIES.md)
-
 ## 使用场景
 
-| 你的情况 | 建议入口 |
-|---|---|
-| 小改动，边界清楚 | `/taku-think` Quick mode → `/taku-build` |
-| 需求模糊 | `/taku-think` |
-| 已有明确 feature，需要拆任务 | `/taku-plan` |
-| 已有 `PLAN.md` | `/taku-build` |
-| 准备交付 | `/taku-review` |
-| 测试失败或行为异常 | `/taku-debug` |
-| 长任务要交接或恢复 | `/taku-compact` |
-| 想沉淀经验或做回顾 | `/taku-reflect` |
+| 你的情况                     | 建议入口                                 |
+| ---------------------------- | ---------------------------------------- |
+| 小改动，边界清楚             | `/taku-think` Quick mode → `/taku-build` |
+| 需求模糊                     | `/taku-think`                            |
+| 已有明确 feature，需要拆任务 | `/taku-plan`                             |
+| 已有 `PLAN.md`               | `/taku-build`                            |
+| 准备交付                     | `/taku-review`                           |
+| 测试失败或行为异常           | `/taku-debug`                            |
+| 长任务要交接或恢复           | `/taku-compact`                          |
+| 想沉淀经验或做回顾           | `/taku-reflect`                          |
+
+## 什么时候不该用 Taku
+
+这些情况更适合 direct prompt 或更轻的 habit skill：
+
+- 没有 review / verification 风险的一次性极小改动
+- 写作、阅读、研究、health audit
+- 不涉及真实 repo change 的泛工程习惯增强
+- 只聊天探索、暂时不准备实现
+
+Taku 最适合真实仓库变更，尤其是有 scope、review、verification、debugging 或长任务恢复风险时。
 
 ## 安装详情
 
@@ -225,12 +259,12 @@ npx skills add KKenny0/Taku -l
 npx skills add KKenny0/Taku -g --skill taku-think
 ```
 
-| 参数 | 作用 |
-|------|------|
-| `-g` | 全局安装到 `~/.claude/skills/`（推荐）。不加则装到当前项目 `.claude/skills/` |
-| `--all` | 安装仓库内全部技能 |
-| `--skill <name>` | 指定安装某个技能，可重复使用 |
-| `-l` | 仅列出可用技能，不安装 |
+| 参数             | 作用                                                                         |
+| ---------------- | ---------------------------------------------------------------------------- |
+| `-g`             | 全局安装到 `~/.claude/skills/`（推荐）。不加则装到当前项目 `.claude/skills/` |
+| `--all`          | 安装仓库内全部技能                                                           |
+| `--skill <name>` | 指定安装某个技能，可重复使用                                                 |
+| `-l`             | 仅列出可用技能，不安装                                                       |
 
 ### 备选：git clone
 
@@ -272,17 +306,25 @@ Taku/
 ├── logo.png
 ├── evals/
 │   ├── README.md
+│   ├── evidence-report.md
 │   └── real_task_scenarios.json
 ├── scripts/
+│   ├── eval_summary.py
 │   └── validate_taku.py  # skill pack 自检脚本
 ├── skills/
 │   ├── think/
+│   │   └── references/
 │   ├── plan/
+│   │   └── references/
 │   ├── build/
+│   │   └── references/
 │   ├── review/
 │   ├── debug/
 │   ├── reflect/
+│   │   ├── references/
+│   │   └── scripts/
 │   └── compact/
+│       └── references/
 ├── platform/
 │   └── openclaw.md
 ├── templates/
@@ -292,12 +334,15 @@ Taku/
 │   └── retro-report.md
 ```
 
+已安装的 skills 是自包含的。Slash command 运行时需要的 scaffold 都在各自
+skill 的 `references/` 或 `scripts/` 目录下；根目录 `templates/` 只作为仓库维护用的 authoring copies。
+
 ## 平台状态
 
-| 平台 | 状态 | 说明 |
-|---|---|---|
-| Claude Code | 主要目标平台 | 使用 canonical `SKILL.md` 格式与 slash-command workflow |
-| OpenClaw | 已包含 adapter | 工具映射记录在 `platform/openclaw.md` |
+| 平台        | 状态           | 说明                                                    |
+| ----------- | -------------- | ------------------------------------------------------- |
+| Claude Code | 主要目标平台   | 使用 canonical `SKILL.md` 格式与 slash-command workflow |
+| OpenClaw    | 已包含 adapter | 工具映射记录在 `platform/openclaw.md`                   |
 
 Taku 的方法可以跨平台使用。基于 subagents 的 parallelism 取决于宿主能力；没有该能力时，`/taku-build` 保留 wave visibility 并按顺序执行 wave tasks。
 
@@ -309,7 +354,9 @@ Taku 的方法可以跨平台使用。基于 subagents 的 parallelism 取决于
 python3 scripts/validate_taku.py
 ```
 
-默认 validator 也会检查 `evals/` 中的真实任务评估套件。这些场景是用来回归验证 routing 与 artifacts 的手动测试，不是 synthetic benchmark。修改阶段说明、安装行为或 README 主张时，应该使用这些场景做行为检查。
+默认 validator 也会检查真实任务评估套件、compact source labels、evidence assets 和 README claim drift。这些场景是用来回归验证 routing 与 artifacts 的手动测试，不是 synthetic benchmark。修改阶段说明、安装行为或 README 主张时，应该使用这些场景做行为检查。
+
+根目录 `templates/` 只是 authoring copies。安装后的 skills 运行时必须使用各自本地的 `references/` 和 `scripts/`。
 
 ## 适合谁使用
 
@@ -321,7 +368,7 @@ Taku 适合那些已经意识到"原始代码生成"并不是主要瓶颈的团�
 - 希望更好地控制 scope expansion
 - 需要显式的 TDD 与 verification gates
 - 希望拆分较大实现，同时不丢失 review discipline
-- 希望在多个项目中复用同一套 engineering habits
+- 希望在多个项目中复用同一套交付标准
 - 希望长任务、调试、审查或研究中保留可恢复的上下文 brief
 
 如果你只想"先快速写点东西，后面再说"，Taku 的流程可能偏重。它优化的是可靠性与杠杆率。
@@ -355,13 +402,7 @@ Taku 建立在两个重要基础之上：
 - **[Superpowers](https://github.com/obra/superpowers)** by [Jesse Vincent](https://github.com/obra)：engineering discipline、TDD enforcement、systematic debugging、evidence-based completion。
 - **[gstack](https://github.com/garrytan/gstack)** by [Garry Tan](https://github.com/garrytan)：sprint thinking、product pressure-testing、QA methodology、parallel execution patterns。
 
-Taku 是围绕六阶段 workflow 和可复用 agent habits 做出的更窄、更强调工程纪律的综合设计。
-
-## Roadmap
-
-- **Phase 1 — Prove It** ✅ 完成。9/10 eval scenarios + interactive dogfood 验证核心纪律机制有效。
-- **Phase 2 — Harden** ✅ 完成。修复已识别 gap，编写 case studies，验证 debug Phase 2-3 interactive depth。
-- **Phase 3 — Lean & Polish** 🔜 下一步。去重各 skill 共享的纪律原则，强化 principles over procedures，并保持 Taku 聚焦 coding-agent engineering discipline。
+Taku 是围绕 coding delivery gates 和可复用 agent habits 做出的更窄、更强调工程纪律的综合设计。
 
 ## License
 

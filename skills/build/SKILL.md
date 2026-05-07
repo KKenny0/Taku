@@ -8,326 +8,158 @@ description: >
   "new branch workspace", "创建工作树".
 ---
 
-# Taku Build — Autonomous Execution
+# Taku Build - Auditable Implementation
 
-Execute PLAN.md tasks. Choose the execution mode yourself and continue immediately.
+Build implements the approved contract and leaves Review enough evidence to
+decide whether the work can ship.
 
 Rule labels: `[IRON LAW]` means a non-negotiable correctness constraint. `[GUIDANCE]` means a strong default that may adapt when context justifies it.
 
-## Capability Detection
+[IRON LAW] No production code without a failing test, reproduction, or explicit
+verification anchor first. If the repo lacks a test harness, create the smallest
+reproducible check and say why.
 
-Before choosing the execution mode, determine whether the host supports subagent dispatch.
+## Preflight
 
-- If subagents are available: Parallel and Hybrid may dispatch independent tasks to subagents.
-- If subagents are unavailable: keep the same dependency waves, but execute each wave locally and sequentially. Report this as `Subagents: unavailable; using sequential wave execution`.
+Before editing:
 
-Never block on missing subagent capability. Degrade the execution shape, keep TDD and reconciliation.
+1. Read `PLAN.md`, an approved Quick mini design, or the explicit user-approved
+   task contract.
+2. If the plan has a `Build Agent Contract`, read Required fields first and use
+   Optional fields only for context.
+3. Load `references/tdd.md` for the local TDD cycle.
+4. Use `references/worktrees.md` only when isolation is needed.
+5. Choose execution mode yourself: sequential, parallel, or hybrid.
 
-## Pre-Build Check
+Do not ask the user to choose a mode unless the choice changes product scope,
+cost, or risk.
 
-Before starting implementation:
+## Output Contract
 
-1. **PLAN.md exists?** If not, route to `/taku-plan`.
-2. **Read the Build Agent Contract.** If PLAN.md has a `Build Agent Contract` block in its header, follow it: read Required fields first, reference Optional fields from `DESIGN.md` as needed, skip review artifacts.
-3. **Check Execution Hints.** If PLAN.md has an `Execution Hints` section, use it as a starting recommendation for mode selection. You own the final decision and may override.
-4. **Worktree needed?** If the feature needs isolation from current workspace, set up a worktree first. Full process in `references/worktrees.md`.
-5. **Load TDD rules.** All code follows test-first discipline. Full cycle in `references/tdd.md`. [IRON LAW] No production code without a failing test first.
+Build speaks in three stable shapes only.
 
----
-
-## Mode Selection
-
-Mode selection is agent-owned.
-
-- Choose the execution mode yourself and continue immediately.
-- Do not ask the user to choose a mode unless the user explicitly requests an override, or the choice would change risk/cost in a way that needs product input.
-- The user may override the mode at any time.
-- Always explain the chosen mode in one short reason statement.
-- For hybrid and multi-task parallel runs, expose execution waves so the user can see which `wave-slug` contains which `task-slug` values.
-
-| Mode | Use When | Shape |
-|------|----------|-------|
-| Sequential | Tasks are tightly coupled, each step depends on the latest result, or conflict/rework risk is high | End-to-end in order |
-| Parallel | Most tasks are independent and boundaries are clear | One or more parallel waves |
-| Hybrid | The plan is best executed in waves: waves depend on earlier waves, but tasks inside a wave can run in parallel | Sequential waves with parallel work inside each wave |
-
-### Execution Waves
-
-When tasks are grouped into waves:
-
-1. Prefer existing identifiers from the plan.
-2. If the plan has no wave IDs, generate stable `wave-1`, `wave-2`, `wave-3` style slugs from the dependency grouping.
-3. Reuse plan task IDs when available. Otherwise, derive stable kebab-case `task-slug` values from task titles.
-4. Keep the same wave and task slugs for the full BUILD lifecycle.
-
-Before execution, announce the schedule in this shape:
+### BUILD PREFLIGHT
 
 ```text
 BUILD PREFLIGHT
-- Mode: hybrid
-- Reason: work is best executed in 3 waves
-- Subagents: available
-- Waves:
-  - wave-1: [task-slug-a, task-slug-b]
-  - wave-2: [task-slug-c, task-slug-d]
-  - wave-3: [task-slug-e]
-- Worktree: not needed
+- Mode: sequential | parallel | hybrid
+- Reason: [one sentence]
+- Subagents: available | unavailable; using sequential wave execution
+- Waves: [wave-slug: task-slug list, or wave-1 for single task]
+- Worktree: not needed | [path]
 - TDD: enabled
-- Next: start wave-1
+- Ledger:
+  - task-slug: files=[...] | tdd=[...] | status=pending | deviation=none | evidence=none
+- Next: [first wave/task]
 ```
 
-During execution, report wave progress in this shape:
+### BUILD UPDATE
 
 ```text
 BUILD UPDATE
-- Completed: wave-1
-- Tasks: [task-slug-a, task-slug-b]
-- Result: tests passed
-- Next: start wave-2
+- Completed: [wave-slug or task-slug]
+- Tasks: [task-slug list]
+- Result: [tests/repro/spec check observed]
+- Deviations: none | approved: [...] | needs-review: [...]
+- Ledger delta: [only changed rows]
+- Next: [next wave/task or REVIEW]
 ```
 
-After execution, summarize completed waves in this shape:
+### BUILD COMPLETE
 
 ```text
 BUILD COMPLETE
-- Executed waves:
-  - wave-1: [task-slug-a, task-slug-b]
-  - wave-2: [task-slug-c, task-slug-d]
-  - wave-3: [task-slug-e]
+- Executed waves: [...]
+- Task ledger: [all done | exceptions listed]
+- Changed files: [...]
+- Verification evidence: [commands and outcomes]
+- Deviations: none | approved: [...] | needs-review: [...]
+- Residual risk: none | [...]
+- Status: READY_FOR_REVIEW | BLOCKED
 - Next: REVIEW
 ```
 
----
+The ledger is a handoff artifact, not a diary. Keep one row per task with these
+fields: `task-slug`, `files`, `tdd`, `status`, `deviation`, `evidence`.
 
-## Parallel Mode
+## Mode Selection
 
-Execute PLAN.md by dispatching subagents when the host supports it. If not, execute the same independent task waves locally and sequentially, with reconciliation after each wave.
+- **Sequential:** tasks are tightly coupled or there are 1-2 obvious steps.
+- **Parallel:** tasks are independent and touch disjoint files.
+- **Hybrid:** waves depend on earlier waves, but tasks inside a wave are
+  independent.
 
-**Announce:** Use the BUILD PREFLIGHT format and show the parallel wave layout.
+Preserve plan task IDs when available. If the plan lacks IDs, create stable
+kebab-case slugs. If a file appears in multiple tasks, those tasks are dependent
+and must not run in parallel.
 
-### Core Loop
+When subagents are unavailable, keep the same wave schedule and execute each
+wave locally in order. Report that in `BUILD PREFLIGHT`.
 
-```
-Read PLAN.md
-    → Parse tasks, build dependency DAG
-    → Group tasks into execution waves
-    → Dispatch independent tasks in parallel, or execute wave tasks locally if subagents are unavailable
-    → Wait for completion (push-based)
-    → Reconcile: check conflicts, run integration tests
-    → Dispatch next wave of now-unblocked tasks
-    → Repeat until all tasks complete
-    → Final integration review
-    → Route to REVIEW phase
-```
+## Execution Loop
 
-### Dependency Analysis
+For each task or wave:
 
-Parse each task in PLAN.md:
-1. **Read all tasks** — extract file lists from each task's "Files:" section
-2. **Build DAG** — task A depends on task B if A modifies files B creates/depends on
-3. **Topological sort** — identify waves of independent tasks
-4. **Label each task** — `parallel-ready` or `blocked-by: [task IDs]`
-5. **Assign slugs** — every wave gets a `wave-slug`; every task gets a stable `task-slug`
+1. Mark ledger row(s) `in_progress`.
+2. Create the failing test, reproduction, or verification anchor.
+3. Implement the smallest change that satisfies the spec.
+4. Run the task verification.
+5. Check spec compliance before code quality.
+6. Update the ledger with status, evidence, and deviations.
+7. Emit `BUILD UPDATE`.
 
-If any file appears in more than one task, mark those tasks as dependent — they must run sequentially.
+Do not mark a task `done` until its spec and TDD/verification anchor have
+evidence.
 
-### Model Selection
+## Deviation Policy
 
-| Task Type | Model | Why |
-|-----------|-------|-----|
-| Mechanical (1-2 files, complete spec) | Fast/cheap | Clear instructions, no judgment needed |
-| Integration (multi-file, cross-cutting) | Standard | Needs to understand how pieces fit |
-| Architecture (design decisions, broad impact) | Powerful | Requires deep reasoning |
+Use the approved contract as the boundary.
 
-### Subagent Context Format
+- `deviation=none`: implementation matches the plan.
+- `deviation=approved`: user explicitly approved the difference; preserve the
+  approval in later summaries.
+- `deviation=needs-review`: implementation differs from plan and has not been
+  approved.
 
-When subagents are available, every subagent receives structured context built from the plan:
+`needs-review` deviations block `READY_FOR_REVIEW` unless the deviation is the
+only safe path and is clearly documented for Review.
 
-```markdown
-## Task Context
+## Reconciliation
 
-### Task: {task_name}
-**From plan:** PLAN.md
-**Depends on:** {task_ids or "none"}
+After every parallel or hybrid wave:
 
-### Files to modify
-- Create: `{exact_path}`
-- Modify: `{exact_path}:{line_range}`
-- Test: `{exact_path}`
+- check for overlapping file changes
+- run the smallest integration verification
+- verify no task leaked outside its assigned files without recording a deviation
 
-### Spec
-{spec_from_plan}
+Reconciliation is required even when all individual tasks report done.
 
-### TDD Anchor
-{tdd_anchor_from_plan}
+## Completion Gate
 
-### Verification
-- Run tests for TDD anchor
-- Expected: all assertions pass
+Before routing to Review:
 
-### Constraints
-- Follow TDD: write the anchor test first, then implement (see references/tdd.md)
-- Commit after each passing test
-- If blocked, report BLOCKED with reason
-- Do NOT modify files outside the list above
-```
+- every task is `done` or explicitly `not-done` with reason
+- every done task has evidence
+- all deviations are either `none`, `approved`, or `needs-review`
+- changed files are listed
+- verification evidence is listed
 
-For dependent tasks, include relevant specs and file paths from completed tasks in the context. The implementer should never guess at interfaces.
-
-### Status Handling
-
-- **DONE** → Proceed to spec compliance review
-- **DONE_WITH_CONCERNS** → Read concerns, address correctness issues, proceed
-- **NEEDS_CONTEXT** → Provide missing information, re-dispatch
-- **BLOCKED** → Assess: context problem → provide more; reasoning → better model; task too large → re-plan; plan wrong → escalate to human
-
-**Never** ignore an escalation or retry with no changes.
-
-DONE_WITH_CONCERNS always requires reading the concerns. Address correctness issues immediately. If concerns are non-critical (style, naming), note and proceed.
-
-### Two-Stage Review
-
-After each task:
-
-**Stage 1: Spec Compliance** — Does implementation match the plan? All criteria met? Nothing extra or missing?
-
-**Stage 2: Code Quality** — Well-built? Naming, structure, coverage, edge cases.
-
-Fix issues between stages. Don't proceed to Stage 2 until Stage 1 passes.
-
-### Reconciliation (After Parallel Wave)
-
-1. Check for file conflicts between parallel tasks
-2. Run integration tests
-3. Verify task boundaries (no task leaked into another's files)
-
-Reconciliation is never optional. After every parallel wave, always check for conflicts before dispatching the next wave.
-
----
-
-## Hybrid Mode
-
-Use hybrid mode when the plan is best executed in waves.
-
-- Waves themselves run sequentially because later waves depend on earlier ones.
-- Within a wave, independent tasks may run in parallel.
-- If subagents are unavailable, run each wave's tasks locally one after another.
-- Choose hybrid when full parallelism creates too much conflict or uncertainty, but full sequential execution would be unnecessarily slow.
-
-**Announce:** Use the BUILD PREFLIGHT format and show every planned wave with its `wave-slug` and `task-slug` list.
-
-### Hybrid Loop
-
-```
-Read PLAN.md
-    → Parse tasks, build dependency DAG
-    → Partition the plan into execution waves
-    → Run wave-1
-    → Reconcile and report wave-1 completion
-    → Run next unblocked wave
-    → Repeat until all waves complete
-    → Final integration review
-    → Route to REVIEW phase
-```
-
-Use the same dependency and reconciliation rules as parallel mode. The difference is scheduling: waves are the first-class unit, and each wave may contain either parallel work or a single sequential task.
-
----
-
-## Sequential Mode
-
-Execute PLAN.md task by task with checkpoints.
-
-**Announce:** Use a concise BUILD PREFLIGHT. You may omit the wave list, or present the full run as `wave-1` when that helps the user track progress.
-
-### Step 1: Load and Review
-
-1. Read PLAN.md
-2. Review critically — identify questions or concerns
-3. Raise concerns with the user before starting
-4. No concerns? Create task tracking and proceed
-
-### Step 2: Execute Tasks
-
-For each task:
-1. Mark as in_progress
-2. Follow each step exactly
-3. Follow TDD for all code steps (load `references/tdd.md` for cycle details)
-4. Run verifications as specified
-5. Commit as specified
-6. Mark as completed
-
-If a step seems wrong, raise it before deviating — don't silently adapt.
-
-### Step 3: Two-Stage Review
-
-After each task completes, run the same two-stage review as Parallel mode:
-
-**Stage 1: Spec Compliance** — Does the implementation match the plan spec? All assertions met? Nothing extra or missing?
-
-**Stage 2: Code Quality** — Well-built? Naming, structure, coverage, edge cases.
-
-Fix issues between stages. Don't proceed to the next task until both stages pass.
-
-### Step 4: Checkpoints
-
-After each task, report progress in BUILD UPDATE format:
-
-```text
-BUILD UPDATE
-- Completed: wave-1 (or task-slug for sequential)
-- Tasks: [task-slug]
-- Result: spec compliance passed, code quality passed
-- Deviations: [none | description]
-- Next: [task-slug or REVIEW]
-```
-
-### Step 5: Complete
-
-After all tasks: run full test suite, announce completion, route to REVIEW phase.
-
----
-
-## Shared Rules (Both Modes)
-
-**Don't:**
-- Dispatch multiple subagents that modify the same files
-- Let subagents read the plan file (provide full text in context)
-- Skip either review stage
-- Accept "close enough" on spec compliance
-- Ignore escalations
-
-**Do:**
-- Answer subagent questions clearly
-- Re-review after every fix
-- Provide complete context upfront
-- Follow TDD for all code changes
-- Show the chosen mode and execution waves before starting
-- State whether subagents are available; if not, state the sequential wave fallback
-- Keep `wave-slug` and `task-slug` values stable in every progress update
-- Stop and ask when stuck
-
-## When to Stop
-
-Stop immediately when: blocker hit, plan has critical gaps, verification fails repeatedly.
-Ask for help rather than guessing.
-
-## Completion
-
-After all tasks: run full test suite, route to REVIEW phase (`/taku-review`).
-
----
+Then emit `BUILD COMPLETE` and route to `/taku-review`.
 
 ## Known Pitfalls
 
-**Parallel subagents modifying the same file.** Both subagents wrote to `utils/auth.py` simultaneously. One commit overwrote the other silently.
+**Ledger missing at Review.** Review cannot distinguish approved deviation from
+scope drift.
 
-*Prevention:* During Dependency Analysis, grep all tasks' file lists for duplicates. Any file in more than one task → mark dependent, run sequentially.
+Prevention: create the ledger in `BUILD PREFLIGHT` and preserve task slugs in
+every update.
 
-**Subagent received partial context.** Task 4 referenced a `UserStore` from Task 2, but the subagent only got Task 4's description. It invented its own `UserStore` with different signatures.
+**Parallel tasks touched the same file.** One task overwrote another.
 
-*Prevention:* For dependent tasks, include relevant code from completed tasks in context. Reference exact file paths and line numbers.
+Prevention: duplicate file paths create dependencies; run them sequentially.
 
-**Skipping reconciliation between waves.** Three parallel tasks completed. Next wave started without checking. Two had added imports to the same file — combined result had duplicate imports and circular dependency.
+**TDD anchor skipped after a test-harness failure.** The agent called the code
+"probably correct."
 
-*Prevention:* Reconciliation is never optional. Always check for conflicts between waves.
+Prevention: debug or bound the harness failure, then preserve a verifiable
+anchor before claiming completion.

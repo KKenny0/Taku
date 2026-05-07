@@ -81,25 +81,25 @@ Use `scripts/learnings.py` for all learnings file operations. Do not hand-edit `
 **ADD:** Gather `type` (with confidence suffix), `context`, `learning`, `action`, and minimal `apply_when` values. Append only after the user confirms the learning should be kept.
 
 ```bash
-python3 skills/reflect/scripts/learnings.py add --project-root . --type preference/high --context "..." --learning "..." --action "..." --task-types feature,refactor --keywords plan,design
+python3 <path-to-this-skill>/scripts/learnings.py add --project-root . --type preference/high --context "..." --learning "..." --action "..." --task-types feature,refactor --keywords plan,design
 ```
 
 **SEARCH:** Query existing learnings through the script and present matches grouped by type when useful.
 
 ```bash
-python3 skills/reflect/scripts/learnings.py search --project-root . --query "plan" --task-type feature --keywords plan,design
+python3 <path-to-this-skill>/scripts/learnings.py search --project-root . --query "plan" --task-type feature --keywords plan,design
 ```
 
 **PRUNE:** Use the script to list stale or low-confidence candidates. Present each flagged entry: Remove / Keep / Update. Do not delete automatically.
 
 ```bash
-python3 skills/reflect/scripts/learnings.py prune --project-root . --days 30
+python3 <path-to-this-skill>/scripts/learnings.py prune --project-root . --days 30
 ```
 
 **EXPORT:** Convert to markdown through the script. Offer to append exported content to `AGENTS.md` or `CLAUDE.md` only when the user confirms an upgrade.
 
 ```bash
-python3 skills/reflect/scripts/learnings.py export --project-root .
+python3 <path-to-this-skill>/scripts/learnings.py export --project-root .
 ```
 
 **Why JSONL over markdown:** JSONL entries can be searched with grep, parsed programmatically, and deduplicated. Markdown learnings files become unstructured text that's hard to query or prune.
@@ -122,7 +122,7 @@ On the first successful reflect run for a project, check whether the project-lev
 **When to check:**
 
 - `.taku/` already exists or this reflect run is about to create `.taku/learnings/{project-slug}.jsonl`
-- Run `python3 skills/reflect/scripts/learnings.py bootstrap-check --project-root .`
+- Run `python3 <path-to-this-skill>/scripts/learnings.py bootstrap-check --project-root .`
 - Treat the result as a suggestion only
 
 **Target selection:**
@@ -153,7 +153,7 @@ Do not create, edit, or prune learnings unless the user explicitly invokes `/tak
 - Never install automatically. Show a `Project Bootstrap Suggestion`; if the user explicitly says to install it, run:
 
 ```bash
-python3 skills/reflect/scripts/learnings.py bootstrap-install --project-root . --targets AGENTS.md,CLAUDE.md
+python3 <path-to-this-skill>/scripts/learnings.py bootstrap-install --project-root . --targets AGENTS.md,CLAUDE.md
 ```
 
 ### Output Format
@@ -171,7 +171,7 @@ When running learn mode, organize results as:
 
 Analyze what the team shipped, how the work happened, and where to improve. Evidence-based, specific, candid.
 
-Use `templates/retro-report.md` as the report structure. The template is a scaffold; fill it with evidence from the steps below and remove placeholders.
+Use `references/retro-report.md` as the local report scaffold; fill it with evidence from the steps below and remove placeholders.
 
 ### Arguments
 

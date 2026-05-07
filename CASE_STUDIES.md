@@ -1,109 +1,109 @@
-# Taku Case Studies
+# Taku Failure-Prevention Case Studies
 
-基于 Prove It 验证轮次的三个真实案例，展示 Taku 的纪律机制如何防止常见 AI coding 失败。
+Taku is useful when it prevents real delivery failures, not when it produces
+longer process artifacts. These case studies map public claims to eval or
+dogfood evidence.
 
----
+## Evidence Map
 
-## Case 1: Debug — 阻止症状修复
+| Claim | Case | Evidence |
+|-------|------|----------|
+| Review blocks critical delivery risk before nits | SQL injection hard stop | `rt-06`, evidence report dogfood-03 |
+| Completion needs verification evidence | Missing verification blocked | `rt-12`, evidence report dogfood-05 |
+| Debug fixes root cause, not symptoms | Symptom fix avoided | `rt-01`, evidence report dogfood-01 |
+| Build keeps scope reviewable | Ledger catches deviation | `rt-13`, evidence report dogfood-03 |
+| Compact resumes without invented truth | Source-labeled resume | `rt-14`, evidence report dogfood-06 |
 
-### 场景
+## Case 1: SQL Injection Is a Hard Stop
 
-文件上传功能突然崩溃，抛出 `FileNotFoundError`。用户报告："昨天还好的，今天上传文件就崩了。"
+**Failure risk:** a search endpoint builds a SQL `WHERE` clause from user input
+and review treats it as a suggestion.
 
-### 没有 Taku
+**Without Taku:** the agent might bury the SQL issue under style comments or
+label it as a medium-severity recommendation.
 
-Agent 读取错误信息后，直接在崩溃点打补丁：
+**With Taku:** `/taku-review` checks critical patterns first. String-built SQL
+from user input is a hard stop, not a nit. The review output must place the
+finding under `HARD STOPS` and withhold ship-ready status until the risk is
+removed or explicitly accepted by the user.
 
-```python
-# 症状修复 — 只在出错位置加了 fallback
-path = config.get("upload_path") or "/tmp/uploads"
-```
+**Evidence:** `rt-06-review-critical-issue` and the existing evidence report
+show SQL injection flagged as Critical with a fix recommendation.
 
-崩溃消失了。但根因（配置文件路径在最近提交中被改坏）没被找到。两天后，另一个依赖同一配置的功能也出了问题。
+## Case 2: Missing Verification Blocks Completion
 
-### 使用 Taku
+**Failure risk:** the build summary says "tests pass" without command output.
 
-`/taku-debug` 强制执行 4 阶段调查：
+**Without Taku:** the review may accept the completion claim and ship unverified
+code.
 
-1. **INVESTIGATE** — 读取完整错误栈，追踪数据流，检查 `git diff HEAD~1`
-2. **PATTERN** — 匹配"配置漂移"模式，搜索同代码库中的类似问题
-3. **HYPOTHESIS** — 排序假设（H1: 路径变更 80%, H2: 权限变更 15%, H3: 环境差异 5%），逐个验证
-4. **IMPLEMENT** — 先写回归测试，确认失败，再修复根因
+**With Taku:** `/taku-review` treats missing verification evidence as a hard
+stop when the implementation claims completion. The final summary separates
+observed evidence from residual risk.
 
-产出 `DEBUG REPORT`，记录症状、根因、假设验证、修复内容和回归测试位置。回归测试确保同样的配置漂移不会被静默引入。
+**Evidence:** `rt-12-review-missing-verification` tests this directly.
+the dogfood-05 record in `evals/evidence-report.md` shows the same principle in
+a real TDD failure: verification failure triggered investigation instead of a
+confidence claim.
 
-### 证据
+## Case 3: Debug Avoids Symptom Fixes
 
-Eval rt-01 retest（2026-05-06）：引入 mandatory sequence enforcement 后，agent 行为从"跳过调查直接修复"变为"产出 DEBUG REPORT + 回归测试 + Phase 1 完整调查"。4 turns, $0.21。
+**Failure risk:** a bug gets patched at the crash site while the underlying
+configuration or data-flow failure remains.
 
----
+**Without Taku:** the agent changes the nearest line that makes the error
+disappear.
 
-## Case 2: Review — SQL 注入不是"建议"
+**With Taku:** `/taku-debug` requires root-cause evidence before the fix and a
+regression anchor after the diagnosis. The point is not to perform a long ritual;
+the point is to prove the failure path.
 
-### 场景
+**Evidence:** `rt-01-small-root-cause-bugfix` and
+the dogfood-01 record in `evals/evidence-report.md` shows the root-cause and
+regression-test gate.
 
-Code review 阶段，diff 中出现字符串拼接构建的 SQL 查询。
+## Case 4: Build Ledger Catches Deviations
 
-### 没有 Taku
+**Failure risk:** Build deviates from the plan and Review cannot tell whether
+the deviation was approved.
 
-Agent 可能将 SQL 注入风险标记为 Informational 或 Medium severity — "建议使用参数化查询" — 但不阻止合并。开发者看到"建议"而非"阻塞"，大概率跳过。
+**Without Taku:** progress state is lost between implementation and review, so
+scope drift looks like ordinary code churn.
 
-更糟的情况：review 产出 30+ 条 findings（命名风格、注释格式、import 顺序…），SQL 注入被淹没在噪音里。开发者先修完 30 条 nit，然后合并了带 SQL 注入的代码。
+**With Taku:** `/taku-build` keeps a compact task ledger with stable slugs,
+files, TDD anchors, deviations, and verification evidence. `/taku-review` reads
+that ledger before judging scope drift.
 
-### 使用 Taku
+**Evidence:** `rt-13-build-review-handoff-ledger` covers the handoff, and
+the dogfood-03 record in `evals/evidence-report.md` shows install-safety scope
+preserved across a multi-directory implementation.
 
-`/taku-review` 两轮审查：
+## Case 5: Compact Resumes Without Invented Truth
 
-- **Pass 1 (Critical)** — 识别 SQL injection risk，标记 **Critical**，引用 CWE-89
-- **Auto-fix** — 直接提供参数化查询修复
-- **阻止合并** — 输出 "Do not merge" 结论
+**Failure risk:** after a long or resumed task, the agent treats mixed memory,
+chat decisions, failed commands, and file state as equally certain.
 
-同时发现资源泄漏（Medium）和 `SELECT *`（Low），但 Critical 优先处理，nit 控制在 2-3 条以内。信号不被噪音淹没。
+**Without Taku:** the resumed session may rely on stale context and start
+editing against the wrong branch or wrong assumptions.
 
-### 证据
+**With Taku:** `/taku-compact` uses strict source labels: `file`, `git`, `tool`,
+`user`, `inferred`, and `unknown`. It keeps reflect candidates separate from
+long-term learnings and does not turn session state into durable truth.
 
-Eval rt-06（2026-05-05）：9 turns, $0.25。SQL 注入被标记为 Critical (CWE-89)，提供修复代码，未执行 commit/push/PR。Review 是 Taku 评估中表现最强的 skill。
+**Evidence:** `rt-14-compact-resume-source-labels` covers the expected behavior.
+the dogfood-06 record in `evals/evidence-report.md` records the current roadmap
+session resumed from a recap, then confirmed git and file state before editing.
 
----
+## v1 Evidence Bar
 
-## Case 3: Reflect — 拒绝编造趋势
+Taku v1 should not ship because the prompts are polished. It should ship when
+the evidence is strong enough:
 
-### 场景
+- 7 installed skills, no new public commands.
+- 12-14 real-task eval scenarios.
+- 6 dogfood reliability records.
+- 5 failure-prevention case studies.
+- README claims trace to eval, dogfood, or this case-study file.
+- Build/Review remain the clearest product core.
 
-Sprint 回顾。Git 历史只有 7 次提交、4 天数据。
-
-### 没有 Taku
-
-Agent 为了让报告看起来更有价值，可能编造趋势分析：
-
-- "团队 velocity 呈上升趋势" — 7 次提交不足以判断趋势
-- "代码质量显著改善" — 没有任何质量指标支撑
-- "Bug 修复效率提高" — 没有对比数据
-
-这些编造的结论会误导后续 sprint 规划。
-
-### 使用 Taku
-
-`/taku-reflect`（Retro 模式）：
-
-- 使用真实 git 数据（7 commits, 4 days, actual commit messages）
-- **明确标注证据不足** — "当前数据不足以判断 velocity 趋势"
-- **拒绝编造** — 不生成无支撑的结论
-- 仍然给出可操作的改进建议（基于实际观察到的 commit pattern）
-
-### 证据
-
-Eval rt-08（2026-05-05）：29 turns, $0.85。Agent 使用真实 git 历史，显式声明数据限制，没有编造 velocity 趋势或质量判断。这是 Taku anti-rationalization 机制的核心价值：宁可报告"证据不足"，也不编造听起来专业的结论。
-
----
-
-## 验证方法
-
-这些案例来自 Taku Prove It 验证轮次：
-
-- **9/10 programmatic evals** via `claude -p` — 覆盖全部 7 个 skills
-- **1 interactive dogfood task** — 完整 Think → Plan → Build → Review 流程
-- **结果** — 5 PASS, 3 PARTIAL, 0 FAIL, 1 SKIP + interactive all PASS
-- **总成本** ~$3.42，平均每场景 ~$0.38
-
-完整评估报告见 [`evals/evidence-report.md`](evals/evidence-report.md)。
+Full evidence report: [`evals/evidence-report.md`](evals/evidence-report.md).
