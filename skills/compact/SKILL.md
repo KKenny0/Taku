@@ -16,7 +16,8 @@ Rule labels: `[IRON LAW]` means a non-negotiable correctness constraint. `[GUIDA
 Compact preserves current task state. Reflect preserves long-term learnings.
 Never write `.taku/learnings` from this skill. You may list
 `reflect_candidates`, but `/taku-reflect` is the only path that can promote them
-after user approval.
+after user approval. A `reflect_candidates` entry is not a recorded learning and
+must never be worded as one.
 
 ## Host Boundary
 
@@ -92,27 +93,30 @@ Treat visible conversation and tool outputs as first-class state:
 - tool output, agent findings, review findings, and debug observations
 - design/research progress that has not been written to project files
 
-Mark session-derived claims as `session`. Do not present them as durable project
-truth unless they were written to a file or other durable artifact.
+Mark conversation-derived claims as `user` and command/tool-output claims as
+`tool`. Do not present them as file-backed project truth unless they were
+written to a durable artifact.
 
 ### 4. Source Tags and Confidence
 
 Every important claim must carry one of these source categories:
 
-- `durable`: project file, Taku context file, or approved learning
-- `git`: status, diff, file system, or commit history
-- `session`: current visible conversation or tool output
+- `file`: project file, Taku context file, approved learning, or file-system inspection
+- `git`: status, diff, or commit history
+- `tool`: command output or tool result visible in the session
+- `user`: explicit user statement, correction, or approval
 - `inferred`: agent synthesis from other evidence
+- `unknown`: unavailable or unverified evidence
 
-Use `unknown` when evidence is not available. Do not say tests passed unless
-actual command output or explicit user-provided evidence shows that.
+Do not say tests passed unless actual command output or explicit user-provided
+evidence shows that.
 
 Include `state_confidence` for goal, changed files, verification, and next step
 using `high`, `medium`, `low`, or `unknown`.
 
 ## Brief Output
 
-Use `templates/compact-brief.md` as the brief scaffold. Fill every applicable
+Use `references/compact-brief.md` as the local brief scaffold. Fill every applicable
 field. Remove irrelevant mode-specific sections, but keep `unknowns`,
 `retrieval_hints`, and `completeness_check`.
 

@@ -38,6 +38,7 @@ Read commit messages and any plan file (PLAN.md, .taku/*.md). Compare stated int
 
 - **Scope creep:** files changed unrelated to intent
 - **Missing requirements:** intent items not addressed in the diff
+- **Unverified completion:** summary claims success without command output or explicit user evidence
 
 Output:
 ```
@@ -46,7 +47,7 @@ Intent: <1-line summary>
 Delivered: <1-line summary>
 ```
 
-This is informational, not a gate. Continue to Step 3b.
+This is a gate. `DRIFT DETECTED`, `REQUIREMENTS MISSING`, or unverified completion claims are Critical findings unless the user explicitly approved the deviation before review.
 
 **Why scope check before code review:** If the diff includes unrelated changes, reviewing those wastes effort. If requirements are missing, no amount of code review will catch them. Scope check focuses the code review on the right surface area.
 
@@ -67,7 +68,7 @@ Spec Compliance: [FULL / PARTIAL / DRIFT]
   Task 2: N/N specs matched [MISSING: ...] [DIFFERENT: ...]
 ```
 
-MISSING or DIFFERENT items are promoted to Critical in Step 5. This check ensures the review catches behavioral drift even when code quality is high.
+MISSING or DIFFERENT items are promoted to Critical in Step 5. Missing or contradictory verification evidence is also Critical when the implementation claims completion. This check ensures the review catches behavioral drift even when code quality is high.
 
 **Why spec compliance matters:** A scope check verifies the right files were touched. A code review verifies the code is well-written. But neither catches the case where well-written code implements the wrong behavior — a function that returns 401 when the spec says 403, or a cache that stores data the spec says should expire. Spec compliance closes this gap.
 
@@ -180,7 +181,10 @@ Apply fixes where user chose "Fix." Do not commit.
 Pre-Landing Review: N issues (X auto-fixed, Y asked, Z skipped)
   Critical: N  Important: N  Minor: N  Nit: N
   Modified files: [list]
+  Verification evidence: [commands observed | missing]
+  Scope/spec status: [clean | drift | requirements missing]
   Remaining concerns: [none | list]
+  Residual risk: [none | list]
   Status: DONE | DONE_WITH_CONCERNS (if Minor findings remain)
 ```
 
@@ -192,6 +196,7 @@ If no issues: "Pre-Landing Review: No issues found. Status: DONE."
 - Be terse. One line problem, one line fix.
 - Only flag real problems. Skip anything that's fine.
 - Never commit, push, or create PRs. Focus on reviewing, not shipping.
+- Never accept "implemented" or "verified" without evidence in the diff, test output, or explicit user-provided command output.
 - Verify your claims. Cite specific lines. Never say "probably fine."
 
 ## Known Pitfalls

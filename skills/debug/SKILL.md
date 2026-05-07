@@ -97,6 +97,12 @@ Also check:
 
 If the pattern isn't obvious, search the web for "{framework} {error type}" (sanitize first: strip hostnames, IPs, file paths, customer data).
 
+Common failure patterns worth checking early:
+- **Config drift:** docs, defaults, env names, or runtime lookup disagree.
+- **Boundary mismatch:** caller and callee disagree about nullability, auth, or ownership.
+- **State race:** async ordering, caching, or lifecycle cleanup changes what later code sees.
+- **Platform path/permission drift:** Windows, symlinks, executable bits, or temp paths behave differently.
+
 ### Phase 3: HYPOTHESIS
 
 Form hypotheses ranked by likelihood. Test them one at a time.
@@ -176,14 +182,18 @@ Fix the root cause, not the symptom.
 
 ## Output: Debug Report
 
+Keep the report short and diagnostic. Name the concrete file/function/condition
+that caused the bug. Put long investigation notes in a brief appendix only when
+they are needed to make the fix reviewable.
+
 ```
 DEBUG REPORT
 ═════════════════════════════════════════
 Symptom:         [what the user observed]
-Root cause:      [what was actually wrong]
-Hypotheses:      [H1: confirmed, H2: denied, H3: untested]
-Fix:             [what changed, file:line references]
-Evidence:        [test output, reproduction showing fix works]
+Root cause:      [file/function/condition that was actually wrong]
+Hypotheses:      [confirmed H1, denied H2/H3 if relevant]
+Fix:             [minimal change, file:line references]
+Evidence:        [red test, green test, reproduction showing fix works]
 Regression test: [file:line of new test]
 Status:          DONE | DONE_WITH_CONCERNS | BLOCKED
 ═════════════════════════════════════════

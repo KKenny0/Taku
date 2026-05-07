@@ -76,6 +76,22 @@ BUILD PREFLIGHT
 - Next: start wave-1
 ```
 
+### Task Contract Ledger
+
+Before changing files, parse the plan or approved Quick mini design into a small
+ledger. Keep this ledger current through BUILD and pass it into REVIEW.
+
+```text
+TASK LEDGER
+- task-slug: status=pending | files=[...] | tdd=[...] | spec=[short contract]
+```
+
+Rules:
+- Preserve `task-slug` and `wave-slug` values in every update.
+- Mark deviations immediately: `none`, `approved`, or `needs-review`.
+- Before REVIEW, every task must be `done` or explicitly `not-done` with a reason.
+- A task is not done until its spec assertions and TDD anchor have evidence.
+
 During execution, report wave progress in this shape:
 
 ```text
@@ -83,6 +99,7 @@ BUILD UPDATE
 - Completed: wave-1
 - Tasks: [task-slug-a, task-slug-b]
 - Result: tests passed
+- Deviations: none
 - Next: start wave-2
 ```
 
@@ -94,6 +111,9 @@ BUILD COMPLETE
   - wave-1: [task-slug-a, task-slug-b]
   - wave-2: [task-slug-c, task-slug-d]
   - wave-3: [task-slug-e]
+- Task ledger: all done | exceptions listed
+- Verification evidence: [commands]
+- Deviations: none | listed
 - Next: REVIEW
 ```
 
@@ -108,8 +128,9 @@ Execute PLAN.md by dispatching subagents when the host supports it. If not, exec
 ### Core Loop
 
 ```
-Read PLAN.md
+Read PLAN.md or approved Quick mini design
     → Parse tasks, build dependency DAG
+    → Create task contract ledger
     → Group tasks into execution waves
     → Dispatch independent tasks in parallel, or execute wave tasks locally if subagents are unavailable
     → Wait for completion (push-based)
@@ -219,8 +240,9 @@ Use hybrid mode when the plan is best executed in waves.
 ### Hybrid Loop
 
 ```
-Read PLAN.md
+Read PLAN.md or approved Quick mini design
     → Parse tasks, build dependency DAG
+    → Create task contract ledger
     → Partition the plan into execution waves
     → Run wave-1
     → Reconcile and report wave-1 completion
@@ -242,10 +264,10 @@ Execute PLAN.md task by task with checkpoints.
 
 ### Step 1: Load and Review
 
-1. Read PLAN.md
+1. Read PLAN.md or the approved Quick mini design
 2. Review critically — identify questions or concerns
 3. Raise concerns with the user before starting
-4. No concerns? Create task tracking and proceed
+4. No concerns? Create the task contract ledger and proceed
 
 ### Step 2: Execute Tasks
 
@@ -284,7 +306,8 @@ BUILD UPDATE
 
 ### Step 5: Complete
 
-After all tasks: run full test suite, announce completion, route to REVIEW phase.
+After all tasks: run the planned verification, reconcile the task ledger against
+the approved scope, announce completion, and route to REVIEW phase.
 
 ---
 

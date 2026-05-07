@@ -59,7 +59,7 @@ For requests where full design process is wasteful. Not "no thinking" — right-
 
 2. **User confirms.** If they correct you, adjust and re-confirm.
 
-3. **Write a mini design.** This is mandatory — even for one-line changes. The mini design is the gate that prevents Quick mode from becoming "no mode." Either append to DESIGN.md as a new section, or write directly into PLAN.md if the change is small enough that design and plan are the same thing:
+3. **Write a mini design.** This is mandatory — even for one-line changes. The mini design is the gate that prevents Quick mode from becoming "no mode." For tiny tasks, the mini design can be chat-visible only; do not create `DESIGN.md` or `PLAN.md` just to satisfy process. Use a durable artifact only when the change needs handoff, multiple tasks, or later review against a written contract.
 
    - **Change:** One sentence describing what to change
    - **Why:** One sentence on motivation
@@ -69,7 +69,7 @@ For requests where full design process is wasteful. Not "no thinking" — right-
 
    **Do not proceed to step 4 until this mini design is written and visible to the user.**
 
-4. **Go.** Route to `/taku-plan` (or proceed to build if plan already exists).
+4. **Go.** Route to `/taku-plan` only when task breakdown is useful. For a single obvious code change, proceed directly to `/taku-build` after approval and keep the mini design in the build context.
 
 ### What Quick Mode is NOT
 
@@ -136,7 +136,7 @@ Scale depth to complexity: a few sentences for moderate changes, a paragraph per
 
 ### Write DESIGN.md
 
-Save the approved design to `DESIGN.md` at the project root. Use `templates/design-doc.md` as the scaffold, then adapt it to the template matching the project's depth-tier (detected in SKILL.md pre-flight; if unknown, use Standard). The skill rules override the template if they differ.
+Save the approved design to `DESIGN.md` at the project root. Use `references/design-doc.md` as the local scaffold, then adapt it to the template matching the project's depth-tier (detected in SKILL.md pre-flight; if unknown, use Standard). The skill rules override the scaffold if they differ.
 
 **Lightweight tier** (for small, focused changes):
 
@@ -286,7 +286,7 @@ This applies to ALL modes, including Quick.
 
 No implementation skill is invoked, no code is written, no project is scaffolded, until the design is presented and the user explicitly approves it.
 
-For Quick mode, "design" can be 3-5 sentences. For Design mode, it's DESIGN.md. For Explore mode, the gate applies when transitioning to build.
+For Quick mode, "design" can be 3-5 chat-visible sentences. For Design mode, it's DESIGN.md. For Explore mode, the gate applies when transitioning to build.
 
 "This is too simple to need a design" — that's where unexamined assumptions cause the most wasted work. The design can be short. But present it and get approval.
 
@@ -305,7 +305,7 @@ Not every think session leads to code. "Do Not Build Yet" is a valid, discipline
 
 Before routing to `/taku-plan`, verify ALL of these exist:
 
-- **Approved design:** DESIGN.md approved by user, or Quick mode mini design confirmed
+- **Approved design:** DESIGN.md approved by user, or Quick mode mini design confirmed in chat or a durable artifact
 - **Recommended approach:** One chosen approach with rationale — not just a list of options
 - **Resolved open questions:** Every open question is either answered or explicitly recorded as an accepted unknown
 - **Success criteria:** Concrete, testable definition of "done"

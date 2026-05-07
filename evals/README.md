@@ -11,6 +11,8 @@ This directory holds a small manual regression suite for Taku behavior. It is no
 - `expected_artifacts` — files, reports, or summaries that should exist
 - `pass_criteria` — observable behavior that must happen
 - `observed_failure_mode` — update this after a manual run
+- `failure_prevention_focus` — optional note describing the concrete delivery
+  failure this scenario is meant to prevent
 
 ## How To Run
 
@@ -18,9 +20,10 @@ This directory holds a small manual regression suite for Taku behavior. It is no
 2. Paste the scenario `prompt` into the target agent session.
 3. Let Taku route the work using the current core workflow and utility skills.
 4. Compare the result with `expected_phase_route`, `expected_artifacts`, and `pass_criteria`.
-5. Update `observed_failure_mode` with the concrete miss, or `Passed on YYYY-MM-DD: <short note>`.
+5. Record whether Taku prevented the target failure, not just whether the output looked good.
+6. Update `observed_failure_mode` with the concrete miss, or `Passed on YYYY-MM-DD: <short note>`.
 
-Keep observations specific. "Bad output" is not useful; "Skipped `/taku-debug` and patched before root-cause investigation" is useful.
+Keep observations specific. "Bad output" is not useful; "Skipped `/taku-debug` and patched before root-cause investigation" is useful. Prefer failure-prevention language: "Blocked unapproved scope drift before merge" is stronger evidence than "Review was thorough."
 
 ## Validation
 
