@@ -42,6 +42,16 @@ Taku 是一组面向 Claude Code / coding agent 的 workflow skills，把真实�
 
 Taku 用结构化的六阶段 workflow 解决这些问题。
 
+## 设计哲学
+
+Taku 是面向 coding agent 的工程纪律 skill pack，不是通用 workflow
+framework。它真正耐用的价值，是一组防止 agentic coding 失败的判断约束：
+scope drift、事后合理化、缺少证据的完成声明，以及只修症状不找根因。
+
+当前方向是 **principles over procedures**。各阶段 skill 保留自己需要的本地
+流程，但共享纪律语言收敛到 `skills/shared/discipline-principles.md`，让 Taku
+随着模型能力提升自然变轻，而不是变成更硬的流程笼子。
+
 ## 30 秒理解
 
 ```text
@@ -351,8 +361,7 @@ Taku 是围绕六阶段 workflow 和可复用 agent habits 做出的更窄、更
 
 - **Phase 1 — Prove It** ✅ 完成。9/10 eval scenarios + interactive dogfood 验证核心纪律机制有效。
 - **Phase 2 — Harden** ✅ 完成。修复已识别 gap，编写 case studies，验证 debug Phase 2-3 interactive depth。
-- **Phase 3 — Framework Extraction** 🔜 下一步。从 coding skills 中提取核心纪律模式，定义 Taku Protocol v0.1。
-- **Phase 4 — Domain Expansion** 根据真实需求信号扩展到其他领域。
+- **Phase 3 — Lean & Polish** 🔜 下一步。去重各 skill 共享的纪律原则，强化 principles over procedures，并保持 Taku 聚焦 coding-agent engineering discipline。
 
 ## License
 

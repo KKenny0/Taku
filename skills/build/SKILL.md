@@ -12,6 +12,8 @@ description: >
 
 Execute PLAN.md tasks. Choose the execution mode yourself and continue immediately.
 
+Shared discipline: when this repository is available, use `../shared/discipline-principles.md` for Taku-wide `[IRON LAW]` and `[GUIDANCE]` semantics.
+
 ## Capability Detection
 
 Before choosing the execution mode, determine whether the host supports subagent dispatch.
@@ -29,7 +31,7 @@ Before starting implementation:
 2. **Read the Build Agent Contract.** If PLAN.md has a `Build Agent Contract` block in its header, follow it: read Required fields first, reference Optional fields from `DESIGN.md` as needed, skip review artifacts.
 3. **Check Execution Hints.** If PLAN.md has an `Execution Hints` section, use it as a starting recommendation for mode selection. You own the final decision and may override.
 4. **Worktree needed?** If the feature needs isolation from current workspace, set up a worktree first. Full process in `references/worktrees.md`.
-5. **Load TDD rules.** All code follows test-first discipline. Full cycle in `references/tdd.md`. The iron law: no production code without a failing test first.
+5. **Load TDD rules.** All code follows test-first discipline. Full cycle in `references/tdd.md`. [IRON LAW] No production code without a failing test first.
 
 ---
 

@@ -11,6 +11,8 @@ description: >
 Use `/taku-compact` to compress active work into a recoverable brief. It is a
 bonus utility skill, not a seventh Taku phase.
 
+Shared discipline: when this repository is available, use `../shared/discipline-principles.md` for Taku-wide `[IRON LAW]` and `[GUIDANCE]` semantics.
+
 Compact preserves current task state. Reflect preserves long-term learnings.
 Never write `.taku/learnings` from this skill. You may list
 `reflect_candidates`, but `/taku-reflect` is the only path that can promote them
@@ -46,7 +48,7 @@ and the user asked for general compacting.
 
 ## State Scan Contract
 
-Run an evidence-first state scan before writing the brief. Do not summarize from
+[IRON LAW] Run an evidence-first state scan before writing the brief. Do not summarize from
 memory first.
 
 ### 1. Durable Sources

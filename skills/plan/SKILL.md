@@ -12,7 +12,9 @@ description: >
 
 # Taku Plan — Review + Plan Pipeline
 
-Three steps, run in sequence. Each gate must pass before the next.
+Shared discipline: when this repository is available, use `../shared/discipline-principles.md` for Taku-wide `[IRON LAW]` and `[GUIDANCE]` semantics.
+
+[GUIDANCE] Default path: run the three steps in sequence. Each gate must pass before the next unless the project state clearly shows that step is already complete.
 
 ## Step Detection
 

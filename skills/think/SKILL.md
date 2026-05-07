@@ -14,7 +14,11 @@ description: >
 
 # Taku Think — Adaptive Design Thinking
 
-Three modes adapt to request complexity. No ceremony for simple requests. Full rigor for complex ones. Hard gate always: no implementation until the selected design path is approved.
+Three modes adapt to request complexity. No ceremony for simple requests. Full rigor for complex ones.
+
+Shared discipline: when this repository is available, use `../shared/discipline-principles.md` for Taku-wide `[IRON LAW]` and `[GUIDANCE]` semantics.
+
+[IRON LAW] No implementation until the selected design path is approved.
 
 ## Mode Selection
 

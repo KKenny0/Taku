@@ -20,6 +20,8 @@ description: >
 
 Random fixes create new bugs. Systematic investigation finds root causes. This skill merges the best of Superpowers' systematic debugging with gstack's investigate workflow into a unified 4-phase process.
 
+Shared discipline: when this repository is available, use `../shared/discipline-principles.md` for Taku-wide `[IRON LAW]` and `[GUIDANCE]` semantics.
+
 ## When to Use This Skill
 
 Use `taku-debug` when:
@@ -32,7 +34,7 @@ Do not use `taku-debug` just to run routine verification. Run the repo's normal 
 
 ## The Iron Law
 
-**NO FIXES WITHOUT ROOT CAUSE INVESTIGATION FIRST.**
+[IRON LAW] **NO FIXES WITHOUT ROOT CAUSE INVESTIGATION FIRST.**
 
 Every fix that doesn't address root cause makes the next bug harder to find. If you haven't completed Phase 1 (INVESTIGATE), you cannot propose fixes. Period.
 

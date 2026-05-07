@@ -23,6 +23,8 @@ allowed-tools:
 
 Three modes: capture learnings (default), weekly retrospective, or codify recurring patterns into skills.
 
+Shared discipline: when this repository is available, use `../shared/discipline-principles.md` for Taku-wide `[IRON LAW]` and `[GUIDANCE]` semantics.
+
 ## Mode Selection
 
 - **Learn** (default): "what have we learned", "add learning", "show learnings", "prune learnings"
@@ -37,7 +39,7 @@ Capture only what the user explicitly wants to preserve so future sessions can r
 
 ### Invocation Rule
 
-`/taku-reflect` is manual. Do not create or update long-term learnings unless the user explicitly invokes reflect.
+[IRON LAW] `/taku-reflect` is manual. Do not create or update long-term learnings unless the user explicitly invokes reflect.
 
 ### Storage
 

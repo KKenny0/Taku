@@ -42,6 +42,18 @@ The most common failures when using coding agents:
 
 Taku solves these with a structured six-phase workflow.
 
+## Design Philosophy
+
+Taku is a coding-agent engineering discipline pack, not a generic workflow
+framework. Its durable value is the set of judgment constraints that prevent
+agentic coding failures: scope drift, post-hoc rationalization, weak evidence,
+and symptom-level fixes.
+
+The current direction is **principles over procedures**. Phase skills keep the
+local process they need, but shared discipline language lives in
+`skills/shared/discipline-principles.md` so the pack can get lighter instead of
+more rigid as models improve.
+
 ## 30-Second Overview
 
 ```text
@@ -351,8 +363,7 @@ Taku is not a clone of either. It is a narrower, more opinionated synthesis arou
 
 - **Phase 1 — Prove It** ✅ Done. 9/10 eval scenarios + interactive dogfood validated core discipline mechanisms.
 - **Phase 2 — Harden** ✅ Done. Fixed identified gaps, wrote case studies, validated debug Phase 2-3 interactive depth.
-- **Phase 3 — Framework Extraction** 🔜 Next. Extract core discipline patterns from coding skills, define Taku Protocol v0.1.
-- **Phase 4 — Domain Expansion** Expand to other domains based on real demand signals.
+- **Phase 3 — Lean & Polish** 🔜 Next. Deduplicate shared discipline principles across skills, refine principles over procedures, and keep Taku focused on coding-agent engineering discipline.
 
 ## License
 

@@ -14,6 +14,8 @@ allowed-tools:
 
 Analyze the current branch's diff against the base branch for structural issues that tests don't catch. Fix-first, not read-only.
 
+Shared discipline: when this repository is available, use `../shared/discipline-principles.md` for Taku-wide `[IRON LAW]` and `[GUIDANCE]` semantics.
+
 ## Step 1: Detect Base Branch
 
 ```bash
