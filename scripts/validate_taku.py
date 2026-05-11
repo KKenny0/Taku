@@ -17,7 +17,7 @@ DESCRIPTION_MAX = 1024
 PROTOCOL_START = "<!-- TAKU_LEARNINGS_PROTOCOL:START -->"
 PROTOCOL_END = "<!-- TAKU_LEARNINGS_PROTOCOL:END -->"
 CORE_PHASES = ("think", "plan", "build", "review", "debug", "reflect")
-UTILITY_SKILLS = ("compact",)
+UTILITY_SKILLS = ("compact", "guard")
 ALL_SKILLS = CORE_PHASES + UTILITY_SKILLS
 EVAL_REQUIRED_FIELDS = {
     "id",

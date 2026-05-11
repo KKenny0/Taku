@@ -104,7 +104,7 @@ After installation, start a new session and type `/taku-` to confirm commands ar
 
 ```text
 /taku-think  /taku-plan  /taku-build  /taku-review
-/taku-debug  /taku-reflect  /taku-compact
+/taku-debug  /taku-reflect  /taku-compact  /taku-guard
 ```
 
 Recommended: run the validator after install to confirm the skill pack, slash commands, and eval scenarios are available:
@@ -115,7 +115,7 @@ python3 scripts/validate_taku.py --install
 
 Add `--strict` to also check that referenced scripts exist and are executable: `python3 scripts/validate_taku.py --strict`
 
-You can also install individual skills: `npx skills add KKenny0/Taku -g --skill taku-think`
+You can also install individual skills: `npx skills add KKenny0/Taku -g --skill taku-guard`
 
 ## First Run
 
@@ -131,6 +131,7 @@ Expected shape:
 2. You approve the mini design
 3. `/taku-plan` writes a compact plan or the agent proceeds inline when appropriate
 4. `/taku-build` implements with a test anchor, then routes to review and verification
+5. `/taku-guard` audits whether the claimed steps and verification have visible evidence
 
 ### First-Run Smoke Checklist
 
@@ -143,7 +144,7 @@ python3 scripts/validate_taku.py --strict
 
 Expected:
 
-- exactly 7 skills are listed: `taku-think`, `taku-plan`, `taku-build`, `taku-review`, `taku-debug`, `taku-reflect`, `taku-compact`
+- exactly 8 skills are listed: `taku-think`, `taku-plan`, `taku-build`, `taku-review`, `taku-debug`, `taku-reflect`, `taku-compact`, `taku-guard`
 - Quick mode can run a tiny task with a chat-visible mini design
 - Build reports `BUILD PREFLIGHT`, `BUILD UPDATE`, and `BUILD COMPLETE`
 - Review reports `HARD STOPS`, `CONCERNS`, and `SUMMARY`
@@ -166,13 +167,14 @@ Expected:
 | Skill   | Command         | Use it when                                                                 | Main output                                                                          |
 | ------- | --------------- | --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
 | Compact | `/taku-compact` | Context-heavy work, handoff, resume, debugging, review, design, or research | Recoverable compact brief with source tags, unknowns, retrieval hints, and next step |
+| Guard   | `/taku-guard`   | Any coding skill or raw agent session claims completed work                 | Omission audit for skipped steps and unsupported completion claims                    |
 
 `/taku-compact` supports `resume`, `handoff`, `debug`, `review`, `design`, and `research` modes. It only preserves active task context; long-term learnings still require user-approved `/taku-reflect`.
 
 ## What Makes It Different
 
-Taku's public surface is the same 7 commands, but the product core is narrower:
-Build and Review make delivery state visible enough to block bad handoffs.
+Taku's public surface is 8 commands, but the product core is narrower: Build,
+Review, and Guard make delivery state visible enough to block bad handoffs.
 
 ### 1. It scales the process to the task
 
@@ -209,6 +211,7 @@ The fifth phase is a verification gate, not a second planning phase. When checks
 | Common failure                                    | How Taku handles it                                                      |
 | ------------------------------------------------- | ------------------------------------------------------------------------ |
 | Scope silently drifts during implementation       | `/taku-plan` forces scope review; build checks drift                     |
+| Steps are silently skipped but work is called done | `/taku-guard` audits step evidence and unsupported completion claims     |
 | Review is superficial, hidden bugs are missed     | `/taku-review` reads real diffs, checks trust-boundary and risk patterns |
 | AI patches randomly without finding root cause    | `/taku-debug` ranks hypotheses, verifies root cause before fixing        |
 | Long-task context bloats or gets lost             | `/taku-compact` writes a recoverable active-work brief                   |
@@ -241,6 +244,7 @@ The fifth phase is a verification gate, not a second planning phase. When checks
 | Scoped feature, needs task breakdown    | `/taku-plan`                             |
 | `PLAN.md` is ready                      | `/taku-build`                            |
 | Ready to ship                           | `/taku-review`                           |
+| A coding session claims completion      | `/taku-guard`                            |
 | Tests fail or behavior is broken        | `/taku-debug`                            |
 | Long task, need to hand off or resume   | `/taku-compact`                          |
 | Want to capture learnings or do a retro | `/taku-reflect`                          |

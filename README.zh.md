@@ -96,7 +96,7 @@ npx skills update -g
 
 ```text
 /taku-think  /taku-plan  /taku-build  /taku-review
-/taku-debug  /taku-reflect  /taku-compact
+/taku-debug  /taku-reflect  /taku-compact  /taku-guard
 ```
 
 建议安装后先运行 validator，确认 skill pack、slash command 和 eval scenarios 处于可用状态：
@@ -107,7 +107,7 @@ python3 scripts/validate_taku.py --install
 
 加 `--strict` 可额外检查引用的外部脚本是否存在且可执行：`python3 scripts/validate_taku.py --strict`
 
-也可以单独安装某个 skill：`npx skills add KKenny0/Taku -g --skill taku-think`
+也可以单独安装某个 skill：`npx skills add KKenny0/Taku -g --skill taku-guard`
 
 ## 第一次运行
 
@@ -123,6 +123,7 @@ python3 scripts/validate_taku.py --install
 2. 你确认 mini design
 3. `/taku-plan` 写紧凑计划，或任务足够小时轻量交接
 4. `/taku-build` 基于 test anchor 实现，然后进入 review 和 verification
+5. `/taku-guard` 审计已声明完成的步骤和验证是否有可见证据
 
 ### First-Run Smoke Checklist
 
@@ -135,7 +136,7 @@ python3 scripts/validate_taku.py --strict
 
 预期：
 
-- 只列出 7 个 skills：`taku-think`、`taku-plan`、`taku-build`、`taku-review`、`taku-debug`、`taku-reflect`、`taku-compact`
+- 只列出 8 个 skills：`taku-think`、`taku-plan`、`taku-build`、`taku-review`、`taku-debug`、`taku-reflect`、`taku-compact`、`taku-guard`
 - Quick mode 能用 chat-visible mini design 跑一个小任务
 - Build 输出 `BUILD PREFLIGHT`、`BUILD UPDATE`、`BUILD COMPLETE`
 - Review 输出 `HARD STOPS`、`CONCERNS`、`SUMMARY`
@@ -158,12 +159,13 @@ python3 scripts/validate_taku.py --strict
 | Skill   | 命令            | 使用时机                                             | 主要输出                                                         |
 | ------- | --------------- | ---------------------------------------------------- | ---------------------------------------------------------------- |
 | Compact | `/taku-compact` | 长任务上下文膨胀、交接、恢复、调试、审查、设计或研究 | 带 source tags、unknowns、retrieval hints 和下一步的可恢复 brief |
+| Guard   | `/taku-guard`   | coding skill 或原始 agent session 宣称完成工作之后   | 对跳过步骤和无证据完成声明的 omission audit                      |
 
 `/taku-compact` 支持 `resume`、`handoff`、`debug`、`review`、`design` 和 `research` modes。它只整理当前任务上下文；长期经验通过 `/taku-reflect` 经用户批准后沉淀。
 
 ## Taku 的不同之处
 
-Taku 的公开命令仍然是 7 个，但产品核心更窄：Build 和 Review 让交付状态足够可审计，从而阻止坏 handoff。
+Taku 的公开命令是 8 个，但产品核心更窄：Build、Review 和 Guard 让交付状态足够可审计，从而阻止坏 handoff。
 
 ### 1. 根据任务规模调整流程强度
 
@@ -200,6 +202,7 @@ Review 产物进入 `DESIGN.md`，`PLAN.md` 保持纯执行内容——goal、ta
 | 常见失败                         | Taku 的处理                                              |
 | -------------------------------- | -------------------------------------------------------- |
 | Scope 在实现中悄悄漂移           | `/taku-plan` 强制 scope review，build 时检查 drift       |
+| 步骤被悄悄跳过，但工作被宣布完成 | `/taku-guard` 审计步骤证据和无证据完成声明              |
 | Review 流于形式，隐蔽 bug 被忽略 | `/taku-review` 读真实 diff，查 trust-boundary 等风险模式 |
 | AI 反复乱 patch，不找根因        | `/taku-debug` 排序假设，验证根因后再修复                 |
 | 长任务上下文膨胀或丢失           | `/taku-compact` 写可恢复的 active-work brief             |
@@ -232,6 +235,7 @@ Review 产物进入 `DESIGN.md`，`PLAN.md` 保持纯执行内容——goal、ta
 | 已有明确 feature，需要拆任务 | `/taku-plan`                             |
 | 已有 `PLAN.md`               | `/taku-build`                            |
 | 准备交付                     | `/taku-review`                           |
+| coding session 宣称已经完成  | `/taku-guard`                            |
 | 测试失败或行为异常           | `/taku-debug`                            |
 | 长任务要交接或恢复           | `/taku-compact`                          |
 | 想沉淀经验或做回顾           | `/taku-reflect`                          |

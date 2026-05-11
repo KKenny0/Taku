@@ -1,0 +1,3 @@
+display_name: Taku Guard
+short_description: Audit completed agent work for skipped steps and unsupported claims.
+default_prompt: Use Taku Guard to check whether completed work has visible evidence for each required step and completion claim.

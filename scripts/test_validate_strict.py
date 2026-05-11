@@ -81,13 +81,26 @@ def test_skill_inventory_requires_exact_taku_commands() -> None:
     """Validator should reject extra installed skill directories."""
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
-        for skill in ("think", "plan", "build", "review", "debug", "reflect", "compact", "extra"):
+        for skill in ("think", "plan", "build", "review", "debug", "reflect", "compact", "guard", "extra"):
             skill_dir = root / "skills" / skill
             skill_dir.mkdir(parents=True)
             (skill_dir / "SKILL.md").write_text("---\nname: taku\n---\n", encoding="utf-8")
         errors: list[str] = []
         check_skill_inventory(root, errors)
         assert any("unexpected skill directory" in e for e in errors), errors
+
+
+def test_skill_inventory_accepts_guard_utility() -> None:
+    """Guard is a first-class utility skill, not an unexpected extra."""
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        for skill in ("think", "plan", "build", "review", "debug", "reflect", "compact", "guard"):
+            skill_dir = root / "skills" / skill
+            skill_dir.mkdir(parents=True)
+            (skill_dir / "SKILL.md").write_text("---\nname: taku\n---\n", encoding="utf-8")
+        errors: list[str] = []
+        check_skill_inventory(root, errors)
+        assert errors == []
 
 
 def test_installed_skills_cannot_reference_root_templates() -> None:
